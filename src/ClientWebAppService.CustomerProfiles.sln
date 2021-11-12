@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PartnerProfile", "ClientWebAppService.PartnerProfile\ClientWebAppService.PartnerProfile.csproj", "{F6146C32-77A1-4065-8EF8-671457375BBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientWebAppService.UserProfile", "ClientWebAppService.UserProfile\ClientWebAppService.UserProfile.csproj", "{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.UserProfile", "ClientWebAppService.UserProfile\ClientWebAppService.UserProfile.csproj", "{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientWebAppService.PosProfile", "ClientWebAppService.PosProfile\ClientWebAppService.PosProfile.csproj", "{72AC6CF9-A420-4114-B8E8-3150B55D94A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientWebAppService.PosProfile.Tests", "ClientWebAppService.PosProfile.Tests\ClientWebAppService.PosProfile.Tests.csproj", "{6CF766EC-3064-48F6-A967-67B40A235B9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72AC6CF9-A420-4114-B8E8-3150B55D94A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72AC6CF9-A420-4114-B8E8-3150B55D94A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72AC6CF9-A420-4114-B8E8-3150B55D94A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72AC6CF9-A420-4114-B8E8-3150B55D94A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
