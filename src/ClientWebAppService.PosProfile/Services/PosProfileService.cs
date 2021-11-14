@@ -37,6 +37,8 @@ namespace ClientWebAppService.PosProfile.Services
             
             try
             {
+                _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
+                
                  posProfile = new Models.PosProfile
                  {
                      PartnerId = posProfileCreationDto.PartnerId,
@@ -66,6 +68,7 @@ namespace ClientWebAppService.PosProfile.Services
                 throw;
             }
 
+            _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
             return new PosProfileDto(posProfile?.PartnerId, posProfile?.PosConfiguration);
         }
 

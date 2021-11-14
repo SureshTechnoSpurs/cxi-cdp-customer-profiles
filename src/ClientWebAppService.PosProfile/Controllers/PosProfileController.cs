@@ -22,11 +22,12 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             _posProfileService = posProfileService;
         }
+
         [HttpGet("{posProfileId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> Get([FromRoute] string posProfileId)
         {
-           var posProfileGetResult = await _posProfileService.GetPosProfileAsync(posProfileId);
+            var posProfileGetResult = await _posProfileService.GetPosProfileAsync(posProfileId);
             return Ok(posProfileGetResult);
         }
 
