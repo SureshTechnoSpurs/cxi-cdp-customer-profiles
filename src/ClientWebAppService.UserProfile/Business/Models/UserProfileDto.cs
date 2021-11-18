@@ -8,7 +8,7 @@ namespace ClientWebAppService.UserProfile.Business.Models
     /// </summary>
     [ExcludeFromCodeCoverage]
     public record UserProfileDto(
-        [JsonProperty("partner_id")] string PartnerId,
+        [JsonProperty("partnerId")] string PartnerId,
         [JsonProperty("email")] string Email,
         [JsonProperty("role")] string Role)
     { }
