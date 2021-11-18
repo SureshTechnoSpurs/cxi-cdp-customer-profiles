@@ -1,0 +1,35 @@
+﻿using CXI.Common.MongoDb;
+using GL.MSA.Core.NoSql.Attributes;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+namespace ClientWebAppService.PartnerProfile.DataAccess
+{
+    [ExcludeFromCodeCoverage]
+    [Collection("partner_profiles")]
+    public class Partner : IMongoEntity<ObjectId>
+    {
+        [BsonId]
+        public ObjectId Id { get; set; }
+
+        [BsonElement("partner_id")]
+        public string PartnerId { get; set; }
+
+        [BsonElement("partner_name")]
+        public string? PartnerName { get; set; }
+
+        [BsonElement("address")]
+        public string? Address { get; set; }
+
+        [BsonElement("amount_of_locations")]
+        public int AmountOfLocations { get; set; }
+
+        [BsonElement("partner_type")]
+        public string? PartnerType { get; set; }
+
+        [BsonElement("profiles")]
+        public IEnumerable<string> UserProfiles { get; set; } = new List<string>();
+    }
+}

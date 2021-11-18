@@ -1,5 +1,11 @@
-﻿namespace ClientWebAppService.PartnerProfile.Core
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace ClientWebAppService.PartnerProfile.Core
 {
+    /// <summary>
+    /// Common service constraints.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
     public class CommonServiceConstraints
     {
         public static class AzureConfiguration

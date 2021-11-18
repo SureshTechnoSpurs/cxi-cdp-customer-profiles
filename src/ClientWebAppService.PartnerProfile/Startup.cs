@@ -15,9 +15,15 @@ using Microsoft.OpenApi.Models;
 using CXI.Common.MongoDb.Extensions;
 using System;
 using ClientWebAppService.TMI.DataAccess.Core;
+using ClientWebAppService.PartnerProfile.DataAccess;
+using ClientWebAppService.PartnerProfile.Business;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
+using FluentValidation.AspNetCore;
 
 namespace ClientWebAppService.PartnerProfile
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -41,7 +47,8 @@ namespace ClientWebAppService.PartnerProfile
                         configureMicrosoftIdentityOptions:
                              options => { Configuration.Bind("AzureAdB2C", options); });
 
-            services.AddControllers();
+            services.AddControllers()
+                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>()); 
 
             services.AddTraceExtentionDispatcher(Configuration)
                   .AddHealthChecks()
@@ -53,7 +60,10 @@ namespace ClientWebAppService.PartnerProfile
                               failureStatus: HealthStatus.Unhealthy,
                               tags: new string[] { "mongoDB", "ready" });
 
-            services.AddCxiMongoDb<PartnerProfileMongoClientProvider>();
+            services.AddCxiMongoDb<PartnerProfileMongoClientProvider>()
+                    .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
+                    .AddTransient<IPartnerRepository, PartnerRepository>()
+                    .AddTransient<IPartnerProfileService, PartnerProfileService>();
 
             services.AddSwaggerGen(c =>
             {
