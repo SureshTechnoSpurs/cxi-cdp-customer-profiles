@@ -11,11 +11,13 @@
 		<PackageReference Include="CXI.Common" Version="1.0.2" />
 		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.0" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.1" />
+		<PackageReference Include="FluentValidation" Version="10.3.4" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
 		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.ResiliencyPolicy" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Tracing.TraceFactory" Version="1.0.0" />
-		<PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.0" />
+		<PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="4.5.0" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="1.17.0" />

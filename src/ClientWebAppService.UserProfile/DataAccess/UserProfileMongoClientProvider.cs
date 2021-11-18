@@ -37,6 +37,7 @@ namespace ClientWebAppService.UserProfile.DataAccess
             };
 
             var mongoClient = new MongoClient(mongoClientSettings);
+
             return mongoClient;
         }
 

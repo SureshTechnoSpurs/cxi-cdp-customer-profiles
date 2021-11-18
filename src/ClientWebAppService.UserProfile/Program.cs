@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ClientWebAppService.UserProfile
 {
+    [ExcludeFromCodeCoverage]
     public class Program
     {
         [ExcludeFromCodeCoverage]

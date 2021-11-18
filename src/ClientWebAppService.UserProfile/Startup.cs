@@ -15,9 +15,14 @@ using Microsoft.OpenApi.Models;
 using CXI.Common.MongoDb.Extensions;
 using System;
 using ClientWebAppService.UserProfile.DataAccess;
+using System.Diagnostics.CodeAnalysis;
+using ClientWebAppService.UserProfile.Business;
+using Microsoft.Extensions.Logging;
+using FluentValidation.AspNetCore;
 
 namespace ClientWebAppService.UserProfile
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -41,11 +46,12 @@ namespace ClientWebAppService.UserProfile
                         configureMicrosoftIdentityOptions:
                              options => { Configuration.Bind("AzureAdB2C", options); });
 
-            services.AddControllers();
+            services.AddControllers()
+                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
             services.AddTraceExtentionDispatcher(Configuration)
-                  .AddHealthChecks()
-                  .AddCheck<LivenessHealthCheck>(name: "live",
+                    .AddHealthChecks()
+                    .AddCheck<LivenessHealthCheck>(name: "live",
                                                  failureStatus: HealthStatus.Unhealthy,
                                                  tags: new[] { "live" })
                   .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
@@ -53,7 +59,10 @@ namespace ClientWebAppService.UserProfile
                               failureStatus: HealthStatus.Unhealthy,
                               tags: new string[] { "mongoDB", "ready" });
 
-            services.AddCxiMongoDb<UserProfileMongoClientProvider>();
+            services.AddCxiMongoDb<UserProfileMongoClientProvider>()
+                    .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
+                    .AddTransient<IUserProfileRepository, UserProfileRepository>()
+                    .AddTransient<IUserProfileService, UserProfileService>();
 
             services.AddSwaggerGen(c =>
             {
