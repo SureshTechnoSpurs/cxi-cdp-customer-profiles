@@ -17,7 +17,7 @@ ENV VSS_NUGET_EXTERNAL_FEED_ENDPOINTS \
    "{\"endpointCredentials\": [{\"endpoint\":\"https://pkgs.dev.azure.com/Customerxi/7744d0ac-6bc1-4039-b0b8-2543d12c2f99/_packaging/cxi/nuget/v3/index.json\",\"username\": \"docker\", \"password\":\"${PAT}\"}]}"
 
 RUN dotnet restore "ClientWebAppService.UserProfile/ClientWebAppService.UserProfile.csproj" --configfile NuGet.Config
-
+COPY . .
 WORKDIR "/src/ClientWebAppService.UserProfile"
 RUN dotnet build "ClientWebAppService.UserProfile.csproj" -c Release -o /app/build
 
