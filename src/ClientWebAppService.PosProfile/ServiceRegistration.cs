@@ -1,24 +1,20 @@
-﻿using System.Configuration;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Azure.Core;
 using Azure.Identity;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Services;
-using ClientWebAppService.PosProfile.Validators;
+using CXI.Common.Authorization;
 using CXI.Common.MongoDb.Extensions;
 using CXI.Common.Security.Secrets;
 using FluentValidation.AspNetCore;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
-using GL.MSA.Core.HealthCheck.HealthCheckExtentions;
 using GL.MSA.Tracing.TraceFactory;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
 namespace ClientWebAppService.PosProfile
@@ -26,16 +22,12 @@ namespace ClientWebAppService.PosProfile
     [ExcludeFromCodeCoverage]
     public static class ServiceRegistration
     {
-        public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApi(options =>
-                    {
-                        configuration.Bind("AzureAdB2C", options);
-                        options.TokenValidationParameters.NameClaimType = "name";
-                    },
-                    options => { configuration.Bind("AzureAdB2C", options); });
-            
+            services.AddAzureAdB2CUserAuthentication(configuration, logger);
+            services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
+            services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
+
             services.AddTraceExtentionDispatcher(configuration);
 
             services.AddControllers();
