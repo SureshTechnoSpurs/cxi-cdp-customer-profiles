@@ -5,7 +5,6 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["nuget.config", "."]
 COPY ["ClientWebAppService.PosProfile/ClientWebAppService.PosProfile.csproj", "ClientWebAppService.PosProfile/"]
 COPY ["NuGet.Config","NuGet.Config"]
 
