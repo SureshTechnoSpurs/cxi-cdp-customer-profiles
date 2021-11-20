@@ -5,19 +5,17 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PartnerProfile", "ClientWebAppService.PartnerProfile\ClientWebAppService.PartnerProfile.csproj", "{F6146C32-77A1-4065-8EF8-671457375BBC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{17DBBAC4-2261-467D-A616-D271878A0E39}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PartnerProfile.Business.Tests", "ClientWebAppService.PartnerProfile.Business.Tests\ClientWebAppService.PartnerProfile.Business.Tests.csproj", "{B3E749A2-7561-4309-A6D1-49EAB588692C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.UserProfile", "ClientWebAppService.UserProfile\ClientWebAppService.UserProfile.csproj", "{462AE483-0D67-4D4A-BF7B-9AF0FCD61BE3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4C782D58-EE0F-41B9-B704-0E6FF761CBE6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.UserProfile.Business.Tests", "ClientWebAppService.UserProfile.Business.Tests\ClientWebAppService.UserProfile.Business.Tests.csproj", "{9840DF73-525E-4D5B-81DA-2CE6F546595B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PosProfile", "ClientWebAppService.PosProfile\ClientWebAppService.PosProfile.csproj", "{72AC6CF9-A420-4114-B8E8-3150B55D94A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PosProfile.Tests", "ClientWebAppService.PosProfile.Tests\ClientWebAppService.PosProfile.Tests.csproj", "{6CF766EC-3064-48F6-A967-67B40A235B9F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B509A0C7-0210-479A-BB4F-FB5B41C83765}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +52,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{B3E749A2-7561-4309-A6D1-49EAB588692C} = {B509A0C7-0210-479A-BB4F-FB5B41C83765}
+		{9840DF73-525E-4D5B-81DA-2CE6F546595B} = {B509A0C7-0210-479A-BB4F-FB5B41C83765}
+		{6CF766EC-3064-48F6-A967-67B40A235B9F} = {B509A0C7-0210-479A-BB4F-FB5B41C83765}
 		{B3E749A2-7561-4309-A6D1-49EAB588692C} = {17DBBAC4-2261-467D-A616-D271878A0E39}
 		{9840DF73-525E-4D5B-81DA-2CE6F546595B} = {4C782D58-EE0F-41B9-B704-0E6FF761CBE6}
 		{6CF766EC-3064-48F6-A967-67B40A235B9F} = {17DBBAC4-2261-467D-A616-D271878A0E39}
