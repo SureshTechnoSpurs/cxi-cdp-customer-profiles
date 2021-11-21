@@ -1,0 +1,314 @@
+trigger:
+- develop
+
+pool:
+ vmImage: ubuntu-latest
+
+resources:
+ repositories:
+   - repository: templates
+     type : git
+     name : cxi-build-templates
+
+variables:
+- group: common    
+
+stages:
+ - stage: Build
+   displayName: Build image
+   jobs:
+    - job: Build
+      displayName: Build
+      steps:
+      - task: Docker@2
+        displayName: Build an image partner-profile
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-partner-profile'
+          command: build
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
+          tags: |
+            $(tag)
+          arguments: '--build-arg PAT=$(PAT)'  
+      - task: Docker@2
+        displayName: Build an image pos-profile
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-pos-profile'
+          command: build
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
+          tags: |
+            $(tag)
+          arguments: '--build-arg PAT=$(PAT)'      
+      - task: Docker@2
+        displayName: Build an image user-profile
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-user-profile'
+          command: build
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
+          tags: |
+            $(tag)
+          arguments: '--build-arg PAT=$(PAT)'       
+
+
+      - script: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy  
+        displayName: 'Download and install trivy'
+
+      - task: CmdLine@2
+        displayName: "Run trivy scan"
+        inputs:
+          script: |
+            trivy --version
+            trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-partner-profile-$(tag).txt  acrnpreastus2cxi.azurecr.io/cxi-cdp-customer-profiles-partner-profile:$(tag) 
+            trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-pos-profile-$(tag).txt  acrnpreastus2cxi.azurecr.io/cxi-cdp-customer-profiles-pos-profile:$(tag) 
+            trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-user-profile-$(tag).txt  acrnpreastus2cxi.azurecr.io/cxi-cdp-customer-profiles-user-profile:$(tag) 
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'restore'
+          projects: 'src/ClientWebAppService.CustomerProfiles.sln'
+          feedsToUse: 'select'
+          vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'
+      - task: DotNetCoreCLI@2
+        displayName: "PartnerProfile.Business.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.PartnerProfile.Business.Tests/ClientWebAppService.PartnerProfile.Business.Tests.csproj'
+          testRunTitle: 'PartnerProfile.Business.Tests.csproj'
+          arguments: '--no-restore'
+      - task: DotNetCoreCLI@2
+        displayName: "PosProfile.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.PosProfile.Tests/ClientWebAppService.PosProfile.Tests.csproj'
+          testRunTitle: 'PosProfile.Tests.csproj'    
+          arguments: '--no-restore'
+
+      - task: DotNetCoreCLI@2
+        displayName: "UserProfile.Business.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.UserProfile.Business.Tests/ClientWebAppService.UserProfile.Business.Tests.csproj'
+          testRunTitle: 'UserProfile.Business.Tests.csproj' 
+          arguments: '--no-restore'
+      - task: Docker@2
+        displayName: Push an image partner-profile
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-partner-profile'
+          command: 'push'
+          tags: '$(tag)'
+      - task: Docker@2
+        displayName: Push an image pos-profile
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-pos-profile'
+          command: 'push'
+          tags: '$(tag)'    
+      - task: Docker@2
+        displayName: Push an image user-profile
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+        inputs:
+          containerRegistry: 'cxi-ado-2-acr'
+          repository: 'cxi-cdp-customer-profiles-user-profile'
+          command: 'push'
+          tags: '$(tag)'     
+
+       
+          
+ - stage: OWASPDependencyCheck
+   displayName: OWASPDependencyCheck
+   jobs:
+   - job: Build_Project
+     steps: 
+     - task: DotNetCoreCLI@2
+       inputs:
+         command: 'restore'
+         projects: 'src/ClientWebAppService.CustomerProfiles.sln'
+         feedsToUse: 'select'
+         vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'
+     - task: DotNetCoreCLI@2
+       inputs:
+         command: 'build'
+         projects: 'src/ClientWebAppService.CustomerProfiles.sln'
+         arguments: '--no-restore --configuration $(BuildConfiguration)'
+       
+     - task: dependency-check-build-task@6
+       continueOnError: true
+       inputs:
+        projectName: 'customer-profiles-app'
+        scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0/*.dll'
+        additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0-windows/*.dll'
+        format: 'HTML, JSON, JUNIT'
+        enableVerbose: true
+        enableExperimental: true
+        failOnCVSS: '8'
+   
+     - task: PublishTestResults@2
+       displayName: 'Publish OWASP Dependency Check security scan results'
+       inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'dependency-check/*junit.xml'
+        searchFolder: '$(Common.TestResultsDirectory)'
+        testRunTitle: 'Dependency Check'
+        buildConfiguration: '$(BuildConfiguration)'
+
+ - stage: Sonar_Qube
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+   pool: kube-agent
+   jobs:
+     - job: 
+       steps:
+        - task: SonarQubePrepare@4
+          inputs:
+            SonarQube: 'sonar'
+            scannerMode: 'CLI'
+            configMode: 'manual'
+            cliProjectKey: 'Cloud_Data_Platform_cxi-cdp-customer-profiles'
+            cliSources: '.'
+        - task: SonarQubeAnalyze@4
+        - task: SonarQubePublish@4
+          inputs:
+           pollingTimeoutSec: '300'        
+           
+ - stage: deploy_dev
+   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+   displayName: Deploy to Kubernetes Dev
+   jobs:
+    - deployment: deploy
+      displayName: Deploy
+      environment: 'Kubernetes_Dev'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - template: HelmDeploy.yaml@templates
+              parameters:
+                kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
+                namespace: 'dev-customer-profiles-partner-profile'
+                acrname: 'acrnpreastus2cxi'
+                azureservice: 'cxi-devops'
+                acrrepo: 'cxi-default:20211121.11'
+                chartPath: '$(build.stagingdirectory)/cxi-default/'
+                components:
+                - componentname: 'customer-profiles-partner-profile'
+                  releasename: 'customer-profiles-partner-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-partner-profile,\
+                    application.env=dev,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                - componentname: 'customer-profiles-pos-profile'
+                  releasename: 'customer-profiles-pos-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-pos-profile,\
+                    application.env=dev,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-pos-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                - componentname: 'customer-profiles-user-profile'
+                  releasename: 'customer-profiles-user-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-user-profile,\
+                    application.env=dev,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-user-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                 
+                    
+ - stage: deploy_stage
+   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+   displayName: Deploy to Kubernetes Stage
+   jobs:
+    - deployment: deploy
+      displayName: Deploy
+      environment: 'Kubernetes_Stage'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - template: HelmDeploy.yaml@templates
+              parameters:
+                kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
+                namespace: 'stg-customer-profiles-partner-profile'
+                acrname: 'acrnpreastus2cxi'
+                azureservice: 'cxi-devops'
+                acrrepo: 'cxi-default:20211121.11'
+                chartPath: '$(build.stagingdirectory)/cxi-default/'
+                components:
+                - componentname: 'customer-profiles-partner-profile'
+                  releasename: 'customer-profiles-partner-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-partner-profile,\
+                    application.env=stg,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                - componentname: 'customer-profiles-pos-profile'
+                  releasename: 'customer-profiles-pos-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-pos-profile,\
+                    application.env=stg,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-pos-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                - componentname: 'customer-profiles-user-profile'
+                  releasename: 'customer-profiles-user-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-user-profile,\
+                    application.env=stg,\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-user-profile,\
+                    deployment.container.image.tag=$(Build.BuildId),\
+                    deployment.nodeSelector.\"beta\\.kubernetes\\.io/os\"=linux,\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"        
