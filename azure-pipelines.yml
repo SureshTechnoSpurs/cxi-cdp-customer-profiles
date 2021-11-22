@@ -200,7 +200,7 @@ stages:
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                namespace: 'dev-customer-profiles-partner-profile'
+                namespace: 'dev-customer-profiles'
                 acrname: 'acrnpreastus2cxi'
                 azureservice: 'cxi-devops'
                 acrrepo: 'cxi-default:20211121.11'
@@ -264,7 +264,7 @@ stages:
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                namespace: 'stg-customer-profiles-partner-profile'
+                namespace: 'stg-customer-profiles'
                 acrname: 'acrnpreastus2cxi'
                 azureservice: 'cxi-devops'
                 acrrepo: 'cxi-default:20211121.11'
