@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
+using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Security.Secrets;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -34,33 +35,33 @@ namespace ClientWebAppService.PosProfile.Services
         {
             Models.PosProfile posProfile;
             var posConfigurationJsonSecret = string.Empty;
-            
+
             try
             {
                 _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
-                
-                 posProfile = new Models.PosProfile
-                 {
-                     PartnerId = posProfileCreationDto.PartnerId,
-                     PosConfiguration = new List<PosCredentialsConfiguration>()
-                 };
 
-                 foreach (var posConfigurationDto in posProfileCreationDto.PosConfigurations)
-                 {
-                     posConfigurationJsonSecret = this.ComposePosConfigurationSecretPayload(posConfigurationDto);
-                     
-                     var keyVaultReferenceTemplate = $"{posProfileCreationDto.PartnerId}-{posConfigurationDto.PosType}";
-                    
-                     ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(new PosCredentialsConfiguration
-                     {
-                         PosType = posConfigurationDto.PosType,
-                         KeyVaultReference = keyVaultReferenceTemplate
-                     });
-                    
-                     _secretSetter.Set(keyVaultReferenceTemplate, posConfigurationJsonSecret, null);
-                 }
-                
-                 await _posProfileRepository.InsertOne(posProfile);
+                posProfile = new Models.PosProfile
+                {
+                    PartnerId = posProfileCreationDto.PartnerId,
+                    PosConfiguration = new List<PosCredentialsConfiguration>()
+                };
+
+                foreach (var posConfigurationDto in posProfileCreationDto.PosConfigurations)
+                {
+                    posConfigurationJsonSecret = this.ComposePosConfigurationSecretPayload(posConfigurationDto);
+
+                    var keyVaultReferenceTemplate = $"{posProfileCreationDto.PartnerId}-{posConfigurationDto.PosType}";
+
+                    ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(new PosCredentialsConfiguration
+                    {
+                        PosType = posConfigurationDto.PosType,
+                        KeyVaultReference = keyVaultReferenceTemplate
+                    });
+
+                    _secretSetter.Set(keyVaultReferenceTemplate, posConfigurationJsonSecret, null);
+                }
+
+                await _posProfileRepository.InsertOne(posProfile);
             }
             catch (Exception exception)
             {
@@ -77,16 +78,16 @@ namespace ClientWebAppService.PosProfile.Services
         {
             var posProfile = await _posProfileRepository.FindOne(pp => pp.PartnerId != null && pp.PartnerId.Equals(partnerId));
 
-            return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration);
+            return posProfile == null ? throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.") : new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration);
         }
 
         private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
-            var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate), 
+            var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
                                                      new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }
-            
+
     }
 }

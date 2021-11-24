@@ -2,6 +2,7 @@
 using ClientWebAppService.PartnerProfile.Business.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using ClientWebAppService.PartnerProfile.Models;
+using CXI.Common.ExceptionHandling.Primitives;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace ClientWebAppService.PartnerProfile.Business
 
             var result = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
 
-            return Map(result);
+            return result == null ? throw new NotFoundException($"PartnerProfile with id: {partnerId} not found.") : Map(result);
         }
 
         ///<inheritdoc/>
@@ -77,7 +78,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                     UserProfiles = updateModel.UserProfileEmails
                 };
 
-                 await _partnerRepository.UpdateAsync(partnerId, newPart);
+                await _partnerRepository.UpdateAsync(partnerId, newPart);
                 _logger.LogInformation($"Successfully updated partner profile with id : {partnerId}");
             }
             catch (Exception ex)

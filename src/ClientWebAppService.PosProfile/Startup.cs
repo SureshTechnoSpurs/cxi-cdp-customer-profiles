@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using CXI.Common.ExceptionHandling;
+using GL.MSA.Core.HealthCheck.HealthCheckExtentions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +36,10 @@ namespace ClientWebAppService.PosProfile
                 app.UseSwaggerUI(
                     c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClientWebAppService.PosProfile v1"));
             }
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+            app.UseHealthCheck();
 
             app.UseRouting();
 

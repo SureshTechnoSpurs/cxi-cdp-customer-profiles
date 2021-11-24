@@ -34,7 +34,7 @@ namespace ClientWebAppService.UserProfile.Business
 
             var result = await _userProfileRepository.FindOne(x => x.Email == email);
 
-            return Map(result);
+            return result == null ? throw new NotFoundException($"UserProfile with email: {email} not found.") : Map(result);
         }
 
         ///<inheritdoc/>
