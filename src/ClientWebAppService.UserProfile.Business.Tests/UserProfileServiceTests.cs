@@ -72,6 +72,18 @@ namespace ClientWebAppService.UserProfile.Business.Tests
                   .Match<UserProfileDto>(x => x.Email == testInput);
         }
 
+        [Fact]
+        public async Task GetByEmail_ProfileNotExist_NotFoundExceptionThrowed()
+        {
+            var testInput = "test@mail.com";
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                           .ReturnsAsync(default(User));
+
+            var invocation = _service.Invoking(x => x.GetByEmailAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData(" ")]

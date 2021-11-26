@@ -78,6 +78,18 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
                   .Match<PartnerProfileDto>(x => x.PartnerId == testInput);
         }
 
+        [Fact]
+        public async Task GetByIdAsync_ProfileNotExist_NotFoundExceptionThrowed()
+        {
+            var testInput = "testId";
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Partner, bool>>>()))
+                           .ReturnsAsync(default(Partner));
+
+            var invocation = _service.Invoking(x => x.GetByIdAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
