@@ -8,7 +8,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
     [ExcludeFromCodeCoverage]
     public static class PartnerProfileUtils
     {
-        private const string PartnerIdPrefix = "cxi-usa-hospitality-";
+        private const string PartnerIdPrefix = "cxi-usa-";
 
         public const string DefaultPartnerType = "Restaurant";
 

@@ -13,7 +13,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Validators
     {
         public PartnerProfileCreationModelValidator()
         {
-            RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.Name).NotEmpty().Matches("^[a-z]{3,}$");
             RuleFor(x => x.Address).NotEmpty();
         }
     }
