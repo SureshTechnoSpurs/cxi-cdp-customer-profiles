@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Models;
 
 namespace ClientWebAppService.PosProfile.Services
@@ -21,6 +22,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        Task<PosProfileDto> GetPosProfileAsync(string partnerId);
+        Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId);
+
+        /// <summary>
+        /// Fetches ALL pos profiles
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria);
     }
 }

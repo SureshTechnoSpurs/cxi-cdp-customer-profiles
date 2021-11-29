@@ -46,7 +46,7 @@ namespace ClientWebAppService.PosProfile.Tests
             _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
                                      .ReturnsAsync(default(Models.PosProfile));
 
-            var invocation = _posProfileService.Invoking(x => x.GetPosProfileAsync(testInput));
+            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
             var result = await invocation.Should().ThrowAsync<NotFoundException>();
         }
 
@@ -66,7 +66,7 @@ namespace ClientWebAppService.PosProfile.Tests
             _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
                                      .ReturnsAsync(posProfile);
 
-            var invocation = _posProfileService.Invoking(x => x.GetPosProfileAsync(testInput));
+            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();
 
             result.Subject

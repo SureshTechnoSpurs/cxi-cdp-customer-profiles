@@ -19,6 +19,12 @@ namespace ClientWebAppService.PosProfile.Models
         
         [BsonElement("partner_id")]
         public string? PartnerId { get; set; }
+        
+        [BsonElement("is_historical_data_ingested")]
+        public bool IsHistoricalDataIngested { get; set; }
+            
+        [BsonElement("historical_ingest_days_period")]
+        public int HistoricalIngestDaysPeriod { get; set; }
 
         [BsonElement("pos_configuration")]
         public IEnumerable<PosCredentialsConfiguration>? PosConfiguration { get; set; }
