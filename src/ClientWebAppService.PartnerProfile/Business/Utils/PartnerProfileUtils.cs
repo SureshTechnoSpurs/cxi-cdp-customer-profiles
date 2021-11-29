@@ -12,6 +12,6 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
 
         public const string DefaultPartnerType = "Restaurant";
 
-        public static string GetPartnerIdByName(string partnerName) => $"{PartnerIdPrefix}{partnerName}";
+        public static string GetPartnerIdByName(string partnerName) => $"{PartnerIdPrefix}{partnerName.ToLower()}";
     }
 }
