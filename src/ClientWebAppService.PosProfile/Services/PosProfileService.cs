@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
@@ -74,11 +75,30 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
-        public async Task<PosProfileDto> GetPosProfileAsync(string partnerId)
+        public async Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId)
         {
             var posProfile = await _posProfileRepository.FindOne(pp => pp.PartnerId != null && pp.PartnerId.Equals(partnerId));
 
-            return posProfile == null ? throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.") : new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration);
+            return posProfile == null ? throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
+                                      : new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration);
+        }
+
+        /// <inheritdoc cref="IPosProfileService"/>
+        public async Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria)
+        {
+            var result = await _posProfileRepository.FilterBy(searchCriteria.IsHistoricalDataIngested != null ? profile =>
+                                                                                   profile.IsHistoricalDataIngested == searchCriteria.IsHistoricalDataIngested : null);
+
+            if (result == null)
+            {
+                throw new NotFoundException($"Pos profiles not found");
+            }
+
+            return result.Select(x =>
+            {
+                return new PosProfileSearchDto(x.PartnerId, x.PosConfiguration?.Select(pc => pc.PosType),
+                    x.IsHistoricalDataIngested, x.HistoricalIngestDaysPeriod);
+            });
         }
 
         private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
@@ -88,6 +108,5 @@ namespace ClientWebAppService.PosProfile.Services
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }
-
     }
 }

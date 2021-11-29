@@ -23,22 +23,6 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
-        /// Returns POS profile by specified profile Id.
-        /// This action method is backed by M2M authorization,
-        /// meaning it can be called only from another microservice
-        /// </summary>
-        /// <param name="posProfileId"></param>
-        /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpGet("m2m/{posProfileId}")]
-        [ProducesResponseType(typeof(PosProfileDto), 200)]
-        public async Task<IActionResult> M2MAuthorizedGet([FromRoute] string posProfileId)
-        {
-            var posProfileGetResult = await _posProfileService.GetPosProfileAsync(posProfileId);
-            return Ok(posProfileGetResult);
-        }
-        
-        /// <summary>
         /// Returns POS profile by specified profile Id
         /// </summary>
         /// <param name="posProfileId"></param>
@@ -48,7 +32,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> Get([FromRoute] string posProfileId)
         {
-            var posProfileGetResult = await _posProfileService.GetPosProfileAsync(posProfileId);
+            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(posProfileId);
             return Ok(posProfileGetResult);
         }
 
@@ -64,6 +48,15 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             var posProfileCreateResult = await _posProfileService.CreatePosProfileAsync(posProfileCreationDto);
             return Ok(posProfileCreateResult);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(PosProfileSearchDto), 200)]
+        public async Task<IActionResult> Search([FromQuery]PosProfileSearchCriteria searchCriteria)
+        {
+            var posProfileSearchResult = await _posProfileService.GetPosProfilesAsync(searchCriteria);
+            return Ok(posProfileSearchResult);
         }
     }
 }
