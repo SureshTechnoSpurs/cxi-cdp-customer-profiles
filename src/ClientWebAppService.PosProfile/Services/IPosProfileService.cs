@@ -25,9 +25,17 @@ namespace ClientWebAppService.PosProfile.Services
         Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId);
 
         /// <summary>
-        /// Fetches ALL pos profiles
+        /// Fetches POS profiles specified by search criteria
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria);
+
+        /// <summary>
+        /// Performs update operation for POS Profile
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="updateModel"></param>
+        /// <returns></returns>
+        Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel);
     }
 }

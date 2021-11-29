@@ -101,6 +101,18 @@ namespace ClientWebAppService.PosProfile.Services
             });
         }
 
+        /// <inheritdoc cref="IPosProfileService.UpdatePosProfileAsync"/>
+        public async Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel)
+        {
+            var posProfile = new Models.PosProfile
+            {
+                PosConfiguration = updateModel.PosConfigurations,
+                IsHistoricalDataIngested = updateModel.IsHistoricalDataIngested
+            };
+            
+            await _posProfileRepository.UpdateAsync(partnerId, posProfile);
+        }
+
         private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
             var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),

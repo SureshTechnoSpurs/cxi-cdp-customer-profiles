@@ -9,7 +9,7 @@ namespace ClientWebAppService.PosProfile.Models
     /// <param name="PartnerId"></param>
     /// <param name="PosConfigurations"></param>
     [ExcludeFromCodeCoverage]
-    public record PosProfileCreationDto(string PartnerId, IEnumerable<PosCredentialsConfigurationDto> PosConfigurations)
+    public record PosProfileCreationDto(string PartnerId, IEnumerable<PosCredentialsConfigurationDto> PosConfigurations, bool HistoricalDataIngested = false)
     {
     }
 }
