@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
+using CXI.Common.ExceptionHandling;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,6 +58,35 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             var posProfileSearchResult = await _posProfileService.GetPosProfilesAsync(searchCriteria);
             return Ok(posProfileSearchResult);
+        }
+        
+        /// <summary>
+        /// Only for M2M - Returns POS profile by specified profile Id
+        /// </summary>
+        /// <param name="posProfileId"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/{posProfileId}")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        public async Task<IActionResult> M2MGet([FromRoute] string posProfileId)
+        {
+            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(posProfileId);
+            return Ok(posProfileGetResult);
+        }
+        
+        /// <summary>
+        /// Only for M2M - Updates POS profile by specified profile Id
+        /// </summary>
+        /// <param name="posProfileId"></param>
+        /// <param name="profileUpdateModel"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPut("m2m/{posProfileId}")]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> M2MPut([FromRoute] string posProfileId, [FromBody]PosProfileUpdateModel profileUpdateModel)
+        {
+            await _posProfileService.UpdatePosProfileAsync(posProfileId, profileUpdateModel);
+            return Ok();
         }
     }
 }
