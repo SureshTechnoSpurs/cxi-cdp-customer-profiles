@@ -11,7 +11,7 @@ parameters:
 trigger: none
 
 variables:
-
+- group: default
 - name: version.MajorMinor
   value: '0.1' # Manually adjust the version number as needed for semantic versioning. Revision is auto-incremented.
 - name: version.Revision
