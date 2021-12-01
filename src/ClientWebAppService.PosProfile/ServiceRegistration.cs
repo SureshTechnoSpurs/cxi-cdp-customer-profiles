@@ -24,6 +24,8 @@ namespace ClientWebAppService.PosProfile
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
+            services.AddLogging(builder => builder.AddApplicationInsights(configuration["applicationinsights:instrumentationkey"]));
+
             services.AddAzureAdB2CUserAuthentication(configuration, logger);
             services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
             services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
@@ -63,7 +65,7 @@ namespace ClientWebAppService.PosProfile
             services.AddSingleton<ISecretConfiguration>(azureCredential);
             services.AddSingleton<ISecretClient, AzureKeyVaultSecretClient>();
             services.AddSingleton<ISecretSetter, AzureKeyVaultSecretSetter>();
-            
+
             return services;
         }
     }

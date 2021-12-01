@@ -36,6 +36,8 @@ namespace ClientWebAppService.PartnerProfile
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(builder => builder.AddApplicationInsights(Configuration["applicationinsights:instrumentationkey"]));
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddMicrosoftIdentityWebApi(
                          configureJwtBearerOptions:
@@ -51,14 +53,14 @@ namespace ClientWebAppService.PartnerProfile
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>()); 
 
             services.AddTraceExtentionDispatcher(Configuration)
-                  .AddHealthChecks()
-                  .AddCheck<LivenessHealthCheck>(name: "live",
-                                                 failureStatus: HealthStatus.Unhealthy,
-                                                 tags: new[] { "live" })
-                  .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
-                              name: "MongoDB",
-                              failureStatus: HealthStatus.Unhealthy,
-                              tags: new string[] { "mongoDB", "ready" });
+                    .AddHealthChecks()
+                    .AddCheck<LivenessHealthCheck>(name: "live",
+                                                   failureStatus: HealthStatus.Unhealthy,
+                                                   tags: new[] { "live" })
+                    .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
+                                name: "MongoDB",
+                                failureStatus: HealthStatus.Unhealthy,
+                                tags: new string[] { "mongoDB", "ready" });
 
             services.AddCxiMongoDb<PartnerProfileMongoClientProvider>()
                     .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
