@@ -6,6 +6,7 @@ using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Security.Secrets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -18,6 +19,7 @@ namespace ClientWebAppService.PosProfile.Services
         private readonly IPosProfileRepository _posProfileRepository;
         private readonly ISecretSetter _secretSetter;
         private readonly ILogger<PosProfileService> _logger;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// ctor
@@ -25,11 +27,13 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="posProfileRepository">DAO object for accessing PosProfile MongoDB collection</param>
         /// <param name="secretSetter">Encapsulates create operation for Key Vault secrets</param>
         /// <param name="logger">Logger</param>
-        public PosProfileService(IPosProfileRepository posProfileRepository, ISecretSetter secretSetter, ILogger<PosProfileService> logger)
+        /// <param name="configuration"></param>
+        public PosProfileService(IPosProfileRepository posProfileRepository, ISecretSetter secretSetter, ILogger<PosProfileService> logger, IConfiguration configuration)
         {
             _posProfileRepository = posProfileRepository;
             _secretSetter = secretSetter;
             _logger = logger;
+            _configuration = configuration;
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
@@ -41,10 +45,13 @@ namespace ClientWebAppService.PosProfile.Services
             {
                 _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
 
+                int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
+                
                 posProfile = new Models.PosProfile
                 {
                     PartnerId = posProfileCreationDto.PartnerId,
-                    PosConfiguration = new List<PosCredentialsConfiguration>()
+                    PosConfiguration = new List<PosCredentialsConfiguration>(),
+                    HistoricalIngestDaysPeriod = defaultHistoricalIngestPeriod
                 };
 
                 foreach (var posConfigurationDto in posProfileCreationDto.PosConfigurations)

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Castle.Core.Configuration;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
@@ -24,10 +25,12 @@ namespace ClientWebAppService.PosProfile.Tests
         private readonly Mock<IPosProfileRepository> _posProfileRepositoryMock;
         private readonly Mock<ISecretSetter> _secretSetterMock;
         private readonly Mock<ILogger<PosProfileService>> _loggerMock;
+        private readonly Mock<Microsoft.Extensions.Configuration.IConfiguration> _configurationMock;
 
         public PosProfileServiceTests()
         {
             _posProfileRepositoryMock = new Mock<IPosProfileRepository>();
+            _configurationMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
             _posProfileRepositoryMock.Setup(
                  x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
 
@@ -35,7 +38,7 @@ namespace ClientWebAppService.PosProfile.Tests
 
             _loggerMock = new Mock<ILogger<PosProfileService>>();
 
-            _posProfileService = new PosProfileService(_posProfileRepositoryMock.Object, _secretSetterMock.Object, _loggerMock.Object);
+            _posProfileService = new PosProfileService(_posProfileRepositoryMock.Object, _secretSetterMock.Object, _loggerMock.Object, _configurationMock.Object);
         }
 
         [Fact]
