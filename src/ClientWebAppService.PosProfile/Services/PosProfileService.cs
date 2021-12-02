@@ -123,11 +123,6 @@ namespace ClientWebAppService.PosProfile.Services
             await _posProfileRepository.UpdateAsync(partnerId, posProfile);
         }
 
-        /// <summary>
-        /// Creates {partnerId}-{squa}
-        /// </summary>
-        /// <param name="posCredentialsConfiguration"></param>
-        /// <returns></returns>
         private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
             var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
