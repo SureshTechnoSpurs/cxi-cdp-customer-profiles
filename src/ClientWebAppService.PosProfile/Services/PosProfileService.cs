@@ -69,7 +69,7 @@ namespace ClientWebAppService.PosProfile.Services
                     _secretSetter.Set(keyVaultReferenceTemplate, posConfigurationJsonSecret, null);
                     
                     var tokenInfo = ComposeSecretPayloadForDataCollectService(posConfigurationDto.PosType, posProfileCreationDto.PartnerId, posConfigurationDto.AccessToken);
-                    _secretSetter.Set(tokenInfo.Item1, tokenInfo.Item2, null);
+                    _secretSetter.Set(tokenInfo.keyVaultSecretName, tokenInfo.keyVaultSecretValue, null);
                 }
 
                 await _posProfileRepository.InsertOne(posProfile);
