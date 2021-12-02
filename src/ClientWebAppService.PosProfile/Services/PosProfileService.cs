@@ -15,6 +15,7 @@ namespace ClientWebAppService.PosProfile.Services
     /// <inheritdoc cref="IPosProfileService"/>
     public class PosProfileService : IPosProfileService
     {
+        private const string AuthenticationScheme = "Bearer";
         private readonly IPosProfileRepository _posProfileRepository;
         private readonly ISecretSetter _secretSetter;
         private readonly ILogger<PosProfileService> _logger;
@@ -66,6 +67,9 @@ namespace ClientWebAppService.PosProfile.Services
                     });
 
                     _secretSetter.Set(keyVaultReferenceTemplate, posConfigurationJsonSecret, null);
+                    
+                    var tokenInfo = ComposeSecretPayloadForDataCollectService(posConfigurationDto.PosType, posProfileCreationDto.PartnerId, posConfigurationDto.AccessToken);
+                    _secretSetter.Set(tokenInfo.keyVaultSecretName, tokenInfo.keyVaultSecretValue, null);
                 }
 
                 await _posProfileRepository.InsertOne(posProfile);
@@ -125,6 +129,11 @@ namespace ClientWebAppService.PosProfile.Services
                                                      new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
+        }
+        
+        private (string keyVaultSecretName, string keyVaultSecretValue) ComposeSecretPayloadForDataCollectService(string posType, string partnerId, string accessToken)
+        {
+            return ($"di-{posType}-{partnerId}-tokeninfo", $"{AuthenticationScheme} {accessToken}");
         }
     }
 }
