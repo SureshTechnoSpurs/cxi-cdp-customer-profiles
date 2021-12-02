@@ -131,7 +131,7 @@ namespace ClientWebAppService.PosProfile.Services
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }
         
-        private (string, string) ComposeSecretPayloadForDataCollectService(string posType, string partnerId, string accessToken)
+        private (string keyVaultSecretName, string keyVaultSecretValue) ComposeSecretPayloadForDataCollectService(string posType, string partnerId, string accessToken)
         {
             return ($"di-{posType}-{partnerId}-tokeninfo", $"{AuthenticationScheme} {accessToken}");
         }
