@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace ClientWebAppService.PartnerProfile.Business.Utils
 {
@@ -12,6 +13,9 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
 
         public const string DefaultPartnerType = "Restaurant";
 
-        public static string GetPartnerIdByName(string partnerName) => $"{PartnerIdPrefix}{partnerName.ToLower()}";
+        public static string GetPartnerIdByName(string partnerName) {
+            var formatedPartnerName = string.Concat(partnerName.Where(c => !char.IsWhiteSpace(c)));
+            return $"{PartnerIdPrefix}{formatedPartnerName.ToLower()}";
+        } 
     }
 }
