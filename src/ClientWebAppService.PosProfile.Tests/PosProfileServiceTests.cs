@@ -94,7 +94,7 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task CreatePosProfileAsync_CorrectParametersPassed_SecretSetterSetInvokedWithCorrectParameters()
+        public async Task CreatePosProfileAsync_CorrectParametersPassed_SecretSetterSetInvokedTwiceWithCorrectParameters()
         {
             var date = DateTime.ParseExact("2021-09-30T23:00:00.00Z",
                 "yyyy-MM-dd'T'HH:mm:ss.ff'Z'",
@@ -119,6 +119,8 @@ namespace ClientWebAppService.PosProfile.Tests
                 a => a.Set(
                     It.Is<string>(x => x == keyVaultItemNameExpected), It.Is<string>(x => x == keyVaultItemValueExpected), null)
             );
+            
+            _secretSetterMock.Verify(ss => ss.Set("di-square-partnerId-tokeninfo", "Bearer AccessToken", null));
         }
 
         [Fact]
@@ -147,6 +149,57 @@ namespace ClientWebAppService.PosProfile.Tests
             }
 
             _loggerMock.VerifyLogWasCalled("partnerId", LogLevel.Error);
+        }
+
+        [Fact]
+        public async Task UpdatePosProfileAsync_CorrectParametersPassed_RepositoryInvoked()
+        {
+            var partnerId = "partnerId";
+            var posCredentialsConfigurationsList = new List<PosCredentialsConfiguration> {new PosCredentialsConfiguration
+                {PosType = "square", KeyVaultReference = "test"}};
+            
+            var updateDto = new PosProfileUpdateModel(posCredentialsConfigurationsList, true);
+            
+            await _posProfileService.UpdatePosProfileAsync(partnerId, updateDto);
+            
+            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true 
+            && x.PosConfiguration == posCredentialsConfigurationsList)));
+        }
+
+        [Fact]
+        public async Task GetPosProfilesAsync_PartnerNotFound_ExceptionThrowed()
+        {
+            var posProfileSearchCriteria = new PosProfileSearchCriteria
+            {
+                IsHistoricalDataIngested = true
+            };
+
+            var invocation = _posProfileService.Invoking(x => x.GetPosProfilesAsync(posProfileSearchCriteria));
+            
+            await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task GetPosProfilesAsync_IsHistoricalDataIngestedPassed_FilterByCalled()
+        {
+            var posProfileSearchCriteria = new PosProfileSearchCriteria
+            {
+                IsHistoricalDataIngested = true
+            };
+            
+            _posProfileRepositoryMock.Verify();
+
+            try
+            {
+                await _posProfileService.GetPosProfilesAsync(posProfileSearchCriteria);
+            }
+            catch (Exception e)
+            {
+                //ignored
+            }
+            
+            _posProfileRepositoryMock
+                .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
         }
     }
 }

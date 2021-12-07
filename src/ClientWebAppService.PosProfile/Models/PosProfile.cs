@@ -33,6 +33,7 @@ namespace ClientWebAppService.PosProfile.Models
     /// <summary>
     /// Represents reference to credentials stored in KeyVault
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class PosCredentialsConfiguration
     {
         [BsonElement("pos_type")]
