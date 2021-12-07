@@ -36,8 +36,6 @@ namespace ClientWebAppService.PartnerProfile
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging(builder => builder.AddApplicationInsights(Configuration["applicationinsights:instrumentationkey"]));
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddMicrosoftIdentityWebApi(
                          configureJwtBearerOptions:
@@ -106,6 +104,8 @@ namespace ClientWebAppService.PartnerProfile
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClientWebAppService.PartnerProfile v1"));
             }
+
+            app.UseTracer();
 
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
