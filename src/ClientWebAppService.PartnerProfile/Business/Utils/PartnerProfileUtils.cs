@@ -1,5 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using CXI.Common.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClientWebAppService.PartnerProfile.Business.Utils
 {
@@ -14,8 +14,8 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
         public const string DefaultPartnerType = "Restaurant";
 
         public static string GetPartnerIdByName(string partnerName) {
-            var formatedPartnerName = string.Concat(partnerName.Where(c => !char.IsWhiteSpace(c)));
-            return $"{PartnerIdPrefix}{formatedPartnerName.ToLower()}";
+            var formatedPartnerName = partnerName.RemoveWhitespace();
+            return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}";
         } 
     }
 }
