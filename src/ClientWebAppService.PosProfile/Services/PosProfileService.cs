@@ -81,6 +81,7 @@ namespace ClientWebAppService.PosProfile.Services
             }
 
             _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
+            
             return new PosProfileDto(posProfile?.PartnerId, posProfile?.PosConfiguration);
         }
 
@@ -99,15 +100,19 @@ namespace ClientWebAppService.PosProfile.Services
             var result = await _posProfileRepository.FilterBy(searchCriteria.IsHistoricalDataIngested != null ? profile =>
                                                                                    profile.IsHistoricalDataIngested == searchCriteria.IsHistoricalDataIngested : null);
 
-            if (result == null)
+            var posProfiles = result.ToList();
+            
+            if (result == null || !posProfiles.Any())
             {
                 throw new NotFoundException($"Pos profiles not found");
             }
 
-            return result.Select(x =>
+            return posProfiles.Select(x =>
             {
-                return new PosProfileSearchDto(x.PartnerId, x.PosConfiguration?.Select(pc => pc.PosType),
-                    x.IsHistoricalDataIngested, x.HistoricalIngestDaysPeriod);
+                return new PosProfileSearchDto(x.PartnerId, 
+                                       x.PosConfiguration?.Select(pc => pc.PosType),
+                                               x.IsHistoricalDataIngested, 
+                                               x.HistoricalIngestDaysPeriod);
             });
         }
 
