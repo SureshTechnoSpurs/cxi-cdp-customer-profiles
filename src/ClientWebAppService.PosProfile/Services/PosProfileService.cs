@@ -104,7 +104,8 @@ namespace ClientWebAppService.PosProfile.Services
             
             if (result == null || !posProfiles.Any())
             {
-                throw new NotFoundException($"Pos profiles not found");
+                _logger.LogCritical("Pos profiles not found");
+                // throw new NotFoundException($"Pos profiles not found");
             }
 
             return posProfiles.Select(x =>
