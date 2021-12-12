@@ -37,37 +37,38 @@ namespace ClientWebAppService.PartnerProfile
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(
-                         configureJwtBearerOptions:
-                             options =>
-                             {
-                                 Configuration.Bind("AzureAdB2C", options);
-                                 options.TokenValidationParameters.NameClaimType = "name";
-                             },
-                        configureMicrosoftIdentityOptions:
-                             options => { Configuration.Bind("AzureAdB2C", options); });
+                .AddMicrosoftIdentityWebApi(
+                    configureJwtBearerOptions:
+                    options =>
+                    {
+                        Configuration.Bind("AzureAdB2C", options);
+                        options.TokenValidationParameters.NameClaimType = "name";
+                    },
+                    configureMicrosoftIdentityOptions:
+                    options => { Configuration.Bind("AzureAdB2C", options); });
 
             services.AddControllers()
-                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>()); 
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
             services.AddTraceExtentionDispatcher(Configuration)
-                    .AddHealthChecks()
-                    .AddCheck<LivenessHealthCheck>(name: "live",
-                                                   failureStatus: HealthStatus.Unhealthy,
-                                                   tags: new[] { "live" })
-                    .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
-                                name: "MongoDB",
-                                failureStatus: HealthStatus.Unhealthy,
-                                tags: new string[] { "mongoDB", "ready" });
+                .AddHealthChecks()
+                .AddCheck<LivenessHealthCheck>(name: "live",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: new[] {"live"})
+                .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
+                    name: "MongoDB",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: new string[] {"mongoDB", "ready"});
 
             services.AddCxiMongoDb<PartnerProfileMongoClientProvider>()
-                    .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
-                    .AddTransient<IPartnerRepository, PartnerRepository>()
-                    .AddTransient<IPartnerProfileService, PartnerProfileService>();
+                .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights())
+                    .CreateLogger("mongobb-resilency"))
+                .AddTransient<IPartnerRepository, PartnerRepository>()
+                .AddTransient<IPartnerProfileService, PartnerProfileService>();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ClientWebAppService.PartnerProfile", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClientWebAppService.PartnerProfile", Version = "v1"});
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -98,12 +99,10 @@ namespace ClientWebAppService.PartnerProfile
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClientWebAppService.PartnerProfile v1"));
-            }
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClientWebAppService.PartnerProfile v1"));
 
             app.UseTracer();
 
@@ -116,10 +115,7 @@ namespace ClientWebAppService.PartnerProfile
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
