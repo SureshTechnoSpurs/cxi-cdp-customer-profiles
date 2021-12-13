@@ -48,9 +48,9 @@ namespace ClientWebAppService.PosProfile
                     tags: new string[] { "mongoDB", "ready" });
             
             
-            services.AddCxiMongoDb<PosProfileMongoClientProvider>()
-                .AddMongoResiliencyFor<Models.PosProfile>(LoggerFactory.Create(builder => builder.AddApplicationInsights())
-                    .CreateLogger("mongodb-resiliency"))
+            services.AddCxiMongoDb()
+                    .AddMongoDbApplicationInsightTelemetry("MongoDB.PosProfile")
+                    .AddMongoResiliencyFor<Models.PosProfile>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                 .AddTransient<IPosProfileRepository, PosProfileRepository>()
                 .AddTransient<IPosProfileService, PosProfileService>();
 

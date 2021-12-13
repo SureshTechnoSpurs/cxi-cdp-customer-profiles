@@ -9,12 +9,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using CXI.Common.MongoDb.Extensions;
 using System;
-using ClientWebAppService.TMI.DataAccess.Core;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using ClientWebAppService.PartnerProfile.Business;
 using Microsoft.Extensions.Logging;
@@ -60,11 +58,11 @@ namespace ClientWebAppService.PartnerProfile
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new string[] {"mongoDB", "ready"});
 
-            services.AddCxiMongoDb<PartnerProfileMongoClientProvider>()
-                .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights())
-                    .CreateLogger("mongobb-resilency"))
-                .AddTransient<IPartnerRepository, PartnerRepository>()
-                .AddTransient<IPartnerProfileService, PartnerProfileService>();
+            services.AddCxiMongoDb()
+                    .AddMongoDbApplicationInsightTelemetry("MongoDB.PartnerProfile")
+                    .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
+                    .AddTransient<IPartnerRepository, PartnerRepository>()
+                    .AddTransient<IPartnerProfileService, PartnerProfileService>();
 
             services.AddSwaggerGen(c =>
             {

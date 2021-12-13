@@ -59,7 +59,8 @@ namespace ClientWebAppService.UserProfile
                               failureStatus: HealthStatus.Unhealthy,
                               tags: new string[] { "mongoDB", "ready" });
 
-            services.AddCxiMongoDb<UserProfileMongoClientProvider>()
+            services.AddCxiMongoDb()
+                    .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
                     .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IUserProfileRepository, UserProfileRepository>()
                     .AddTransient<IUserProfileService, UserProfileService>();
