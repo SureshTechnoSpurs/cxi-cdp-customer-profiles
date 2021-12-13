@@ -51,7 +51,7 @@ namespace ClientWebAppService.PosProfile.Controllers
             return Ok(posProfileCreateResult);
         }
 
-        //[Authorize(Policy = Constants.M2MPolicy)]
+        [Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("search")]
         [ProducesResponseType(typeof(PosProfileSearchDto), 200)]
         public async Task<IActionResult> Search([FromQuery]PosProfileSearchCriteria searchCriteria)
