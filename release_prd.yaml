@@ -44,7 +44,7 @@ stages:
           containerRegistry: 'ado-2-acr-prd'
           repository: 'cxi-cdp-customer-profiles-partner-profile'
           command: 'build'
-          Dockerfile: '**/Dockerfile'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
           tags: |
             $(Build.BuildNumber)
@@ -56,7 +56,7 @@ stages:
           containerRegistry: 'ado-2-acr-prd'
           repository: 'cxi-cdp-customer-profiles-pos-profile'
           command: 'build'
-          Dockerfile: '**/Dockerfile'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
           tags: |
             $(Build.BuildNumber)
@@ -68,7 +68,7 @@ stages:
           containerRegistry: 'ado-2-acr-prd'
           repository: 'cxi-cdp-customer-profiles-user-profile'
           command: 'build'
-          Dockerfile: '**/Dockerfile'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
           tags: |
             $(Build.BuildNumber)
