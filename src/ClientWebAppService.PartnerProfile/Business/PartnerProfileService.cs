@@ -53,6 +53,8 @@ namespace ClientWebAppService.PartnerProfile.Business
         ///<inheritdoc/>
         public async Task<PartnerProfileDto> GetByIdAsync(string partnerId)
         {
+            _logger.LogInformation($"Get partner profile with id : {partnerId}.");
+
             if (string.IsNullOrWhiteSpace(partnerId))
             {
                 throw new ValidationException(nameof(partnerId), $"{nameof(partnerId)} should not be null or empty.");

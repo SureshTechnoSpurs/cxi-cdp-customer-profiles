@@ -88,6 +88,8 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="IPosProfileService"/>
         public async Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId)
         {
+            _logger.LogInformation($"Find pos profile for partnerId = {partnerId}");
+
             var posProfile = await _posProfileRepository.FindOne(pp => pp.PartnerId != null && pp.PartnerId.Equals(partnerId));
 
             return posProfile == null ? throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
@@ -97,6 +99,9 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="IPosProfileService"/>
         public async Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria)
         {
+
+            _logger.LogInformation($"get pos profile by search Criteria");
+
             var result = await _posProfileRepository.FilterBy(searchCriteria.IsHistoricalDataIngested != null ? profile =>
                                                                                    profile.IsHistoricalDataIngested == searchCriteria.IsHistoricalDataIngested : null);
 
@@ -119,13 +124,25 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="IPosProfileService.UpdatePosProfileAsync"/>
         public async Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel)
         {
-            var posProfile = new Models.PosProfile
+            _logger.LogInformation($"Update pos profile for partnerId = {partnerId}");
+
+            try
             {
-                PosConfiguration = updateModel.PosConfigurations,
-                IsHistoricalDataIngested = updateModel.IsHistoricalDataIngested
-            };
-            
-            await _posProfileRepository.UpdateAsync(partnerId, posProfile);
+                var posProfile = new Models.PosProfile
+                {
+                    PosConfiguration = updateModel.PosConfigurations,
+                    IsHistoricalDataIngested = updateModel.IsHistoricalDataIngested
+                };
+
+                await _posProfileRepository.UpdateAsync(partnerId, posProfile);
+
+                _logger.LogInformation($"Successfully updated pos profiler for partnerId = {partnerId}");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"UpdatePosProfileAsync - Attempted to update profile for partnerId = {partnerId}, Exception message - {exception.Message}");
+                throw;
+            }
         }
 
         private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
