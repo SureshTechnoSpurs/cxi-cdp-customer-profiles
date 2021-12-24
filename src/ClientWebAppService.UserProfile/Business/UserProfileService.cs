@@ -24,6 +24,8 @@ namespace ClientWebAppService.UserProfile.Business
         ///<inheritdoc/>
         public async Task<UserProfileDto> GetByEmailAsync(string email)
         {
+            _logger.LogInformation($"Get user profile by email: {email}");
+
             var validator = new EmailValidator();
             var validationResult = validator.Validate(email);
 
@@ -42,7 +44,7 @@ namespace ClientWebAppService.UserProfile.Business
         {
             try
             {
-                _logger.LogInformation($"Creating new UserProfile for partnerId : {creationModel.PartnerId}");
+                _logger.LogInformation($"Creating new user profile for partnerId : {creationModel.PartnerId}");
 
                 var newUser = new User
                 {
@@ -58,7 +60,7 @@ namespace ClientWebAppService.UserProfile.Business
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CreateProfileAsync - Attempted to create profile for ${creationModel.PartnerId}, Exception message - {ex.Message}");
+                _logger.LogError($"CreateProfileAsync - Attempted to create user profile for ${creationModel.PartnerId}, Exception message - {ex.Message}");
                 throw;
             }
         }
