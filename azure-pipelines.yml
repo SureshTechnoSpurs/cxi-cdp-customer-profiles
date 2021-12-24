@@ -83,25 +83,30 @@ stages:
           ArtifactName: 'drop'
           publishLocation: 'Container'
       - task: DotNetCoreCLI@2
+        displayName: Restore sln
         inputs:
           command: 'restore'
-          projects: 'src/ClientWebAppService.CustomerProfiles.sln'
+          projects: '**/*.sln'
           feedsToUse: 'select'
-          vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'
+          vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'   
+     
       - task: DotNetCoreCLI@2
         displayName: "PartnerProfile.Business.Tests"
         inputs:
           command: 'test'
           projects: 'src/ClientWebAppService.PartnerProfile.Business.Tests/ClientWebAppService.PartnerProfile.Business.Tests.csproj'
           testRunTitle: 'PartnerProfile.Business.Tests.csproj'
-          arguments: '--no-restore'
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
+
       - task: DotNetCoreCLI@2
         displayName: "PosProfile.Tests"
         inputs:
           command: 'test'
           projects: 'src/ClientWebAppService.PosProfile.Tests/ClientWebAppService.PosProfile.Tests.csproj'
           testRunTitle: 'PosProfile.Tests.csproj'    
-          arguments: '--no-restore'
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
 
       - task: DotNetCoreCLI@2
         displayName: "UserProfile.Business.Tests"
@@ -109,7 +114,30 @@ stages:
           command: 'test'
           projects: 'src/ClientWebAppService.UserProfile.Business.Tests/ClientWebAppService.UserProfile.Business.Tests.csproj'
           testRunTitle: 'UserProfile.Business.Tests.csproj' 
-          arguments: '--no-restore'
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
+
+      - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool'  
+        displayName: 'Install ReportGenerator tool'  
+
+      - script: 'reportgenerator -reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/coverlet/reports -reporttypes:"Cobertura"'  
+        displayName: 'Create reports'  
+        
+      - task: PublishCodeCoverageResults@1  
+        displayName: 'Publish code coverage'  
+        inputs:  
+          codeCoverageTool: Cobertura  
+          summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'      
+
+      - task: BuildQualityChecks@8
+        displayName: Build Quality Checks
+        inputs:
+          checkCoverage: true
+          coverageFailOption: 'fixed'
+          coverageType: 'lines'
+          coverageThreshold: '70'
+          buildConfiguration: '$(BuildConfiguration)'       
+
       - task: Docker@2
         displayName: Push an image partner-profile
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
@@ -143,12 +171,14 @@ stages:
    - job: Build_Project
      steps: 
      - task: DotNetCoreCLI@2
+       displayName: Restore sln
        inputs:
          command: 'restore'
          projects: 'src/ClientWebAppService.CustomerProfiles.sln'
          feedsToUse: 'select'
          vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'
      - task: DotNetCoreCLI@2
+       displayName: Build sln
        inputs:
          command: 'build'
          projects: 'src/ClientWebAppService.CustomerProfiles.sln'
