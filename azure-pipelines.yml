@@ -33,31 +33,37 @@ stages:
         inputs:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-partner-profile'
-          command: build
-          buildContext: '$(Build.SourcesDirectory)/src/'
+          command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"
-          arguments: '--build-arg PAT=$(PAT)'  
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'
       - task: Docker@2
         displayName: Build an image pos-profile
         inputs:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-pos-profile'
-          command: build
-          buildContext: '$(Build.SourcesDirectory)/src/'
+          command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"
-          arguments: '--build-arg PAT=$(PAT)'      
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'
       - task: Docker@2
         displayName: Build an image user-profile
         inputs:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-user-profile'
-          command: build
-          buildContext: '$(Build.SourcesDirectory)/src/'
+          command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"
-          arguments: '--build-arg PAT=$(PAT)'       
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'  
 
 
       - script: |
@@ -145,7 +151,9 @@ stages:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-partner-profile'
           command: 'push'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
       - task: Docker@2
         displayName: Push an image pos-profile
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
@@ -153,7 +161,9 @@ stages:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-pos-profile'
           command: 'push'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"  
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
       - task: Docker@2
         displayName: Push an image user-profile
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
@@ -161,7 +171,9 @@ stages:
           containerRegistry: 'ado-2-acr-npr'
           repository: 'cxi-cdp-customer-profiles-user-profile'
           command: 'push'
-          tags: "$(Build.BuildNumber)\n$(Build.SourceBranchName)-$(Build.BuildNumber)"    
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)  
 
        
           
