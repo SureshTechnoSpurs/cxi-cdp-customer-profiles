@@ -52,11 +52,12 @@ namespace ClientWebAppService.PosProfile
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.PosProfile")
                     .AddMongoResiliencyFor<Models.PosProfile>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                 .AddTransient<IPosProfileRepository, PosProfileRepository>()
-                .AddTransient<IPosProfileService, PosProfileService>();
+                .AddTransient<IPosProfileService, PosProfileService>()
+                .AddTransient<IPosTypeService, PosTypeService>();
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClientWebAppService.BFF", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClientWebAppService.PosProfile", Version = "v1"});
             });
 
             var azureCredential = configuration.GetSection(nameof(AzureClientSecretCredential)).Get<AzureClientSecretCredential>();

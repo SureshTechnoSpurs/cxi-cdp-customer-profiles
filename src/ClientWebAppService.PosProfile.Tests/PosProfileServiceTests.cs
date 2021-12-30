@@ -119,7 +119,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 a => a.Set(
                     It.Is<string>(x => x == keyVaultItemNameExpected), It.Is<string>(x => x == keyVaultItemValueExpected), null)
             );
-            
+
             _secretSetterMock.Verify(ss => ss.Set("di-square-partnerId-tokeninfo", "Bearer AccessToken", null));
         }
 
@@ -157,12 +157,12 @@ namespace ClientWebAppService.PosProfile.Tests
             var partnerId = "partnerId";
             var posCredentialsConfigurationsList = new List<PosCredentialsConfiguration> {new PosCredentialsConfiguration
                 {PosType = "square", KeyVaultReference = "test"}};
-            
+
             var updateDto = new PosProfileUpdateModel(posCredentialsConfigurationsList, true);
-            
+
             await _posProfileService.UpdatePosProfileAsync(partnerId, updateDto);
-            
-            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true 
+
+            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true
             && x.PosConfiguration == posCredentialsConfigurationsList)));
         }
 
@@ -173,9 +173,9 @@ namespace ClientWebAppService.PosProfile.Tests
             {
                 IsHistoricalDataIngested = true
             };
-        
+
             var invocation = _posProfileService.Invoking(x => x.GetPosProfilesAsync(posProfileSearchCriteria));
-            
+
             await invocation.Should().ThrowAsync<NotFoundException>();
         }
 
@@ -186,7 +186,7 @@ namespace ClientWebAppService.PosProfile.Tests
             {
                 IsHistoricalDataIngested = true
             };
-            
+
             _posProfileRepositoryMock.Verify();
 
             try
@@ -197,9 +197,9 @@ namespace ClientWebAppService.PosProfile.Tests
             {
                 //ignored
             }
-            
+
             _posProfileRepositoryMock
                 .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
-        }
+        }      
     }
 }

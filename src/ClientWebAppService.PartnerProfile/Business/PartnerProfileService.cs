@@ -1,10 +1,15 @@
 ﻿using ClientWebAppService.PartnerProfile.Business.Models;
 using ClientWebAppService.PartnerProfile.Business.Utils;
+using ClientWebAppService.PartnerProfile.Configuration;
+using ClientWebAppService.PartnerProfile.Core.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using ClientWebAppService.PartnerProfile.Models;
 using CXI.Common.ExceptionHandling.Primitives;
+using GL.MSA.ISC.Transport.RestClient;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ValidationException = CXI.Common.ExceptionHandling.Primitives.ValidationException;
 
@@ -14,13 +19,22 @@ namespace ClientWebAppService.PartnerProfile.Business
     public class PartnerProfileService : IPartnerProfileService
     {
         private readonly IPartnerRepository _partnerRepository;
+        private readonly IDomainServicesConfiguration _configuration;
+        private readonly IRestClient _restClient;
+        private readonly IRequestDispatcher _requestDispatcher;
         private readonly ILogger<PartnerProfileService> _logger;
 
         public PartnerProfileService(IPartnerRepository partnerRepository,
-                                     ILogger<PartnerProfileService> logger)
+                                     ILogger<PartnerProfileService> logger,
+                                     IDomainServicesConfiguration configuration,
+                                     IRestClientFactory restClientFactory,
+                                     IRequestDispatcher requestDispatcher)
         {
             _partnerRepository = partnerRepository;
             _logger = logger;
+            _configuration = configuration;
+            _restClient = restClientFactory.GetRestClient();
+            _requestDispatcher = requestDispatcher;
         }
 
         ///<inheritdoc/>
@@ -88,6 +102,29 @@ namespace ClientWebAppService.PartnerProfile.Business
                 _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
                 throw;
             }
+        }
+
+        ///<inheritdoc/>
+        public async Task<IEnumerable<PosTypePartnerDto>> GetActivePartnersByPosTypeAsync(string posType)
+        {
+            if (string.IsNullOrWhiteSpace(posType))
+            {
+                throw new ValidationException(nameof(posType), "POS type can not be null or empty.");
+            }
+
+            var requestUrl = Endpoints.PosProfileService.GetActivePartnersByPosTypeEndpoint
+                (_configuration.PosProfileService?.BaseUrl, posType);
+
+            var response = await _requestDispatcher.DispatchRequestResult<IEnumerable<string>>(() =>
+                        _restClient.GetAsync(requestUrl, null, PolicyEnum.HttpCircuitBreakerPolicy));
+            // filter out active profiles
+            var posTypePartners = response.ToList();
+
+            return posTypePartners.Select(partnerId =>
+            {
+                return new PosTypePartnerDto(partnerId, PartnerProfileUtils.DefaultPartnerCountry, partnerId);
+            });
+
         }
 
         private PartnerProfileDto Map(Partner partner) =>

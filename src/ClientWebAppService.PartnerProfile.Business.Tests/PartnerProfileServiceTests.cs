@@ -10,18 +10,34 @@ using System;
 using ClientWebAppService.PartnerProfile.Business.Utils;
 using ClientWebAppService.PartnerProfile.Models;
 using Microsoft.Extensions.Logging;
+using GL.MSA.ISC.Transport.RestClient;
+using ClientWebAppService.PartnerProfile.Configuration;
+using ClientWebAppService.PartnerProfile.Core.Utils;
 
 namespace ClientWebAppService.PartnerProfile.Business.Tests
 {
     public class PartnerProfileServiceTests
     {
+        private readonly string BaseUrl = "http://test.cxi";
         private readonly IPartnerProfileService _service;
-
         private Mock<IPartnerRepository> _repositoryMock = new Mock<IPartnerRepository>();
+        private Mock<IRestClientFactory> _restClientFactoryMock = new Mock<IRestClientFactory>();
+        private Mock<IRestClient> _restClientMock = new Mock<IRestClient>();
+        private Mock<IDomainServicesConfiguration> _configurationMock = new Mock<IDomainServicesConfiguration>();
 
         public PartnerProfileServiceTests()
         {
-            _service = new PartnerProfileService(_repositoryMock.Object , new Mock<ILogger<PartnerProfileService>>().Object);
+            _configurationMock
+                .SetupGet(x => x.PosProfileService)
+                .Returns(new PosProfileServiceConfiguration { BaseUrl = BaseUrl });
+
+            _restClientFactoryMock.Setup(x => x.GetRestClient()).Returns(_restClientMock.Object);
+
+            _service = new PartnerProfileService(_repositoryMock.Object,
+                new Mock<ILogger<PartnerProfileService>>().Object,
+                _configurationMock.Object,
+                _restClientFactoryMock.Object,
+                 new RequestDispatcher());
         }
 
         [Fact]

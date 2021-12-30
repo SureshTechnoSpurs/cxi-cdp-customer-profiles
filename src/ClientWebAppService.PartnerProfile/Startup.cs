@@ -18,6 +18,10 @@ using ClientWebAppService.PartnerProfile.Business;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.AspNetCore;
+using GL.MSA.ISC.Transport.RestClient;
+using ClientWebAppService.PartnerProfile.Core;
+using ClientWebAppService.PartnerProfile.Core.Utils;
+using ClientWebAppService.PartnerProfile.Configuration;
 
 namespace ClientWebAppService.PartnerProfile
 {
@@ -46,6 +50,12 @@ namespace ClientWebAppService.PartnerProfile
 
             services.AddControllers()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
+
+            services.AddTransient<IDomainServicesConfiguration>(_ =>
+               Configuration.GetSection("DomainServices").Get<DomainServicesConfiguration>());
+            services.AddHttpClient<IRestClient, BearerAuthorizedRestClient>();
+            services.AddSingleton<IRestClientFactory, RestClientFactory>();
+            services.AddTransient<IRequestDispatcher, RequestDispatcher>();
 
             services.AddTraceExtentionDispatcher(Configuration)
                 .AddHealthChecks()

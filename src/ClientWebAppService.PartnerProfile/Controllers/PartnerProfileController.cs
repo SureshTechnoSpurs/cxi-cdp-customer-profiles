@@ -1,9 +1,11 @@
 ﻿using ClientWebAppService.PartnerProfile.Business;
 using ClientWebAppService.PartnerProfile.Business.Models;
+using ClientWebAppService.PartnerProfile.Core.Exceptions;
 using ClientWebAppService.PartnerProfile.Models;
 using CXI.Common.ExceptionHandling;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -54,6 +56,17 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             await _partnerProfileService.UpdateProfileAsync(partnerId, updateModel);
 
             return Ok();
+        }
+
+        [HttpGet("active/{posType}")]
+        [ProducesResponseType(typeof(IEnumerable<PosTypePartnerDto>), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        [ProducesResponseType(typeof(DownstreamServiceRequestFailedException), 424)]
+        public async Task<IActionResult> GetActivePartnersByPosType([FromRoute] string posType)
+        {
+            var result = await _partnerProfileService.GetActivePartnersByPosTypeAsync(posType);
+
+            return Ok(result);
         }
     }
 }

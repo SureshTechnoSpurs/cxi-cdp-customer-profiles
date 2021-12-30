@@ -13,6 +13,8 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
 
         public const string DefaultPartnerType = "Restaurant";
 
+        public const string DefaultPartnerCountry = "USA";
+
         public static string GetPartnerIdByName(string partnerName) {
             var formatedPartnerName = partnerName.RemoveWhitespace();
             return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}";
