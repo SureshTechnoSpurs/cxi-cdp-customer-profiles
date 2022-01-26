@@ -1,4 +1,4 @@
-﻿using ClientWebAppService.UserProfile.Business.Models;
+﻿using CXI.Contracts.UserProfile.Models;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.UserProfile.Business

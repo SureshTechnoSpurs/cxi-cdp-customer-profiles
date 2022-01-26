@@ -1,8 +1,7 @@
 ﻿using ClientWebAppService.PartnerProfile.Business;
 using ClientWebAppService.PartnerProfile.Business.Models;
-using ClientWebAppService.PartnerProfile.Core.Exceptions;
-using ClientWebAppService.PartnerProfile.Models;
 using CXI.Common.ExceptionHandling;
+using CXI.Contracts.PartnerProfile.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -61,7 +60,7 @@ namespace ClientWebAppService.PartnerProfile.Controllers
         [HttpGet("active/{posType}")]
         [ProducesResponseType(typeof(IEnumerable<PosTypePartnerDto>), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
-        [ProducesResponseType(typeof(DownstreamServiceRequestFailedException), 424)]
+        [ProducesResponseType(typeof(ProblemResponse), 424)]
         public async Task<IActionResult> GetActivePartnersByPosType([FromRoute] string posType)
         {
             var result = await _partnerProfileService.GetActivePartnersByPosTypeAsync(posType);

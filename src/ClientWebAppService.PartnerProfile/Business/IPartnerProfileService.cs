@@ -1,5 +1,5 @@
 ﻿using ClientWebAppService.PartnerProfile.Business.Models;
-using ClientWebAppService.PartnerProfile.Models;
+using CXI.Contracts.PartnerProfile.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

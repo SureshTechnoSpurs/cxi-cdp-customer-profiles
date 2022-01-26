@@ -1,7 +1,7 @@
-﻿using ClientWebAppService.UserProfile.Business.Models;
-using ClientWebAppService.UserProfile.Business.Validators;
+﻿using ClientWebAppService.UserProfile.Business.Validators;
 using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Contracts.UserProfile.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;

@@ -1,5 +1,4 @@
-﻿using ClientWebAppService.PartnerProfile.Business.Models;
-using ClientWebAppService.PartnerProfile.DataAccess;
+﻿using ClientWebAppService.PartnerProfile.DataAccess;
 using Moq;
 using System.Threading.Tasks;
 using Xunit;
@@ -8,36 +7,24 @@ using CXI.Common.ExceptionHandling.Primitives;
 using System.Linq.Expressions;
 using System;
 using ClientWebAppService.PartnerProfile.Business.Utils;
-using ClientWebAppService.PartnerProfile.Models;
 using Microsoft.Extensions.Logging;
-using GL.MSA.ISC.Transport.RestClient;
-using ClientWebAppService.PartnerProfile.Configuration;
-using ClientWebAppService.PartnerProfile.Core.Utils;
+using CXI.Contracts.PosProfile;
+using CXI.Contracts.PartnerProfile.Models;
 
 namespace ClientWebAppService.PartnerProfile.Business.Tests
 {
     public class PartnerProfileServiceTests
     {
-        private readonly string BaseUrl = "http://test.cxi";
         private readonly IPartnerProfileService _service;
-        private Mock<IPartnerRepository> _repositoryMock = new Mock<IPartnerRepository>();
-        private Mock<IRestClientFactory> _restClientFactoryMock = new Mock<IRestClientFactory>();
-        private Mock<IRestClient> _restClientMock = new Mock<IRestClient>();
-        private Mock<IDomainServicesConfiguration> _configurationMock = new Mock<IDomainServicesConfiguration>();
+        private readonly Mock<IPartnerRepository> _repositoryMock = new Mock<IPartnerRepository>();
+        private readonly Mock<IPosProfileServiceClient> _posProfileServiceClientMock = new Mock<IPosProfileServiceClient>();
 
         public PartnerProfileServiceTests()
         {
-            _configurationMock
-                .SetupGet(x => x.PosProfileService)
-                .Returns(new PosProfileServiceConfiguration { BaseUrl = BaseUrl });
-
-            _restClientFactoryMock.Setup(x => x.GetRestClient()).Returns(_restClientMock.Object);
-
-            _service = new PartnerProfileService(_repositoryMock.Object,
+            _service = new PartnerProfileService(
+                _repositoryMock.Object,
                 new Mock<ILogger<PartnerProfileService>>().Object,
-                _configurationMock.Object,
-                _restClientFactoryMock.Object,
-                 new RequestDispatcher());
+                _posProfileServiceClientMock.Object);
         }
 
         [Fact]
@@ -46,7 +33,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.InsertOne(It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileCreationModel("testcorrect", "testname");
+            var testInput = new PartnerProfileCreationModel { Address = "testcorrect", Name = "testname" };
 
             var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();
@@ -62,7 +49,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.InsertOne(It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileCreationModel("testcorrect", "testname");
+            var testInput = new PartnerProfileCreationModel { Address = "testcorrect", Name = "testname" };
 
             var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();

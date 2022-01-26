@@ -6,9 +6,11 @@ using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Security.Secrets;
+using CXI.Contracts.PosProfile.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
 
 namespace ClientWebAppService.PosProfile.Services
 {
@@ -37,7 +39,7 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
-        public async Task<PosProfileDto> CreatePosProfileAsync(PosProfileCreationDto posProfileCreationDto)
+        public async Task<PosProfileDto> CreatePosProfileAsync(PosProfileCreationModel posProfileCreationDto)
         {
             Models.PosProfile posProfile;
 
@@ -46,7 +48,7 @@ namespace ClientWebAppService.PosProfile.Services
                 _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
 
                 int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
-                
+
                 posProfile = new Models.PosProfile
                 {
                     PartnerId = posProfileCreationDto.PartnerId,
@@ -67,7 +69,7 @@ namespace ClientWebAppService.PosProfile.Services
                     });
 
                     _secretSetter.Set(keyVaultReferenceTemplate, posConfigurationJsonSecret, null);
-                    
+
                     var tokenInfo = ComposeSecretPayloadForDataCollectService(posConfigurationDto.PosType, posProfileCreationDto.PartnerId, posConfigurationDto.AccessToken);
                     _secretSetter.Set(tokenInfo.keyVaultSecretName, tokenInfo.keyVaultSecretValue, null);
                 }
@@ -81,8 +83,11 @@ namespace ClientWebAppService.PosProfile.Services
             }
 
             _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
-            
-            return new PosProfileDto(posProfile?.PartnerId, posProfile?.PosConfiguration);
+
+            return new PosProfileDto(posProfile.PartnerId,
+                                     posProfile.PosConfiguration.Select(x =>
+                                        new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference)
+                                     ));
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
@@ -92,12 +97,15 @@ namespace ClientWebAppService.PosProfile.Services
 
             var posProfile = await _posProfileRepository.FindOne(pp => pp.PartnerId != null && pp.PartnerId.Equals(partnerId));
 
-            return posProfile == null ? throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
-                                      : new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration);
+            return posProfile != null ? new PosProfileDto(posProfile.PartnerId,
+                                                          posProfile.PosConfiguration.Select(x =>
+                                                             new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference)))
+                : throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
+                                      ;
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
-        public async Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria)
+        public async Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteriaModel searchCriteria)
         {
 
             _logger.LogInformation($"get pos profile by search Criteria");
@@ -106,7 +114,7 @@ namespace ClientWebAppService.PosProfile.Services
                                                                                    profile.IsHistoricalDataIngested == searchCriteria.IsHistoricalDataIngested : null);
 
             var posProfiles = result.ToList();
-            
+
             if (result == null || !posProfiles.Any())
             {
                 throw new NotFoundException($"Pos profiles not found");
@@ -114,9 +122,9 @@ namespace ClientWebAppService.PosProfile.Services
 
             return posProfiles.Select(x =>
             {
-                return new PosProfileSearchDto(x.PartnerId, 
-                                       x.PosConfiguration?.Select(pc => pc.PosType),
-                                               x.IsHistoricalDataIngested, 
+                return new PosProfileSearchDto(x.PartnerId,
+                                               x.PosConfiguration?.Select(pc => pc.PosType),
+                                               x.IsHistoricalDataIngested,
                                                x.HistoricalIngestDaysPeriod);
             });
         }
@@ -130,7 +138,8 @@ namespace ClientWebAppService.PosProfile.Services
             {
                 var posProfile = new Models.PosProfile
                 {
-                    PosConfiguration = updateModel.PosConfigurations,
+                    PosConfiguration = updateModel.PosConfigurations
+                        .Select(x => new PosCredentialsConfiguration { KeyVaultReference = x.KeyVaultReference, PosType = x.PosType }),
                     IsHistoricalDataIngested = updateModel.IsHistoricalDataIngested
                 };
 
@@ -145,14 +154,14 @@ namespace ClientWebAppService.PosProfile.Services
             }
         }
 
-        private string ComposePosConfigurationSecretPayload(PosCredentialsConfigurationDto posCredentialsConfiguration)
+        private string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
             var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
                                                      new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }
-        
+
         private (string keyVaultSecretName, string keyVaultSecretValue) ComposeSecretPayloadForDataCollectService(string posType, string partnerId, string accessToken)
         {
             return ($"di-{posType}-{partnerId}-tokeninfo", $"{AuthenticationScheme} {accessToken}");

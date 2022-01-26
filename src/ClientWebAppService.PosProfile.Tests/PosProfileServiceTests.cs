@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using CXI.Common.ExceptionHandling.Primitives;
 using MongoDB.Bson;
+using CXI.Contracts.PosProfile.Models;
+using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
 
 namespace ClientWebAppService.PosProfile.Tests
 {
@@ -80,11 +82,11 @@ namespace ClientWebAppService.PosProfile.Tests
         [Fact]
         public async Task CreatePosProfileAsync_CorrectParametersPassed_SuccessfulResultReturned()
         {
-            var creationDto = new PosProfileCreationDto(
+            var creationDto = new PosProfileCreationModel(
                 "partnerId",
-                new List<PosCredentialsConfigurationDto>
+                new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
+                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
                 }
             );
 
@@ -102,11 +104,11 @@ namespace ClientWebAppService.PosProfile.Tests
                 DateTimeStyles.AssumeUniversal |
                 DateTimeStyles.AdjustToUniversal);
 
-            var creationDto = new PosProfileCreationDto(
+            var creationDto = new PosProfileCreationModel(
                 "partnerId",
-                new List<PosCredentialsConfigurationDto>
+                new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new PosCredentialsConfigurationDto("square", "AccessToken", "RefreshToken", date)
+                    new Models.PosCredentialsConfigurationDto("square", "AccessToken", "RefreshToken", date)
                 }
             );
 
@@ -131,11 +133,11 @@ namespace ClientWebAppService.PosProfile.Tests
                     x => x.InsertOne(It.IsAny<Models.PosProfile>()))
                 .Throws(new MongoException(exceptionMessage));
 
-            var creationDto = new PosProfileCreationDto(
+            var creationDto = new PosProfileCreationModel(
                 "partnerId",
-                new List<PosCredentialsConfigurationDto>
+                new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
+                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
                 }
             );
 
@@ -155,24 +157,24 @@ namespace ClientWebAppService.PosProfile.Tests
         public async Task UpdatePosProfileAsync_CorrectParametersPassed_RepositoryInvoked()
         {
             var partnerId = "partnerId";
-            var posCredentialsConfigurationsList = new List<PosCredentialsConfiguration> {new PosCredentialsConfiguration
-                {PosType = "square", KeyVaultReference = "test"}};
+            var posCredentialsConfigurationsList = new List<PosCredentialsConfigurationDto> {
+                new PosCredentialsConfigurationDto(PosType : "square", KeyVaultReference : "test")};
 
-            var updateDto = new PosProfileUpdateModel(posCredentialsConfigurationsList, true);
+            var updateDto = new PosProfileUpdateModel
+            {
+                PosConfigurations = posCredentialsConfigurationsList,
+                IsHistoricalDataIngested = true
+            };
 
             await _posProfileService.UpdatePosProfileAsync(partnerId, updateDto);
 
-            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true
-            && x.PosConfiguration == posCredentialsConfigurationsList)));
+            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true)));
         }
 
         [Fact]
         public async Task GetPosProfilesAsync_PartnerNotFound_ExceptionThrowed()
         {
-            var posProfileSearchCriteria = new PosProfileSearchCriteria
-            {
-                IsHistoricalDataIngested = true
-            };
+            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
 
             var invocation = _posProfileService.Invoking(x => x.GetPosProfilesAsync(posProfileSearchCriteria));
 
@@ -182,10 +184,7 @@ namespace ClientWebAppService.PosProfile.Tests
         [Fact]
         public async Task GetPosProfilesAsync_IsHistoricalDataIngestedPassed_FilterByCalled()
         {
-            var posProfileSearchCriteria = new PosProfileSearchCriteria
-            {
-                IsHistoricalDataIngested = true
-            };
+            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
 
             _posProfileRepositoryMock.Verify();
 
@@ -200,6 +199,6 @@ namespace ClientWebAppService.PosProfile.Tests
 
             _posProfileRepositoryMock
                 .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
-        }      
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using ClientWebAppService.UserProfile.Business;
-using ClientWebAppService.UserProfile.Business.Models;
 using CXI.Common.ExceptionHandling;
+using CXI.Contracts.UserProfile.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;

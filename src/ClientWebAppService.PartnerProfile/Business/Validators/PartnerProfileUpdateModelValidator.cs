@@ -1,4 +1,4 @@
-﻿using ClientWebAppService.PartnerProfile.Models;
+﻿using CXI.Contracts.PartnerProfile.Models;
 using FluentValidation;
 using System.Diagnostics.CodeAnalysis;
 

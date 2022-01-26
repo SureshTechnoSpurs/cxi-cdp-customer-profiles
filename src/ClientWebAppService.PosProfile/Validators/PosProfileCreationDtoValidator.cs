@@ -5,10 +5,10 @@ using FluentValidation;
 namespace ClientWebAppService.PosProfile.Validators
 {
     /// <summary>
-    /// Validator for <see cref="PosProfileCreationDto"/>
+    /// Validator for <see cref="PosProfileCreationModel"/>
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class PosProfileCreationDtoValidator : AbstractValidator<PosProfileCreationDto>
+    public class PosProfileCreationDtoValidator : AbstractValidator<PosProfileCreationModel>
     {
         public PosProfileCreationDtoValidator()
         {

@@ -1,11 +1,9 @@
 ﻿using ClientWebAppService.PartnerProfile.Business.Models;
 using ClientWebAppService.PartnerProfile.Business.Utils;
-using ClientWebAppService.PartnerProfile.Configuration;
-using ClientWebAppService.PartnerProfile.Core.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
-using ClientWebAppService.PartnerProfile.Models;
 using CXI.Common.ExceptionHandling.Primitives;
-using GL.MSA.ISC.Transport.RestClient;
+using CXI.Contracts.PartnerProfile.Models;
+using CXI.Contracts.PosProfile;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,23 +16,17 @@ namespace ClientWebAppService.PartnerProfile.Business
     ///<inheritdoc/>
     public class PartnerProfileService : IPartnerProfileService
     {
-        private readonly IPartnerRepository _partnerRepository;
-        private readonly IDomainServicesConfiguration _configuration;
-        private readonly IRestClient _restClient;
-        private readonly IRequestDispatcher _requestDispatcher;
         private readonly ILogger<PartnerProfileService> _logger;
+        private readonly IPartnerRepository _partnerRepository;
+        private readonly IPosProfileServiceClient _posProfileServiceClient;
 
         public PartnerProfileService(IPartnerRepository partnerRepository,
                                      ILogger<PartnerProfileService> logger,
-                                     IDomainServicesConfiguration configuration,
-                                     IRestClientFactory restClientFactory,
-                                     IRequestDispatcher requestDispatcher)
+                                     IPosProfileServiceClient posProfileServiceClient)
         {
             _partnerRepository = partnerRepository;
             _logger = logger;
-            _configuration = configuration;
-            _restClient = restClientFactory.GetRestClient();
-            _requestDispatcher = requestDispatcher;
+            _posProfileServiceClient = posProfileServiceClient;
         }
 
         ///<inheritdoc/>
@@ -112,11 +104,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                 throw new ValidationException(nameof(posType), "POS type can not be null or empty.");
             }
 
-            var requestUrl = Endpoints.PosProfileService.GetActivePartnersByPosTypeEndpoint
-                (_configuration.PosProfileService?.BaseUrl, posType);
+            var response = await _posProfileServiceClient.GetPosProfileIdsByPosTypeAsync(posType);
 
-            var response = await _requestDispatcher.DispatchRequestResult<IEnumerable<string>>(() =>
-                        _restClient.GetAsync(requestUrl, null, PolicyEnum.HttpCircuitBreakerPolicy));
             // filter out active profiles
             var posTypePartners = response.ToList();
 
@@ -124,7 +113,6 @@ namespace ClientWebAppService.PartnerProfile.Business
             {
                 return new PosTypePartnerDto(partnerId, PartnerProfileUtils.DefaultPartnerCountry, partnerId);
             });
-
         }
 
         private PartnerProfileDto Map(Partner partner) =>

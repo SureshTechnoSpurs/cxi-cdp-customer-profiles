@@ -19,9 +19,8 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.AspNetCore;
 using GL.MSA.ISC.Transport.RestClient;
-using ClientWebAppService.PartnerProfile.Core;
-using ClientWebAppService.PartnerProfile.Core.Utils;
 using ClientWebAppService.PartnerProfile.Configuration;
+using CXI.Contracts.PosProfile;
 
 namespace ClientWebAppService.PartnerProfile
 {
@@ -49,23 +48,24 @@ namespace ClientWebAppService.PartnerProfile
                     options => { Configuration.Bind("AzureAdB2C", options); });
 
             services.AddControllers()
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
+                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
-            services.AddTransient<IDomainServicesConfiguration>(_ =>
-               Configuration.GetSection("DomainServices").Get<DomainServicesConfiguration>());
-            services.AddHttpClient<IRestClient, BearerAuthorizedRestClient>();
-            services.AddSingleton<IRestClientFactory, RestClientFactory>();
-            services.AddTransient<IRequestDispatcher, RequestDispatcher>();
+            var serviceConfigs = Configuration.GetSection("DomainServices").Get<DomainServicesConfiguration>();
+
+            services.AddTransient<IDomainServicesConfiguration>(_ => serviceConfigs);
+
+            services.AddPosProfileServiceClient(serviceConfigs.PosProfileService.BaseUrl)
+                    .WithHttpContextAuthorizationTokenResolver();
 
             services.AddTraceExtentionDispatcher(Configuration)
-                .AddHealthChecks()
-                .AddCheck<LivenessHealthCheck>(name: "live",
-                    failureStatus: HealthStatus.Unhealthy,
-                    tags: new[] {"live"})
-                .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
-                    name: "MongoDB",
-                    failureStatus: HealthStatus.Unhealthy,
-                    tags: new string[] {"mongoDB", "ready"});
+                    .AddHealthChecks()
+                    .AddCheck<LivenessHealthCheck>(name: "live",
+                        failureStatus: HealthStatus.Unhealthy,
+                        tags: new[] { "live" })
+                    .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
+                        name: "MongoDB",
+                        failureStatus: HealthStatus.Unhealthy,
+                        tags: new string[] { "mongoDB", "ready" });
 
             services.AddCxiMongoDb()
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.PartnerProfile")
@@ -75,10 +75,10 @@ namespace ClientWebAppService.PartnerProfile
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "ClientWebAppService.PartnerProfile", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ClientWebAppService.PartnerProfile", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                { 
+                {
                     Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer 12345abcdef')",
                     Name = "Authorization",
                     In = ParameterLocation.Header,

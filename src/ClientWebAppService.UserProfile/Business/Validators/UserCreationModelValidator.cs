@@ -1,4 +1,4 @@
-﻿using ClientWebAppService.UserProfile.Business.Models;
+﻿using CXI.Contracts.UserProfile.Models;
 using FluentValidation;
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,7 +8,7 @@ namespace ClientWebAppService.UserProfile.Business.Validators
     /// Validator for <see cref="UserCreationModel"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class UserCreationModelValidator: AbstractValidator<UserCreationModel>
+    public class UserCreationModelValidator : AbstractValidator<UserCreationModel>
     {
         public UserCreationModelValidator()
         {

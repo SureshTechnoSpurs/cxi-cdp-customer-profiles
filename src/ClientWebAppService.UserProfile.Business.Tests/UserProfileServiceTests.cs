@@ -1,6 +1,6 @@
-﻿using ClientWebAppService.UserProfile.Business.Models;
-using ClientWebAppService.UserProfile.DataAccess;
+﻿using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Contracts.UserProfile.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;

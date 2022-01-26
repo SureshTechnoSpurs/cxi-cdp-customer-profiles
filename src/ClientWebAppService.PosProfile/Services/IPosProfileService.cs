@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models;
 
 namespace ClientWebAppService.PosProfile.Services
 {
@@ -15,7 +16,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// </summary>
         /// <param name="posProfileDto"></param>
         /// <returns></returns>
-        Task<PosProfileDto> CreatePosProfileAsync(PosProfileCreationDto posProfileDto);
+        Task<PosProfileDto> CreatePosProfileAsync(PosProfileCreationModel posProfileDto);
 
         /// <summary>
         /// Returns POS Profile by <paramref name="partnerId"/>\
@@ -28,7 +29,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// Fetches POS profiles specified by search criteria
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteria searchCriteria);
+        Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteriaModel searchCriteria);
 
         /// <summary>
         /// Performs update operation for POS Profile
