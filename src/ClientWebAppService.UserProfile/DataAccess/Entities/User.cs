@@ -1,7 +1,10 @@
-﻿using CXI.Common.MongoDb;
+﻿using CXI.Contracts.UserProfile.Models;
+using CXI.Common.MongoDb;
 using GL.MSA.Core.NoSql.Attributes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ClientWebAppService.UserProfile.DataAccess
@@ -19,7 +22,12 @@ namespace ClientWebAppService.UserProfile.DataAccess
         [BsonElement("user_email")]
         public string Email { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
         [BsonElement("role")]
-        public string Role { get; set; }
+        public UserRole Role { get; set; }
+
+        [BsonElement("invitation_accepted")]
+        public bool? InvitationAccepted { get; set; }
     }
 }

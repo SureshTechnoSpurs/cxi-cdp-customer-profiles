@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,12 +24,12 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         }
 
         [Fact]
-        public async Task CreateProfile_CorrectParametersPassed_NotNullResultReturned()
+        public async Task CreateProfileAsync_CorrectParametersPassed_NotNullResultReturned()
         {
             _repositoryMock.Setup(x => x.InsertOne(It.IsAny<User>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new UserCreationModel { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = "owner" };
+            var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Owner };
 
             var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();
@@ -39,12 +40,12 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         }
 
         [Fact]
-        public async Task CreateProfile_CorrectParametersPassed_CorrectResult()
+        public async Task CreateProfileAsync_CorrectParametersPassed_CorrectResult()
         {
             _repositoryMock.Setup(x => x.InsertOne(It.IsAny<User>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new UserCreationModel { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = "owner" };
+            var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate };
 
             var result = await _service.CreateProfileAsync(testInput);
 
@@ -52,6 +53,77 @@ namespace ClientWebAppService.UserProfile.Business.Tests
                   .NotBeNull()
                   .And
                   .Match<UserProfileDto>(x => x.Email == testInput.Email && x.PartnerId == testInput.PartnerId && x.Role == testInput.Role);
+        }
+
+        [Fact]
+        public async Task CreateProfileAsync_ExistingUserPassed_ValidationExceptionThrown()
+        {
+            var existingUser = new User { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                .ReturnsAsync(existingUser);
+
+            var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Fact]
+        public async Task GetUserProfilesAsync_UserProfilesFound_SuccessfulResultReturned()
+        {
+            var existingUsers = new List<UserProfileDto>()
+            {
+                new UserProfileDto("testPartnerId", "testemail@mail.com", UserRole.Associate, false),
+                new UserProfileDto("testPartnerId", "testemail2@mail.com", UserRole.Associate, true)
+            };
+
+            _repositoryMock.Setup(
+                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileDto>>>(),
+                It.IsAny<Expression<Func<User, bool>>>()))
+                .ReturnsAsync(existingUsers);
+
+            var testInput = new UserProfileSearchDto { PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            var result = await _service.GetUserProfilesAsync(testInput);
+
+            result.Should().Match<List<UserProfileDto>>(x => x.TrueForAll(element => element.Role == testInput.Role));
+        }
+
+        [Fact]
+        public async Task GetUserProfilesAsync_UserProfilesNotFound_NotFoundExceptionThrown()
+        {
+            var existingUsers = new List<UserProfileDto>();
+
+            _repositoryMock.Setup(
+                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileDto>>>(),
+                It.IsAny<Expression<Func<User, bool>>>()))
+                .ReturnsAsync(existingUsers);
+
+            var testInput = new UserProfileSearchDto { PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            var invocation = _service.Invoking(x => x.GetUserProfilesAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task UpdateUserProfilesAsync_CorrectParametersPassed_UserProfileUpdated()
+        {
+            var initialUserProfileState = new User { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate, InvitationAccepted = false };
+
+            _repositoryMock.Setup(
+                x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(initialUserProfileState);
+
+            var updateInput = new UserProfileUpdateDto
+            {
+                PartnerId = initialUserProfileState.PartnerId,
+                Email = initialUserProfileState.Email,
+                InvitationAccepted = true
+            };
+            await _service.UpdateUserProfilesAsync(updateInput);
+
+            _repositoryMock.Verify(x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()));
         }
 
         [Fact]

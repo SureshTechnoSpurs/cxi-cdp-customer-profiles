@@ -4,6 +4,8 @@ using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Contracts.UserProfile.Models;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.UserProfile.Business
@@ -40,32 +42,83 @@ namespace ClientWebAppService.UserProfile.Business
         }
 
         ///<inheritdoc/>
-        public async Task<UserProfileDto> CreateProfileAsync(UserCreationModel creationModel)
+        public async Task<UserProfileDto> CreateProfileAsync(UserCreationDto creationModel)
         {
             try
             {
                 _logger.LogInformation($"Creating new user profile for partnerId : {creationModel.PartnerId}");
 
+                var result = await _userProfileRepository.FindOne(x => x.Email == creationModel.Email &&
+                    x.PartnerId == creationModel.PartnerId);
+
+                if (result != null)
+                {
+                    _logger.LogError($"CreateProfileAsync - Attempted to create user profile with email ({creationModel.Email}) and parner Id ${creationModel.PartnerId}");
+                    throw new ValidationException(nameof(creationModel.PartnerId),
+                        $"User profile with email ({creationModel.Email}) and parnerId ${creationModel.PartnerId} already exists.");
+                }
+
                 var newUser = new User
                 {
                     Email = creationModel.Email,
                     PartnerId = creationModel.PartnerId,
-                    Role = creationModel.Role
+                    Role = creationModel.Role,
+                    InvitationAccepted = creationModel.Role == UserRole.Owner ? true : false
                 };
 
                 await _userProfileRepository.InsertOne(newUser);
 
-                _logger.LogInformation($"Successfully created user profile for partnerId = {creationModel.PartnerId}");
+                _logger.LogInformation($"Successfully created user profile with {creationModel.Role} role for partnerId = {creationModel.PartnerId}");
                 return Map(newUser);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"CreateProfileAsync - Attempted to create user profile for ${creationModel.PartnerId}, Exception message - {ex.Message}");
+                _logger.LogError($"CreateProfileAsync - Attempted to create user profile with {creationModel.Role} role for ${creationModel.PartnerId}, Exception message - {ex.Message}");
+                throw;
+            }
+        }
+
+        ///<inheritdoc/>
+        public async Task<IEnumerable<UserProfileDto>> GetUserProfilesAsync(UserProfileSearchDto criteria)
+        {
+            _logger.LogInformation($"Retrieving user profiles by search criteria.");
+
+            var result = await _userProfileRepository.FilterBy(profile => Map(profile),
+                userProfile => userProfile.PartnerId == criteria.PartnerId &&
+                userProfile.Role == criteria.Role);
+
+            var userProfiles = result.ToList();
+
+            if (result == null || !userProfiles.Any())
+            {
+                _logger.LogInformation($"User profiles were not found for partnerId {criteria.PartnerId}.");
+                throw new NotFoundException($"User profiles were not found.");
+            }
+
+            return userProfiles;
+        }
+
+        ///<inheritdoc/>
+        public async Task<UserProfileDto> UpdateUserProfilesAsync(UserProfileUpdateDto updateDto)
+        {
+            _logger.LogInformation($"Updating user profile for partnerId = {updateDto.PartnerId} with email = {updateDto.Email}.");
+
+            try
+            {
+                var updatedUser = await _userProfileRepository.UpdateAsync(updateDto.PartnerId, updateDto.Email, updateDto.InvitationAccepted);
+
+                _logger.LogInformation($"Successfully updated user profile for partnerId = {updateDto.PartnerId} with email = {updateDto.Email}.");
+
+                return Map(updatedUser);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"UpdateUserProfilesAsync - Attempted to update user profile for partnerId = {updateDto.PartnerId}, Exception message - {exception.Message}");
                 throw;
             }
         }
 
         private UserProfileDto Map(User profile) =>
-             new UserProfileDto(profile.PartnerId, profile.Email, profile.Role);
+             new UserProfileDto(profile.PartnerId, profile.Email, profile.Role, profile.InvitationAccepted);
     }
 }

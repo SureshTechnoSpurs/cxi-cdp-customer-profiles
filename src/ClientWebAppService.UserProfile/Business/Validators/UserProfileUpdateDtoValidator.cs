@@ -4,17 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ClientWebAppService.UserProfile.Business.Validators
 {
-    /// <summary>
-    /// Validator for <see cref="UserCreationModel"/>.
-    /// </summary>
     [ExcludeFromCodeCoverage]
-    public class UserCreationModelValidator : AbstractValidator<UserCreationDto>
+    public class UserProfileUpdateDtoValidator : AbstractValidator<UserProfileUpdateDto>
     {
-        public UserCreationModelValidator()
+        public UserProfileUpdateDtoValidator()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.PartnerId).NotEmpty();
-            RuleFor(x => x.Role).NotEmpty();
         }
     }
 }
