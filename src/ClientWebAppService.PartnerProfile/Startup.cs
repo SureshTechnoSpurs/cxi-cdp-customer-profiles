@@ -18,7 +18,6 @@ using ClientWebAppService.PartnerProfile.Business;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.AspNetCore;
-using GL.MSA.ISC.Transport.RestClient;
 using ClientWebAppService.PartnerProfile.Configuration;
 using CXI.Contracts.PosProfile;
 
@@ -54,7 +53,7 @@ namespace ClientWebAppService.PartnerProfile
 
             services.AddTransient<IDomainServicesConfiguration>(_ => serviceConfigs);
 
-            services.AddPosProfileServiceClient(serviceConfigs.PosProfileService.BaseUrl)
+            services.AddPosProfileServiceClient(serviceConfigs.PosProfileServiceConfiguration.BaseUrl)
                     .WithHttpContextAuthorizationTokenResolver();
 
             services.AddTraceExtentionDispatcher(Configuration)
