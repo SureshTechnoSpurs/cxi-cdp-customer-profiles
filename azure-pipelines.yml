@@ -79,9 +79,9 @@ stages:
         inputs:
           script: |
               trivy --version
-              trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-partner-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-partner-profile:$(Build.BuildNumber) 
-              trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-pos-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-pos-profile:$(Build.BuildNumber) 
-              trivy -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-user-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-user-profile:$(Build.BuildNumber)
+              trivy c -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-partner-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-partner-profile:$(Build.BuildNumber) 
+              trivy c -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-pos-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-pos-profile:$(Build.BuildNumber) 
+              trivy c -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-user-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-user-profile:$(Build.BuildNumber)
 
       - task: PublishBuildArtifacts@1
         inputs:
