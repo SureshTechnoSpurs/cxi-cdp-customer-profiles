@@ -1,7 +1,6 @@
 using ClientWebAppService.PartnerProfile.Core;
 using CXI.Common.Extensions;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,8 +16,8 @@ namespace ClientWebAppService.PartnerProfile
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .AddAzureAppConfiguration(CommonServiceConstraints.AzureConfiguration.KeyPrefix)
+                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

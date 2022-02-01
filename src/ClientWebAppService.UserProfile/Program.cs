@@ -19,8 +19,8 @@ namespace ClientWebAppService.UserProfile
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .AddAzureAppConfiguration(CommonServiceConstraints.AzureConfiguration.KeyPrefix)
+                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

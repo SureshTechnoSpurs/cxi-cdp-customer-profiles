@@ -2,6 +2,6 @@
 {
     public interface IDomainServicesConfiguration
     {
-        PosProfileServiceConfiguration? PosProfileService { get; set; }
+        PosProfileServiceConfiguration? PosProfileServiceConfiguration { get; set; }
     }
 }

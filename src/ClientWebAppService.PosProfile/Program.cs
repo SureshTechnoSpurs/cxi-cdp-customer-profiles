@@ -15,8 +15,8 @@ namespace ClientWebAppService.PosProfile
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .AddAzureAppConfiguration("ClientWebAppServicePosProfile:")
+                .AddAzureKeyVaultConfiguration(new[] { "ds-global", "ds-customer-profiles" })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
