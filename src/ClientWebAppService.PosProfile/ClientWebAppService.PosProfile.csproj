@@ -15,7 +15,7 @@
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
     <PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
     <PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
-    <PackageReference Include="GL.MSA.Tracing.TraceFactory" Version="1.0.0" />
+    <PackageReference Include="GL.MSA.Tracing.TraceFactory" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.13" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
