@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"					
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+<changeSet id="initial_user_profiles_collection_creation" author="Maskym Verhun">
+    <!--Create initial collection schema-->
+	<ext:createCollection collectionName="user_profiles">
+		<ext:options>
+		{
+		    validator: {
+		    	$jsonSchema: {
+		    		bsonType: "object",
+		    		required: ["_id" ,"user_email"],
+		    		properties: {
+		    		    _id: {
+		    			    bsonType: "objectId"
+		    			},
+		    	        partner_id: {
+		    		        bsonType: "string"
+		    			},
+		    	        user_email: {
+		    		        bsonType: "string"
+		    			},
+		    	        role: {
+		    		        bsonType: "string"
+		    			}
+		    		}
+		    	}
+		    },
+		    validationAction: "warn",
+		    validationLevel: "strict"
+		}
+		</ext:options>
+	</ext:createCollection>
+
+    <!--Defile initial collection indecies-->
+    <ext:createIndex collectionName="user_profiles">
+        <ext:keys>
+            { _id: 1}
+        </ext:keys>
+        <ext:options>
+            {name: "_id_"}
+        </ext:options>
+    </ext:createIndex>
+    <rollback>
+        <ext:dropCollection collectionName="user_profiles"/>
+    </rollback>
+	</changeSet>
+</databaseChangeLog>

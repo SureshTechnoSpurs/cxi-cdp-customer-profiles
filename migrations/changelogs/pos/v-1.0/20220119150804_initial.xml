@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"					
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+<changeSet id="initial_pos_profiles_collection_creation" author="Maskym Verhun">
+    <!--Create initial collection schema-->
+	<ext:createCollection collectionName="pos_profiles">
+		<ext:options>
+		{
+		    validator: {
+		    	$jsonSchema: {
+		    		bsonType: "object",
+		    		required: ["_id"],
+		    		properties: {
+		    		    _id: {
+		    			    bsonType: "objectId"
+		    			},
+		    	        is_historical_data_ingested: {
+		    		        bsonType: "bool"
+		    			},
+		    	        historical_ingest_days_period: {
+		    		        bsonType: "int"
+		    			},
+		    	        pos_configuration: {
+		    		        bsonType: "array",
+                            items:{
+                                bsonType: "object",
+                                required:["pos_type","keyvault_reference"],
+                            properties:{
+                                pos_type:{
+                                    bsonType: "string",
+                                },
+                                keyvault_reference:{
+                                    bsonType: "string",
+                                }
+                            }
+                        }
+		    		}
+		    	}
+		    }
+		},
+		validationAction: "warn",
+		validationLevel: "strict"
+		}
+		</ext:options>
+	</ext:createCollection>
+
+    <!--Defile initial collection indecies-->
+    <ext:createIndex collectionName="pos_profiles">
+        <ext:keys>
+            { _id: 1}
+        </ext:keys>
+        <ext:options>
+            {name: "_id_"}
+        </ext:options>
+    </ext:createIndex>
+
+    <rollback>
+        <ext:dropCollection collectionName="pos_profiles"/>
+    </rollback>
+	</changeSet>
+</databaseChangeLog>

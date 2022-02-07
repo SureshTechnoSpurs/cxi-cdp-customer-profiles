@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"					
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+<changeSet id="initial_partner_profiles_collection_creation" author="Maskym Verhun">
+    <!--Create initial collection schema-->
+	<ext:createCollection collectionName="partner_profiles">
+		<ext:options>
+		{
+		    validator: {
+		    	$jsonSchema: {
+		    		bsonType: "object",
+		    		required: ["_id", "partner_name", "address", "partner_type"],
+		    		properties: {
+		    		    _id: {
+		    			    bsonType: "objectId"
+		    			},
+		    	        partner_id: {
+		    		        bsonType: "string"
+		    			},
+		    	        partner_name: {
+		    		        bsonType: "string"
+		    			},
+		    	        address: {
+		    		        bsonType: "string"
+		    			},
+		    	        amount_of_locations: {
+		    		        bsonType: "int"
+		    			},
+		    	        partner_type: {
+		    		        bsonType: "string"
+		    			},
+		    	        profiles: {
+		    		        bsonType: "array"
+		    			}
+		    		}
+		    	}
+		    },
+		    validationAction: "warn",
+		    validationLevel: "strict"
+		}
+		</ext:options>
+	</ext:createCollection>
+
+    <!--Defile initial collection indecies-->
+    <ext:createIndex collectionName="partner_profiles">
+        <ext:keys>
+            { _id: 1}
+        </ext:keys>
+        <ext:options>
+            {name: "_id_"}
+        </ext:options>
+    </ext:createIndex>
+
+    <ext:createIndex collectionName="partner_profiles">
+        <ext:keys>
+            {partner_id: 1}
+        </ext:keys>
+        <ext:options>
+            {unique: true, name: "partner_id_uniq_index"}
+        </ext:options>
+    </ext:createIndex>
+
+    <ext:createIndex collectionName="partner_profiles">
+        <ext:keys>
+            {address: 1}
+        </ext:keys>
+        <ext:options>
+            {unique: true, name: "address_uniq_index"}
+        </ext:options>
+    </ext:createIndex>
+
+    <ext:createIndex collectionName="partner_profiles">
+        <ext:keys>
+            {partner_id: 1}
+        </ext:keys>
+        <ext:options>
+            {name: "partner_name_index"}
+        </ext:options>
+    </ext:createIndex>
+
+    <rollback>
+        <ext:dropCollection collectionName="partner_profiles"/>
+    </rollback>
+	</changeSet>
+
+</databaseChangeLog>
