@@ -44,6 +44,18 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
         }
 
         [Fact]
+        public async Task CreateProfileAsync_CorrectParametersPassed_SuchPartnerAlreadyExisted_ValidationExceptionThrowed()
+        {
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new Partner());
+
+            var testInput = new PartnerProfileCreationModel { Address = "testcorrect", Name = "testname" };
+
+            var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
+            await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Fact]
         public async Task CreateProfileAsync_CorrectParametersPassed_CorrectResult()
         {
             _repositoryMock.Setup(x => x.InsertOne(It.IsAny<Partner>()))
