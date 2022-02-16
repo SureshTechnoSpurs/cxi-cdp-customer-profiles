@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CXI.Common.Extensions;
+using CXI.Common.Security.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
