@@ -58,7 +58,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [HttpDelete("byPartnerId/{partnerId}")]
+        [HttpDelete("partnerId/{partnerId}")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
         {

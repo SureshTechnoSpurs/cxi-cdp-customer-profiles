@@ -40,7 +40,7 @@ namespace ClientWebAppService.PosProfile.Services
         Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel);
 
         /// <summary>
-        /// DeletePosProfileAndSecretsAsync
+        /// Removes posProfile record and keyVault secrets related to particular partner
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
