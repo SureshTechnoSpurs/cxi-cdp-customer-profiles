@@ -17,10 +17,11 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         public readonly IUserProfileService _service;
 
         public Mock<IUserProfileRepository> _repositoryMock = new Mock<IUserProfileRepository>();
+        public Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
 
         public UserProfileServiceTests()
         {
-            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object);
+            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object);
         }
 
         [Fact]
@@ -53,6 +54,19 @@ namespace ClientWebAppService.UserProfile.Business.Tests
                   .NotBeNull()
                   .And
                   .Match<UserProfileDto>(x => x.Email == testInput.Email && x.PartnerId == testInput.PartnerId && x.Role == testInput.Role);
+        }
+
+        [Fact]
+        public async Task CreateProfileAsync_AssociateUserPassed_InvitationSent()
+        {
+            _repositoryMock.Setup(x => x.InsertOne(It.IsAny<User>()))
+                .Returns(Task.CompletedTask);
+
+            var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            var result = await _service.CreateProfileAsync(testInput);
+
+            _emailServiceMock.Verify(mock => mock.SendInvitationMessageToAssociateAsync(testInput.Email), Times.Once);
         }
 
         [Fact]
