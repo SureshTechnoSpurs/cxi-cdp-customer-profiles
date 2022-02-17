@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ClientWebAppService.PosProfile.Models;
+﻿using ClientWebAppService.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ClientWebAppService.PosProfile.Services
 {
@@ -16,7 +16,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// </summary>
         /// <param name="posProfileDto"></param>
         /// <returns></returns>
-        Task<PosProfileDto> CreatePosProfileAsync(PosProfileCreationModel posProfileDto);
+        Task<PosProfileDto> CreatePosProfileAndSecretsAsync(PosProfileCreationModel posProfileDto);
 
         /// <summary>
         /// Returns POS Profile by <paramref name="partnerId"/>\
@@ -38,5 +38,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="updateModel"></param>
         /// <returns></returns>
         Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel);
+
+        /// <summary>
+        /// DeletePosProfileAndSecretsAsync
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        Task DeletePosProfileAndSecretsAsync(string partnerId);
     }
 }

@@ -1,22 +1,21 @@
-﻿using Moq;
-using Xunit;
-using System.Linq.Expressions;
+﻿using ClientWebAppService.PosProfile.DataAccess;
+using ClientWebAppService.PosProfile.Models;
+using ClientWebAppService.PosProfile.Services;
+using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Common.Security.Secrets;
+using CXI.Contracts.PosProfile.Models;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Castle.Core.Configuration;
-using ClientWebAppService.PosProfile.DataAccess;
-using ClientWebAppService.PosProfile.Models;
-using ClientWebAppService.PosProfile.Services;
-using CXI.Common.Security.Secrets;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using CXI.Common.ExceptionHandling.Primitives;
-using MongoDB.Bson;
-using CXI.Contracts.PosProfile.Models;
+using Xunit;
 using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
 
 namespace ClientWebAppService.PosProfile.Tests
@@ -28,19 +27,23 @@ namespace ClientWebAppService.PosProfile.Tests
         private readonly Mock<ISecretSetter> _secretSetterMock;
         private readonly Mock<ILogger<PosProfileService>> _loggerMock;
         private readonly Mock<Microsoft.Extensions.Configuration.IConfiguration> _configurationMock;
+        private readonly Mock<ISecretClient> _secretClientMock;
 
         public PosProfileServiceTests()
         {
             _posProfileRepositoryMock = new Mock<IPosProfileRepository>();
             _configurationMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
-            _posProfileRepositoryMock.Setup(
-                 x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
-
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
             _secretSetterMock = new Mock<ISecretSetter>();
-
             _loggerMock = new Mock<ILogger<PosProfileService>>();
+            _secretClientMock = new Mock<ISecretClient>();
 
-            _posProfileService = new PosProfileService(_posProfileRepositoryMock.Object, _secretSetterMock.Object, _loggerMock.Object, _configurationMock.Object);
+            _posProfileService = new PosProfileService(
+                _posProfileRepositoryMock.Object,
+                _secretSetterMock.Object,
+                _loggerMock.Object,
+                _configurationMock.Object,
+                _secretClientMock.Object);
         }
 
         [Fact]
@@ -90,7 +93,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 }
             );
 
-            var invocation = _posProfileService.Invoking(x => x.CreatePosProfileAsync(creationDto));
+            var invocation = _posProfileService.Invoking(x => x.CreatePosProfileAndSecretsAsync(creationDto));
 
             await invocation.Should().NotThrowAsync();
         }
@@ -115,7 +118,7 @@ namespace ClientWebAppService.PosProfile.Tests
             var keyVaultItemNameExpected = $"partnerId-square";
             var keyVaultItemValueExpected = @"{""AccessToken"":{""Value"":""AccessToken"",""ExpirationDate"":""2021-09-30T23:00:00Z""},""RefreshToken"":{""Value"":""RefreshToken"",""ExpirationDate"":null}}";
 
-            await _posProfileService.CreatePosProfileAsync(creationDto);
+            await _posProfileService.CreatePosProfileAndSecretsAsync(creationDto);
 
             _secretSetterMock.Verify(
                 a => a.Set(
@@ -143,7 +146,7 @@ namespace ClientWebAppService.PosProfile.Tests
 
             try
             {
-                await _posProfileService.CreatePosProfileAsync(creationDto);
+                await _posProfileService.CreatePosProfileAndSecretsAsync(creationDto);
             }
             catch (Exception e)
             {
@@ -199,6 +202,30 @@ namespace ClientWebAppService.PosProfile.Tests
 
             _posProfileRepositoryMock
                 .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
+        }
+
+        [Fact]
+        public async Task DeletePosProfileAndSecretsAsync_Success()
+        {
+            var partnerId = "test-partner-id";
+            var posProfile = new Models.PosProfile
+            {
+                Id = new ObjectId(),
+                PartnerId = partnerId,
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = "square" }
+                }
+            };
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile> { posProfile });
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+
+            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Exactly(2));
+            _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Once);
         }
     }
 }
