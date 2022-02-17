@@ -19,6 +19,9 @@ using System.Diagnostics.CodeAnalysis;
 using ClientWebAppService.UserProfile.Business;
 using Microsoft.Extensions.Logging;
 using FluentValidation.AspNetCore;
+using CXI.Common.MessageBrokers.Extentions;
+using Microsoft.AspNetCore.Http;
+using ClientWebAppService.UserProfile.Core;
 
 namespace ClientWebAppService.UserProfile
 {
@@ -46,6 +49,8 @@ namespace ClientWebAppService.UserProfile
                         configureMicrosoftIdentityOptions:
                              options => { Configuration.Bind("AzureAdB2C", options); });
 
+            services.Configure<AdB2CInvitationOptions>(Configuration.GetSection("AzureAdB2C"));
+
             services.AddControllers()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
@@ -63,7 +68,10 @@ namespace ClientWebAppService.UserProfile
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
                     .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IUserProfileRepository, UserProfileRepository>()
-                    .AddTransient<IUserProfileService, UserProfileService>();
+                    .AddTransient<IUserProfileService, UserProfileService>()
+                    .AddTransient<IEmailService, EmailService>();
+
+            services.AddProducer(Configuration);
 
             services.AddSwaggerGen(c =>
             {

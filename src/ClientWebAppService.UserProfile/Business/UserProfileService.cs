@@ -15,12 +15,17 @@ namespace ClientWebAppService.UserProfile.Business
     {
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly ILogger<UserProfileService> _logger;
+        private readonly IEmailService _emailService;
 
-        public UserProfileService(IUserProfileRepository userProfileRepository,
-            ILogger<UserProfileService> logger)
+
+        public UserProfileService(
+            IUserProfileRepository userProfileRepository,
+            ILogger<UserProfileService> logger,
+            IEmailService emailService)
         {
             _userProfileRepository = userProfileRepository;
             _logger = logger;
+            _emailService = emailService;
         }
 
         ///<inheritdoc/>
@@ -67,6 +72,11 @@ namespace ClientWebAppService.UserProfile.Business
                 };
 
                 await _userProfileRepository.InsertOne(newUser);
+
+                if (creationModel.Role == UserRole.Associate)
+                {
+                    await _emailService.SendInvitationMessageToAssociateAsync(creationModel.Email);
+                }
 
                 _logger.LogInformation($"Successfully created user profile with {creationModel.Role} role for partnerId = {creationModel.PartnerId}");
                 return Map(newUser);
