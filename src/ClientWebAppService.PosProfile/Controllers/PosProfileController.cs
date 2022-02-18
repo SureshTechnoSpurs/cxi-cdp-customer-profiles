@@ -1,11 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+﻿using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
 using CXI.Common.ExceptionHandling;
+using CXI.Common.Helpers;
+using CXI.Contracts.PosProfile.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CXI.Contracts.PosProfile.Models;
-using ClientWebAppService.PosProfile.Models;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace ClientWebAppService.PosProfile.Controllers
 {
@@ -25,16 +26,16 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
-        /// Returns POS profile by specified profile Id
+        /// Returns POS profile by specified partnerId
         /// </summary>
-        /// <param name="posProfileId"></param>
+        /// <param name="partnerId"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("{posProfileId}")]
+        [HttpGet("{partnerId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
-        public async Task<IActionResult> Get([FromRoute] string posProfileId)
+        public async Task<IActionResult> Get([FromRoute] string partnerId)
         {
-            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(posProfileId);
+            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(partnerId);
             return Ok(posProfileGetResult);
         }
 
@@ -48,8 +49,23 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
         public async Task<IActionResult> Post(PosProfileCreationModel posProfileCreationDto)
         {
-            var posProfileCreateResult = await _posProfileService.CreatePosProfileAsync(posProfileCreationDto);
+            var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
             return Ok(posProfileCreateResult);
+        }
+
+        /// <summary>
+        /// DeleteByPartnerId
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        [HttpDelete("partnerId/{partnerId}")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            return Ok();
         }
 
         [Authorize(Policy = Constants.M2MPolicy)]
