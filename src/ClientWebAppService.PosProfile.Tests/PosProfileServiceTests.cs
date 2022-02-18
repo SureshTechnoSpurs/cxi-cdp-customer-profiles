@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.PosProfile.DataAccess;
+﻿using Azure;
+using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
 using CXI.Common.ExceptionHandling.Primitives;
@@ -22,6 +23,8 @@ namespace ClientWebAppService.PosProfile.Tests
 {
     public class PosProfileServiceTests
     {
+        private const string SecretNotFoundErrorCode = "SecretNotFound";
+
         private IPosProfileService _posProfileService;
         private readonly Mock<IPosProfileRepository> _posProfileRepositoryMock;
         private readonly Mock<ISecretSetter> _secretSetterMock;
@@ -205,7 +208,7 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task DeletePosProfileAndSecretsAsync_Success()
+        public async Task DeletePosProfileAndSecretsAsync_RemovedSecretsAndPosProfile_Success()
         {
             var partnerId = "test-partner-id";
             var posProfile = new Models.PosProfile
@@ -226,6 +229,58 @@ namespace ClientWebAppService.PosProfile.Tests
 
             _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Exactly(2));
             _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeletePosProfileAndSecretsAsync_SecretNotFound_RequestFailedExceptionThrown()
+        {
+            var partnerId = "test-partner-id";
+            var expectedMessage = $"Secret was not found in key vault for ${partnerId}";
+            var exception = new RequestFailedException(1, expectedMessage, SecretNotFoundErrorCode, null);
+            var posProfile = new Models.PosProfile
+            {
+                Id = new ObjectId(),
+                PartnerId = partnerId,
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = "square" }
+                }
+            };
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile> { posProfile });
+
+            _secretClientMock
+                .Setup(x => x.DeleteSecretAsync(It.IsAny<string>()))
+                .Throws(exception);
+
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId));
+
+            _loggerMock.Verify(
+                x => x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((message, type) => message.ToString() == expectedMessage),
+                    It.Is<Exception>(ex => ex == exception),
+                    It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)), Times.Once);
+
+            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeletePosProfileAndSecretsAsync_PosProfilesNotFound_Success()
+        {
+            var partnerId = "test-partner-id";
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile>());
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            
+            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Never);
+            _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Never);
         }
     }
 }
