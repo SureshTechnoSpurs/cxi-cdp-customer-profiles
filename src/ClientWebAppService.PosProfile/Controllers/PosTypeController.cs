@@ -10,6 +10,8 @@ namespace ClientWebAppService.PosProfile.Controllers
 {
     [ExcludeFromCodeCoverage]
     [Route("api/postype")]
+    [Route("api/v{version:apiVersion}/postype")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class PosTypeController : ControllerBase
     {

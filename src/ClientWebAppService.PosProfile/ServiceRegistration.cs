@@ -11,6 +11,7 @@ using FluentValidation.AspNetCore;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
 using GL.MSA.Tracing.TraceFactory;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -54,6 +55,17 @@ namespace ClientWebAppService.PosProfile
                 .AddTransient<IPosProfileRepository, PosProfileRepository>()
                 .AddTransient<IPosProfileService, PosProfileService>()
                 .AddTransient<IPosTypeService, PosTypeService>();
+
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = Microsoft.AspNetCore.Mvc.ApiVersion.Default;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new HeaderApiVersionReader("api-version", "version"),
+                    new QueryStringApiVersionReader("api-version", "version")
+                );
+                options.ReportApiVersions = true;
+            });
 
             services.AddSwaggerGen(c =>
             {

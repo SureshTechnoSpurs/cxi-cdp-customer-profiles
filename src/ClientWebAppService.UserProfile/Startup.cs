@@ -22,6 +22,7 @@ using FluentValidation.AspNetCore;
 using CXI.Common.MessageBrokers.Extentions;
 using Microsoft.AspNetCore.Http;
 using ClientWebAppService.UserProfile.Core;
+using Microsoft.AspNetCore.Mvc.Versioning;
 
 namespace ClientWebAppService.UserProfile
 {
@@ -72,6 +73,17 @@ namespace ClientWebAppService.UserProfile
                     .AddTransient<IEmailService, EmailService>();
 
             services.AddProducer(Configuration);
+
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = Microsoft.AspNetCore.Mvc.ApiVersion.Default;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new HeaderApiVersionReader("api-version", "version"),
+                    new QueryStringApiVersionReader("api-version", "version")
+                );
+                options.ReportApiVersions = true;
+            });
 
             services.AddSwaggerGen(c =>
             {

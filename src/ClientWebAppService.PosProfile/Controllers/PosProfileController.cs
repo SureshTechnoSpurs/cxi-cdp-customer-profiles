@@ -15,6 +15,8 @@ namespace ClientWebAppService.PosProfile.Controllers
     /// </summary>
     [ExcludeFromCodeCoverage]
     [Route("api/posprofile")]
+    [Route("api/v{version:apiVersion}/posprofile")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class PosProfileController : ControllerBase
     {

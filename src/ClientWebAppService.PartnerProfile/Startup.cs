@@ -20,6 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation.AspNetCore;
 using ClientWebAppService.PartnerProfile.Configuration;
 using CXI.Contracts.PosProfile;
+using Microsoft.AspNetCore.Mvc.Versioning;
 
 namespace ClientWebAppService.PartnerProfile
 {
@@ -71,6 +72,17 @@ namespace ClientWebAppService.PartnerProfile
                     .AddMongoResiliencyFor<Partner>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IPartnerRepository, PartnerRepository>()
                     .AddTransient<IPartnerProfileService, PartnerProfileService>();
+
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = Microsoft.AspNetCore.Mvc.ApiVersion.Default;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new HeaderApiVersionReader("api-version", "version"),
+                    new QueryStringApiVersionReader("api-version", "version")
+                );
+                options.ReportApiVersions = true;
+            });
 
             services.AddSwaggerGen(c =>
             {

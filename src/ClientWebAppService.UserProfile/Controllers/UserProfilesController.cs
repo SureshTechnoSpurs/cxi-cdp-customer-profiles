@@ -14,6 +14,8 @@ namespace ClientWebAppService.UserProfile.Controllers
     /// </summary>
     [ExcludeFromCodeCoverage]
     [Route("api/profile")]
+    [Route("api/v{version:apiVersion}/profile")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     public class UserProfilesController : ControllerBase

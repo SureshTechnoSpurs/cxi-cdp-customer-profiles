@@ -14,6 +14,8 @@ namespace ClientWebAppService.PartnerProfile.Controllers
     /// Provide functionality for read\create profile information.
     /// </summary>
     [Route("api/profile")]
+    [Route("api/v{version:apiVersion}/profile")]
+    [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [ExcludeFromCodeCoverage]
