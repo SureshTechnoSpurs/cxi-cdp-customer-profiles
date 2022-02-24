@@ -42,6 +42,22 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
+        /// Returns accessToken for specified partnerId
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("{partnerId}/accessToken")]
+        [ProducesResponseType(typeof(string), 200)]
+        public async Task<IActionResult> GetAccessToken(string partnerId)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
+            return Ok(accessToken);
+        }
+
+        /// <summary>
         /// Creates POS profile based on <see cref="PosProfileCreationModel"/>
         /// </summary>
         /// <param name="posProfileCreationDto"></param>

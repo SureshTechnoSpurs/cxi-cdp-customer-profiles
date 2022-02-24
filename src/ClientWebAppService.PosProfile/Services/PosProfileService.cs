@@ -158,6 +158,34 @@ namespace ClientWebAppService.PosProfile.Services
             }
         }
 
+        /// <inheritdoc cref="GetAccesTokenForPartner(string)" />
+        public async Task<string> GetAccesTokenForPartner(string partnerId)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            var posProfile = (await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId)).FirstOrDefault();
+            if (posProfile == null)
+            {
+                return null;
+            }
+
+            var posConfiguration = posProfile.PosConfiguration?.FirstOrDefault();
+            if (posConfiguration == null)
+            {
+                return null;
+            }
+
+            var posConfigurationSecretName = GetPosConfigurationSecretName(partnerId, posConfiguration.PosType);
+
+            VerifyHelper.NotEmpty(posConfigurationSecretName, nameof(posConfigurationSecretName));
+            var secret = _secretClient.GetSecret(posConfigurationSecretName);
+
+            VerifyHelper.NotNull(secret, nameof(secret));
+            var secretPayload = JsonConvert.DeserializeObject<PosProfileSecretConfiguration>(secret.Value);
+
+            return secretPayload?.AccessToken?.Value;
+        }
+
         /// <inheritdoc cref="IPosProfileService"/>
         public async Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId)
         {
