@@ -6,6 +6,7 @@ using CXI.Contracts.PosProfile.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.PosProfile.Controllers
@@ -54,7 +55,7 @@ namespace ClientWebAppService.PosProfile.Controllers
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
 
             var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
-            return Ok(accessToken);
+            return Ok(JsonContent.Create(accessToken));
         }
 
         /// <summary>
