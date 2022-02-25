@@ -175,7 +175,7 @@ namespace ClientWebAppService.PosProfile.Services
                 return null;
             }
 
-            var posConfigurationSecretName = GetPosConfigurationSecretName(partnerId, posConfiguration.PosType);
+            var posConfigurationSecretName = posConfiguration.KeyVaultReference;
 
             VerifyHelper.NotEmpty(posConfigurationSecretName, nameof(posConfigurationSecretName));
             var secret = _secretClient.GetSecret(posConfigurationSecretName);
@@ -250,10 +250,13 @@ namespace ClientWebAppService.PosProfile.Services
             }
         }
 
-        private string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
+        /// <inheritdoc cref="ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto)" />
+        public string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
-            var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
-                                                     new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
+            var posProfileSecretConfiguration = 
+                new PosProfileSecretConfiguration(
+                    new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
+                    new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }

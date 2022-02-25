@@ -52,5 +52,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="partnerId"></param>
         /// <returns></returns>
         Task<string> GetAccesTokenForPartner(string partnerId);
+
+        /// <summary>
+        /// Gets secret payload
+        /// </summary>
+        /// <param name="posCredentialsConfiguration"></param>
+        /// <returns></returns>
+        string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration);
     }
 }

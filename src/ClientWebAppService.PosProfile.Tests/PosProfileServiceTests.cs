@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Security.KeyVault.Secrets;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
@@ -281,6 +282,62 @@ namespace ClientWebAppService.PosProfile.Tests
             
             _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Never);
             _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetAccesTokenForPartner_CorrectParametersPassed_Success()
+        {
+            var partnerId = "test-partner-id";
+
+            var posProfile = new Models.PosProfile
+            {
+                Id = new ObjectId(),
+                PartnerId = partnerId,
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = "square" }
+                }
+            };
+
+            var secretValue = _posProfileService.ComposePosConfigurationSecretPayload(
+                new Models.PosCredentialsConfigurationDto("posType", "accessToken", "refreshToken", DateTime.UtcNow));
+
+            var secret = new KeyVaultSecret("secretName", secretValue);
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile> { posProfile });
+
+            _secretClientMock
+                .Setup(x => x.GetSecret(It.IsAny<string>()))
+                .Returns(secret);
+
+            var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
+
+            Assert.NotEmpty(accessToken);
+        }
+
+        [Fact]
+        public async Task GetAccesTokenForPartner_PosProfileNotExist_ReturnsNull()
+        {
+            var partnerId = "test-partner-id";
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile> { });
+
+            var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
+
+            Assert.Null(accessToken);
+        }
+
+        [Fact]
+        public async Task GetAccesTokenForPartner_EmptyPosProfile_ThrowsValidationException()
+        {
+            var partnerId = "";
+
+            await Assert.ThrowsAsync<ValidationException>(
+                async () => await _posProfileService.GetAccesTokenForPartner(partnerId));
         }
     }
 }
