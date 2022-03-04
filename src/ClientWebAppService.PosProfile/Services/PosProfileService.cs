@@ -158,6 +158,34 @@ namespace ClientWebAppService.PosProfile.Services
             }
         }
 
+        /// <inheritdoc cref="GetAccesTokenForPartner(string)" />
+        public async Task<string> GetAccesTokenForPartner(string partnerId)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            var posProfile = (await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId)).FirstOrDefault();
+            if (posProfile == null)
+            {
+                return null;
+            }
+
+            var posConfiguration = posProfile.PosConfiguration?.FirstOrDefault();
+            if (posConfiguration == null)
+            {
+                return null;
+            }
+
+            var posConfigurationSecretName = posConfiguration.KeyVaultReference;
+
+            VerifyHelper.NotEmpty(posConfigurationSecretName, nameof(posConfigurationSecretName));
+            var secret = _secretClient.GetSecret(posConfigurationSecretName);
+
+            VerifyHelper.NotNull(secret, nameof(secret));
+            var secretPayload = JsonConvert.DeserializeObject<PosProfileSecretConfiguration>(secret.Value);
+
+            return secretPayload?.AccessToken?.Value;
+        }
+
         /// <inheritdoc cref="IPosProfileService"/>
         public async Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId)
         {
@@ -222,10 +250,13 @@ namespace ClientWebAppService.PosProfile.Services
             }
         }
 
-        private string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
+        /// <inheritdoc cref="ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto)" />
+        public string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
         {
-            var posProfileSecretConfiguration = new PosProfileSecretConfiguration(new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
-                                                     new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
+            var posProfileSecretConfiguration = 
+                new PosProfileSecretConfiguration(
+                    new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
+                    new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
 
             return JsonConvert.SerializeObject(posProfileSecretConfiguration);
         }

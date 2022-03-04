@@ -45,5 +45,19 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="partnerId"></param>
         /// <returns></returns>
         Task DeletePosProfileAndSecretsAsync(string partnerId);
+
+        /// <summary>
+        /// Obtains accessToken from keyVaul for particalar PartnerId
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        Task<string> GetAccesTokenForPartner(string partnerId);
+
+        /// <summary>
+        /// Gets secret payload
+        /// </summary>
+        /// <param name="posCredentialsConfiguration"></param>
+        /// <returns></returns>
+        string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration);
     }
 }
