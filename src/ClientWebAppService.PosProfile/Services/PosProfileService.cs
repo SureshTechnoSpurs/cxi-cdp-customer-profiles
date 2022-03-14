@@ -200,6 +200,24 @@ namespace ClientWebAppService.PosProfile.Services
                                       ;
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerId(string partnerId)
+        {
+            _logger.LogInformation($"Getting POS profiles for partnerId: {partnerId}.");
+
+            var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
+
+            var posProfiles = result.ToList();
+
+            if (!posProfiles.Any())
+            {
+                throw new NotFoundException($"Pos profiles for partnerId: {partnerId} not found.");
+            }
+
+            return posProfiles.Select(posProfile => new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
+                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference))));
+        }
+
         /// <inheritdoc cref="IPosProfileService"/>
         public async Task<IEnumerable<PosProfileSearchDto>> GetPosProfilesAsync(PosProfileSearchCriteriaModel searchCriteria)
         {

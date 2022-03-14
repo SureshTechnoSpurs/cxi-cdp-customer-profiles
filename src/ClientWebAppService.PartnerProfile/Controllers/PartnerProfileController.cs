@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using ClientWebAppService.PartnerProfile.Core;
 
 namespace ClientWebAppService.PartnerProfile.Controllers
 {
@@ -34,6 +35,17 @@ namespace ClientWebAppService.PartnerProfile.Controllers
         public async Task<IActionResult> GetById([FromRoute] string partnerId)
         {
             var result = await _partnerProfileService.GetByIdAsync(partnerId);
+
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> M2MGet()
+        {
+            var result = await _partnerProfileService.GetPartnerProfilesAsync();
 
             return Ok(result);
         }

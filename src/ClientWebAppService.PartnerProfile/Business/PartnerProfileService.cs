@@ -80,6 +80,23 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         ///<inheritdoc/>
+        public async Task<IEnumerable<PartnerProfileDto>> GetPartnerProfilesAsync()
+        {
+            _logger.LogInformation("Getting all partner profiles.");
+
+            var result = await _partnerRepository.FilterBy();
+
+            var partnerProfiles = result.ToList();
+
+            if (!partnerProfiles.Any())
+            {
+                throw new NotFoundException("Partner profiles don't exist.");
+            }
+
+            return partnerProfiles.Select(Map);
+        }
+
+        ///<inheritdoc/>
         public async Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel)
         {
             try
@@ -124,6 +141,6 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         private PartnerProfileDto Map(Partner partner) =>
-            new PartnerProfileDto(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.UserProfiles);
+            new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.UserProfiles);
     }
 }

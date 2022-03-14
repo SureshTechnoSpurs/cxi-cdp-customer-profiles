@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.PosProfile.Models;
+﻿using System;
+using ClientWebAppService.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,7 +24,14 @@ namespace ClientWebAppService.PosProfile.Services
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
+        [Obsolete("Partner may have more than 1 Pos. Use GetPosProfilesByPartnerId")]
         Task<PosProfileDto> FindPosProfileByPartnerIdAsync(string partnerId);
+
+        /// <summary>
+        /// Returns POS Profiles for <paramref name="partnerId"/>\
+        /// </summary>
+        /// <param name="partnerId"></param>
+        Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerId(string partnerId);
 
         /// <summary>
         /// Fetches POS profiles specified by search criteria

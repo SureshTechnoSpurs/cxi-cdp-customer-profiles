@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.PosProfile.Models;
+﻿using System;
+using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
 using CXI.Common.ExceptionHandling;
 using CXI.Common.Helpers;
@@ -101,7 +102,8 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// Only for M2M - Returns POS profile by specified profile Id
         /// </summary>
         /// <param name="posProfileId"></param>
-        /// <returns></returns>
+        /// <returns></returns>`
+        [Obsolete("Partner may have more than 1 Pos. Use M2MGetPosProfiles")]
         [Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{posProfileId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
@@ -109,6 +111,20 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(posProfileId);
             return Ok(posProfileGetResult);
+        }
+
+        /// <summary>
+        /// Only for M2M - Returns POS profiles by specified partner Id
+        /// </summary>
+        /// <param name="partnerId"></param>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/{partnerId}/profiles")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        public async Task<IActionResult> M2MGetPosProfiles([FromRoute] string partnerId)
+        {
+            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+
+            return Ok(result);
         }
 
         /// <summary>
