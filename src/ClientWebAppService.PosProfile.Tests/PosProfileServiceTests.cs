@@ -93,7 +93,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 "partnerId",
                 new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
+                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
                 }
             );
 
@@ -115,7 +115,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 "partnerId",
                 new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new Models.PosCredentialsConfigurationDto("square", "AccessToken", "RefreshToken", date)
+                    new Models.PosCredentialsConfigurationDto("square", "AccessToken", "RefreshToken", date, "merchantId")
                 }
             );
 
@@ -144,7 +144,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 "partnerId",
                 new List<Models.PosCredentialsConfigurationDto>
                 {
-                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today)
+                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
                 }
             );
 
@@ -165,7 +165,7 @@ namespace ClientWebAppService.PosProfile.Tests
         {
             var partnerId = "partnerId";
             var posCredentialsConfigurationsList = new List<PosCredentialsConfigurationDto> {
-                new PosCredentialsConfigurationDto(PosType : "square", KeyVaultReference : "test")};
+                new PosCredentialsConfigurationDto(PosType : "square", KeyVaultReference : "test", "merchantId")};
 
             var updateDto = new PosProfileUpdateModel
             {
@@ -300,7 +300,7 @@ namespace ClientWebAppService.PosProfile.Tests
             };
 
             var secretValue = _posProfileService.ComposePosConfigurationSecretPayload(
-                new Models.PosCredentialsConfigurationDto("posType", "accessToken", "refreshToken", DateTime.UtcNow));
+                new Models.PosCredentialsConfigurationDto("posType", "accessToken", "refreshToken", DateTime.UtcNow, "merchantId"));
 
             var secret = new KeyVaultSecret("secretName", secretValue);
 
@@ -338,6 +338,40 @@ namespace ClientWebAppService.PosProfile.Tests
 
             await Assert.ThrowsAsync<ValidationException>(
                 async () => await _posProfileService.GetAccesTokenForPartner(partnerId));
+        }
+
+        [Fact]
+        public async Task GetByMerchantId_PosProfileNotExist_ReturnsNotFoundException()
+        {
+            var merchantId = "merchantId";
+
+            await Assert.ThrowsAsync<NotFoundException>(
+                async () => await _posProfileService.GetByMerchantId(merchantId));
+        }
+
+        [Fact]
+        public async Task GetByMerchantId_PosProfileExist_IsSuccess()
+        {
+            var merchantId = "merchantId";
+            var posProfile = new Models.PosProfile
+            {
+                PartnerId = "partnerId",
+                PosConfiguration = new List<PosCredentialsConfiguration> 
+                { 
+                    new PosCredentialsConfiguration 
+                    { 
+                        MerchantId = merchantId, 
+                        PosType = "posType", 
+                        KeyVaultReference = "reference" 
+                    } 
+                }
+            };
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(posProfile);
+
+            await _posProfileService.GetByMerchantId(merchantId);
         }
     }
 }

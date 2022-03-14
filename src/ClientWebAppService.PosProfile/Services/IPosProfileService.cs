@@ -59,5 +59,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="posCredentialsConfiguration"></param>
         /// <returns></returns>
         string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration);
+
+        /// <summary>
+        /// Gets PosProfile by specific MerchantId
+        /// </summary>
+        /// <param name="merchantId"></param>
+        /// <returns></returns>
+        Task<PosProfileDto> GetByMerchantId(string merchantId);
     }
 }

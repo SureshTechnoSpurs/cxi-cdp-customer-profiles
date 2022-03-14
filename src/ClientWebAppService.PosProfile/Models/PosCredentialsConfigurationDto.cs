@@ -10,8 +10,14 @@ namespace ClientWebAppService.PosProfile.Models
     /// <param name="AccessToken">Access token for Data Source</param>
     /// <param name="RefreshToken">Refresh token for Data Source</param>
     /// <param name="ExpirationDate">Access token expiration date</param>
+    /// <param name="MerchantId">The ID of the authorizing merchant's business</param>
     [ExcludeFromCodeCoverage]
-    public record PosCredentialsConfigurationDto(string PosType, string AccessToken, string RefreshToken, DateTime ExpirationDate)
+    public record PosCredentialsConfigurationDto(
+        string PosType, 
+        string AccessToken, 
+        string RefreshToken, 
+        DateTime ExpirationDate, 
+        string MerchantId)
     {
     }
 }

@@ -41,5 +41,8 @@ namespace ClientWebAppService.PosProfile.Models
         
         [BsonElement("keyvault_reference")]
         public string KeyVaultReference { get; set; }
+
+        [BsonElement("merchant_id")]
+        public string MerchantId { get; set; }
     }
 }

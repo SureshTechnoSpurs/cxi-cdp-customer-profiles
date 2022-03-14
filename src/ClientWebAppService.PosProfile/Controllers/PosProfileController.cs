@@ -43,6 +43,22 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
+        /// Gets PosProfile by specific merchantId
+        /// </summary>
+        /// <param name="merchantId"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/merchantId/{merchantId}")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        public async Task<IActionResult> GetByMerchantId([FromRoute] string merchantId)
+        {
+            VerifyHelper.NotEmpty(merchantId, nameof(merchantId));
+
+            var result = await _posProfileService.GetByMerchantId(merchantId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Returns accessToken for specified partnerId
         /// </summary>
         /// <param name="partnerId"></param>
@@ -122,6 +138,17 @@ namespace ClientWebAppService.PosProfile.Controllers
         public async Task<IActionResult> M2MPut([FromRoute] string posProfileId, [FromBody] PosProfileUpdateModel profileUpdateModel)
         {
             await _posProfileService.UpdatePosProfileAsync(posProfileId, profileUpdateModel);
+            return Ok();
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpDelete("m2m/partnerId/{partnerId}")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> M2mDeleteByPartnerId([FromRoute] string partnerId)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
             return Ok();
         }
     }
