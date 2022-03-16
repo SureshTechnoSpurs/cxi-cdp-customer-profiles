@@ -341,6 +341,48 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
+        public async Task GetPosProfilesByPartnerId_ProfilesExist_ShouldReturnPosProfilesDto()
+        {
+            // Arrange
+            var partnerId = "partnerId";
+
+            _posProfileRepositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile>
+                {
+                    new()
+                    {
+                        PartnerId = partnerId,
+                        PosConfiguration = new List<PosCredentialsConfiguration>
+                        {
+                            new()
+                            {
+                                KeyVaultReference = "ref", PosType = "square"
+                            }
+                        }
+                    }
+                });
+
+            // Act
+            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+
+            // Assert
+            result.Should().AllBeOfType<PosProfileDto>();
+        }
+
+        [Fact]
+        public async Task GetPosProfilesByPartnerId_ProfilesDoNotExist_ShouldThrowNotFoundException()
+        {
+            // Arrange
+            var partnerId = "partnerId";
+
+            // Act
+            Func<Task> act = () => _posProfileService.GetPosProfilesByPartnerId(partnerId);
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profiles for partnerId: {partnerId} not found.");
+        }
+
+        [Fact]
         public async Task GetByMerchantId_PosProfileNotExist_ReturnsNotFoundException()
         {
             var merchantId = "merchantId";

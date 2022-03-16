@@ -21,6 +21,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         Task<PartnerProfileDto> GetByIdAsync(string partnerId);
 
         /// <summary>
+        /// Get all partner profiles.
+        /// </summary>
+        Task<IEnumerable<PartnerProfileDto>> GetPartnerProfilesAsync();
+
+        /// <summary>
         /// Update specified partner profile.
         /// </summary>
         Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel);

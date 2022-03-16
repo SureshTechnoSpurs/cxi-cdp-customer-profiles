@@ -6,6 +6,7 @@ using FluentAssertions;
 using CXI.Common.ExceptionHandling.Primitives;
 using System.Linq.Expressions;
 using System;
+using System.Collections.Generic;
 using ClientWebAppService.PartnerProfile.Business.Utils;
 using Microsoft.Extensions.Logging;
 using CXI.Contracts.PosProfile;
@@ -126,6 +127,36 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             var invocation = _service.Invoking(x => x.UpdateProfileAsync("testId", testInput));
 
             await invocation.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task GetPartnerProfilesAsync_ProfilesExist_ShouldReturnPartnerProfiles()
+        {
+            // Arrange
+            _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new List<Partner>
+                {
+                    new()
+                    {
+                        PartnerId = "partnerId"
+                    }
+                });
+
+            // Act
+            var result = await _service.GetPartnerProfilesAsync();
+
+            // Assert
+            result.Should().AllBeOfType<PartnerProfileDto>();
+        }
+
+        [Fact]
+        public async Task GetPartnerProfilesAsync_ProfilesDoNotExist_ShouldThrowNotFoundException()
+        {
+            // Act
+            Func<Task> act = () => _service.GetPartnerProfilesAsync();
+
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>().WithMessage("Partner profiles don't exist.");
         }
     }
 }
