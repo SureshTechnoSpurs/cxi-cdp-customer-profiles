@@ -48,7 +48,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     PartnerName = creationModel.Name,
                     Address = creationModel.Address,
                     PartnerId = PartnerProfileUtils.GetPartnerIdByName(creationModel.Name),
-                    PartnerType = PartnerProfileUtils.DefaultPartnerType
+                    PartnerType = PartnerProfileUtils.DefaultPartnerType,
+                    ServiceAgreementAccepted = false
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -108,7 +109,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     PartnerType = updateModel.PartnerType,
                     AmountOfLocations = updateModel.AmountOfLocations,
                     Address = updateModel.Address,
-                    UserProfiles = updateModel.UserProfileEmails
+                    UserProfiles = updateModel.UserProfileEmails,
+                    ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -141,6 +143,6 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         private PartnerProfileDto Map(Partner partner) =>
-            new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.UserProfiles);
+            new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles);
     }
 }

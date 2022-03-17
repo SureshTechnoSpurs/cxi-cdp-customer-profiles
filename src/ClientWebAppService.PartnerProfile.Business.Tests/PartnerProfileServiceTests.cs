@@ -73,7 +73,8 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
                   x.PartnerName == testInput.Name &&
                   x.Address == testInput.Address &&
                   x.PartnerType == PartnerProfileUtils.DefaultPartnerType &&
-                  x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(testInput.Name));
+                  x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(testInput.Name) &&
+                  x.ServiceAgreementAccepted == false);
         }
 
         [Fact]
@@ -122,7 +123,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", new[] { "test@mail.com" });
+            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" });
 
             var invocation = _service.Invoking(x => x.UpdateProfileAsync("testId", testInput));
 

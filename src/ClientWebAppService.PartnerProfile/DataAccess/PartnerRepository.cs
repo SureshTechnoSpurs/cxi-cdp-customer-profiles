@@ -38,6 +38,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                     Builders<Partner>.Update.Set(x => x.PartnerType, updatedPartner.PartnerType),
                     Builders<Partner>.Update.Set(x => x.Address, updatedPartner.Address),
                     Builders<Partner>.Update.Set(x => x.AmountOfLocations, updatedPartner.AmountOfLocations),
+                    Builders<Partner>.Update.Set(x => x.ServiceAgreementAccepted, updatedPartner.ServiceAgreementAccepted),
                     Builders<Partner>.Update.Set(x => x.UserProfiles, updatedPartner.UserProfiles));
 
             var policy = GetDefaultPolicy();

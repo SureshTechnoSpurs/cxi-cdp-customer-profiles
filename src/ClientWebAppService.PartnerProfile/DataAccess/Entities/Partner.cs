@@ -29,6 +29,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         [BsonElement("partner_type")]
         public string? PartnerType { get; set; }
 
+        [BsonElement("service_agreement_accepted")]
+        public bool ServiceAgreementAccepted { get; set; }
+
         [BsonElement("profiles")]
         public IEnumerable<string> UserProfiles { get; set; } = new List<string>();
     }
