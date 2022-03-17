@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"					
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+	<changeSet id="Merchant_id_field_added" author="Dmytro.Chepil">
+		<ext:runCommand>
+            <ext:command>
+                { update: "pos_profiles",
+				  updates: [{ q: { }, u: { $set: { "pos_configuration.$[].merchant_id" : "" } }, multi: true }] }
+            </ext:command>
+        </ext:runCommand>
+		<ext:runCommand>
+            <ext:command>
+                { collMod: "pos_profiles",
+				   validator: {
+				  $jsonSchema: {
+					bsonType: 'object',
+					required: [
+					  '_id'
+					],
+					properties: {
+					  _id: {
+						bsonType: 'objectId'
+					  },
+					  is_historical_data_ingested: {
+						bsonType: 'bool'
+					  },
+					  historical_ingest_days_period: {
+						bsonType: 'object'
+					  },
+					  pos_configuration: {
+						bsonType: 'array',
+						items: {
+						  bsonType: 'object',
+						  required: [
+							'pos_type',
+							'keyvault_reference',
+							'merchant_id'
+						  ],
+						  properties: {
+							pos_type: {
+							  bsonType: 'string'
+							},
+							keyvault_reference: {
+							  bsonType: 'string'
+							},
+							merchant_id: {
+							  bsonType: 'string'
+							}
+						  }
+						}
+					  }
+					}
+				  }
+				},
+				   validationLevel: "moderate",
+				   validationAction: "warn"
+				}
+            </ext:command>
+        </ext:runCommand>
+	</changeSet>
+</databaseChangeLog>

@@ -77,7 +77,8 @@ namespace ClientWebAppService.PosProfile.Services
                     ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(new PosCredentialsConfiguration
                     {
                         PosType = posConfigurationDto.PosType,
-                        KeyVaultReference = posConfigurationSecretName
+                        KeyVaultReference = posConfigurationSecretName,
+                        MerchantId = posConfigurationDto.MerchantId
                     });
 
                     _secretSetter.Set(posConfigurationSecretName, posConfigurationJsonSecret, null);
@@ -110,7 +111,7 @@ namespace ClientWebAppService.PosProfile.Services
 
             return new PosProfileDto(posProfile.PartnerId,
                                      posProfile.PosConfiguration.Select(x =>
-                                        new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference)
+                                        new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)
                                      ));
         }
 
@@ -195,7 +196,7 @@ namespace ClientWebAppService.PosProfile.Services
 
             return posProfile != null ? new PosProfileDto(posProfile.PartnerId,
                                                           posProfile.PosConfiguration.Select(x =>
-                                                             new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference)))
+                                                             new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)))
                 : throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
                                       ;
         }
@@ -215,7 +216,23 @@ namespace ClientWebAppService.PosProfile.Services
             }
 
             return posProfiles.Select(posProfile => new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
-                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference))));
+                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId))));
+        }
+
+        /// <inheritdoc cref="GetByMerchantId(string)" />
+        public async Task<PosProfileDto> GetByMerchantId(string merchantId)
+        {
+            VerifyHelper.NotEmpty(merchantId, nameof(merchantId));
+
+            var posProfile = await _posProfileRepository.FindOne(x => x.PosConfiguration.Any(c => c.MerchantId == merchantId));
+            if (posProfile == null)
+            {
+                throw new NotFoundException($"PosProfile with merchantId:{merchantId} not found.");
+            }
+
+            return new PosProfileDto(
+                posProfile.PartnerId,
+                posProfile.PosConfiguration.Select(x => new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)));
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
