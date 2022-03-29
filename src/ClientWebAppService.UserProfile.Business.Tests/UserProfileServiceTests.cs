@@ -84,6 +84,15 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         }
 
         [Fact]
+        public async Task CreateProfileAsync_NoUserProfileRole_ValidationExceptionThrown()
+        {
+            var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId" };
+
+            var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Fact]
         public async Task GetUserProfilesAsync_UserProfilesFound_SuccessfulResultReturned()
         {
             var existingUsers = new List<UserProfileDto>()
