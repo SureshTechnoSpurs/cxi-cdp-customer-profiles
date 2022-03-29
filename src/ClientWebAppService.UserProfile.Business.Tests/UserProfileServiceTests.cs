@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.UserProfile.DataAccess;
+﻿using ClientWebAppService.UserProfile.Core.Exceptions;
+using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Contracts.UserProfile.Models;
 using FluentAssertions;
@@ -18,10 +19,11 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
         public Mock<IUserProfileRepository> _repositoryMock = new Mock<IUserProfileRepository>();
         public Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
+        public Mock<IAzureADB2CDirectoryManager> _azureADB2CDirectoryManagerMock = new Mock<IAzureADB2CDirectoryManager>();
 
         public UserProfileServiceTests()
         {
-            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object);
+            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object);
         }
 
         [Fact]
@@ -179,6 +181,62 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         {
             var invocation = _service.Invoking(x => x.GetByEmailAsync(email));
             var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("testmail.com")]
+        [InlineData("@mail.com")]
+        public async Task DeleteProfileByEmailAsync_IncorrectEmailPassed_ValidationException_Throwed(string email)
+        {
+            var invocation = _service.Invoking(x => x.DeleteProfileByEmailAsync(email));
+            var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+
+        [Fact]
+        public async Task DeleteProfileByEmailAsync_UserProfileNotFound_NotFoundExceptionThrown()
+        {
+            var testInput = "test@mail.com";
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                           .ReturnsAsync(default(User));
+
+            var invocation = _service.Invoking(x => x.DeleteProfileByEmailAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task DeleteProfileByEmailAsync_UserProfileAssociateFound_ProperMethodsInoked()
+        {
+            var testInput = "test@mail.com";
+            var existingUser = new User { Email = testInput, PartnerId = "testPartnerId", Role = UserRole.Associate };
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                           .ReturnsAsync(existingUser);
+
+            await _service.Invoking(x => x.DeleteProfileByEmailAsync(testInput))
+                         .Should()
+                         .NotThrowAsync();
+
+            _repositoryMock.Verify(x => x.DeleteOne(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
+            _azureADB2CDirectoryManagerMock.Verify(x => x.DeleteADB2CAccountByEmailAsync(testInput), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteProfileByEmailAsync_UserProfileOwnerFound_ProperMethodsInvoked()
+        {
+            var inputEmail = "test@mail.com";
+            var testPartnerId = "testPartnerId";
+            var existingUser = new User { Email = inputEmail, PartnerId = testPartnerId, Role = UserRole.Owner };        
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                           .ReturnsAsync(existingUser);
+
+            await _service.Invoking(x => x.DeleteProfileByEmailAsync(inputEmail))
+                         .Should()
+                         .ThrowAsync<OwnerDeletionForbiddenException>();
         }
     }
 }

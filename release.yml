@@ -128,7 +128,7 @@ stages:
                 namespace: 'stg-customer-profiles'
                 acrname: '$(registry)'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20211129.2'
+                acrrepo: 'cxi-default:20220329.1'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
                 - componentname: 'customer-profiles-partner-profile'
@@ -194,23 +194,9 @@ stages:
                 namespace: 'sqa-customer-profiles'
                 acrname: '$(registry)'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20211129.2'
+                acrrepo: 'cxi-default:20220329.1'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
-                - componentname: 'customer-profiles-partner-profile'
-                  releasename: 'customer-profiles-partner-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-partner-profile,\
-                    application.env=sqa,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
                 - componentname: 'customer-profiles-pos-profile'
                   releasename: 'customer-profiles-pos-profile'
                   overridevalues: "
@@ -239,4 +225,18 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
                     deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"     
+                - componentname: 'customer-profiles-partner-profile'
+                  releasename: 'customer-profiles-partner-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-partner-profile,\
+                    application.env=sqa,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
+                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)" 
                 

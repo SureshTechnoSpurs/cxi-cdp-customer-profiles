@@ -65,6 +65,16 @@ namespace ClientWebAppService.UserProfile.Controllers
 
             return Ok(result);
         }
+
+        [HttpDelete("{email}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> DeleteByEmail([FromRoute] string email)
+        {
+            await _userProfileService.DeleteProfileByEmailAsync(email);
+
+            return Ok();
+        }
     }
 }
 

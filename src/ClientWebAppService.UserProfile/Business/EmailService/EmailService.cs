@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace ClientWebAppService.UserProfile.Business
 {
+    ///<inheritdoc cref="IEmailService"/>
     public class EmailService : IEmailService
     {
         private readonly IProducer _producer;

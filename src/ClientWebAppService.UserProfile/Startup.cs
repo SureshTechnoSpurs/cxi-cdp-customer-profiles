@@ -51,6 +51,7 @@ namespace ClientWebAppService.UserProfile
                              options => { Configuration.Bind("AzureAdB2C", options); });
 
             services.Configure<AdB2CInvitationOptions>(Configuration.GetSection("AzureAdB2C"));
+            services.Configure<AdB2CMicrosoftGraphOptions>(Configuration.GetSection("AzureAdB2C"));
 
             services.AddControllers()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
@@ -70,7 +71,9 @@ namespace ClientWebAppService.UserProfile
                     .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IUserProfileRepository, UserProfileRepository>()
                     .AddTransient<IUserProfileService, UserProfileService>()
-                    .AddTransient<IEmailService, EmailService>();
+                    .AddTransient<IEmailService, EmailService>()
+                    .AddTransient<IAzureADB2CDirectoryManager, AzureADB2CDirectoryManager>()
+                    .AddTransient<IAzureADB2CDirectoryRepository, AzureADB2CDirectoryRepository>();
 
             services.AddProducer(Configuration);
 

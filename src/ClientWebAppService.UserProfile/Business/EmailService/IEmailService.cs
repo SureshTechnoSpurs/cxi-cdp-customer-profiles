@@ -2,13 +2,14 @@
 
 namespace ClientWebAppService.UserProfile.Business
 {
+    /// <summary>
+    /// Provides APIs for creating messages to be sent by Email app.
+    /// </summary>
     public interface IEmailService
     {
         /// <summary>
         /// Sends invitation message to AzureService Bus topic.
         /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
         Task SendInvitationMessageToAssociateAsync(string email);
     }
 }

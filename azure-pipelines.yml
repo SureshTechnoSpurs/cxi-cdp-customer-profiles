@@ -251,7 +251,7 @@ stages:
                 namespace: 'dev-customer-profiles'
                 acrname: 'acrnpreastus2mgmt'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20211129.2'
+                acrrepo: 'cxi-default:20220329.1'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
                 - componentname: 'customer-profiles-partner-profile'

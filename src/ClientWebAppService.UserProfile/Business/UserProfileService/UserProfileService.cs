@@ -1,4 +1,5 @@
 ﻿using ClientWebAppService.UserProfile.Business.Validators;
+using ClientWebAppService.UserProfile.Core.Exceptions;
 using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Contracts.UserProfile.Models;
@@ -16,16 +17,18 @@ namespace ClientWebAppService.UserProfile.Business
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly ILogger<UserProfileService> _logger;
         private readonly IEmailService _emailService;
-
+        private readonly IAzureADB2CDirectoryManager _azureADB2CDirectoryManager;
 
         public UserProfileService(
             IUserProfileRepository userProfileRepository,
             ILogger<UserProfileService> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAzureADB2CDirectoryManager azureADB2CDirectoryManager)
         {
             _userProfileRepository = userProfileRepository;
             _logger = logger;
             _emailService = emailService;
+            _azureADB2CDirectoryManager = azureADB2CDirectoryManager;
         }
 
         ///<inheritdoc/>
@@ -126,6 +129,36 @@ namespace ClientWebAppService.UserProfile.Business
                 _logger.LogError($"UpdateUserProfilesAsync - Attempted to update user profile for partnerId = {updateDto.PartnerId}, Exception message - {exception.Message}");
                 throw;
             }
+        }
+
+        ///<inheritdoc/>
+        public async Task DeleteProfileByEmailAsync(string email)
+        {
+            _logger.LogInformation($"Deleteing user profile with email: {email}");
+
+            var validator = new EmailValidator();
+            var validationResult = validator.Validate(email);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(nameof(email), validationResult.Errors.ToString());
+            }       
+
+            var userToDelete = await _userProfileRepository.FindOne(x => x.Email == email);
+
+            if (userToDelete == null)
+            {
+                throw new NotFoundException($"DeleteProfileByEmailAsync. UserProfile with email: {email} not found.");
+            }
+
+            if (userToDelete.Role == UserRole.Owner)
+            {
+                throw new OwnerDeletionForbiddenException($"DeleteProfileByEmailAsync. Deleting user with role \"Owner\" with email: {email} is forbidden.");
+            }
+
+            await _azureADB2CDirectoryManager.DeleteADB2CAccountByEmailAsync(email);
+            await _userProfileRepository.DeleteOne(x => x.Email == email);
+
         }
 
         private UserProfileDto Map(User profile) =>

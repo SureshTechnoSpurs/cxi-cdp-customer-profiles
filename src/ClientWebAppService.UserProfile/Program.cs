@@ -1,5 +1,6 @@
 using ClientWebAppService.UserProfile.Core;
 using CXI.Common.Extensions;
+using CXI.Common.Security.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

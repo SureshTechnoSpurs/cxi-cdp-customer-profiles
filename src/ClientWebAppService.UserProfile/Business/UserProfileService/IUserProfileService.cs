@@ -28,5 +28,10 @@ namespace ClientWebAppService.UserProfile.Business
         /// Update user profile.
         /// </summary>
         Task<UserProfileDto> UpdateUserProfilesAsync(UserProfileUpdateDto updateDto);
+
+        /// <summary>
+        /// Delete user profile and its account in Azure ADB2C Directory.
+        /// </summary>
+        Task DeleteProfileByEmailAsync(string email);
     }
 }
