@@ -14,7 +14,7 @@ namespace ClientWebAppService.UserProfile.Business.Validators
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress();
             RuleFor(x => x.PartnerId).NotEmpty();
-            RuleFor(x => x.Role).NotEmpty();
+            RuleFor(x => x.Role).NotEmpty().IsInEnum();
         }
     }
 }

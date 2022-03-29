@@ -53,12 +53,6 @@ namespace ClientWebAppService.UserProfile.Business
             {
                 _logger.LogInformation($"Creating new user profile for partnerId : {creationModel.PartnerId}");
 
-                if (!Enum.IsDefined(typeof(UserRole), creationModel.Role))
-                {
-                    throw new ValidationException(nameof(creationModel.Role),
-                        $"User Role ({creationModel.Role}) doesn't exists.");
-                }
-
                 var result = await _userProfileRepository.FindOne(x => x.Email == creationModel.Email &&
                     x.PartnerId == creationModel.PartnerId);
 
