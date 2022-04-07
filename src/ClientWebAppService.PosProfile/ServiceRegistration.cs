@@ -10,7 +10,7 @@ using CXI.Common.Security.Secrets;
 using FluentValidation.AspNetCore;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
-using GL.MSA.Tracing.TraceFactory;
+using CXI.Common.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

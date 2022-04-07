@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CXI.Common.ExceptionHandling;
 using GL.MSA.Core.HealthCheck.HealthCheckExtentions;
-using GL.MSA.Tracing.TraceFactory;
+using CXI.Common.ApplicationInsights;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

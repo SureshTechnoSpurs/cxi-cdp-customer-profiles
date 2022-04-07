@@ -22,6 +22,7 @@
 		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.2" />
 		<PackageReference Include="CXI.Common.MessageBrokers" Version="1.0.1" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.3" />
+		<PackageReference Include="CXI.Common.Utilities" Version="1.0.1" />
 		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.3" />
 		<PackageReference Include="CXI.MessageBroker.Messages" Version="1.0.9" />
 		<PackageReference Include="FluentValidation" Version="10.3.4" />
@@ -29,7 +30,7 @@
 		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.ResiliencyPolicy" Version="1.0.0" />
-		<PackageReference Include="GL.MSA.Tracing.TraceFactory" Version="1.0.1" />
+		<PackageReference Include="CXI.Common.ApplicationInsights" Version="1.0.0" />
 		<PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.15" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
