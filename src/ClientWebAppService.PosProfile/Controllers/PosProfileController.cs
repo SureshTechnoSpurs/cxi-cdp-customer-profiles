@@ -1,14 +1,14 @@
 ﻿using System;
-using ClientWebAppService.PosProfile.Models;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Services;
 using CXI.Common.ExceptionHandling;
 using CXI.Common.Helpers;
 using CXI.Contracts.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 
 namespace ClientWebAppService.PosProfile.Controllers
 {
@@ -73,21 +73,6 @@ namespace ClientWebAppService.PosProfile.Controllers
 
             var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
             return Ok(JsonConvert.SerializeObject(accessToken));
-
-        }
-
-        /// <summary>
-        /// Creates POS profile based on <see cref="PosProfileCreationModel"/>
-        /// </summary>
-        /// <param name="posProfileCreationDto"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(PosProfileDto), 200)]
-        [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
-        public async Task<IActionResult> Post(PosProfileCreationModel posProfileCreationDto)
-        {
-            var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
-            return Ok(posProfileCreateResult);
         }
 
         /// <summary>
@@ -167,6 +152,37 @@ namespace ClientWebAppService.PosProfile.Controllers
 
             await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
             return Ok();
+        }
+
+        /// <summary>
+        /// Creates POS profile based on <see cref="PosProfileCreationModel{T}"/>
+        /// </summary>
+        /// <param name="posProfileCreationDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("m2m/square")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
+        public async Task<IActionResult> M2MPostSquare(PosProfileCreationModel<PosCredentialsConfigurationSquareCreationDto> posProfileCreationDto)
+        {
+            var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
+            return Ok(posProfileCreateResult);
+        }
+
+        /// <summary>
+        /// Creates POS profile based on <see cref="PosProfileCreationModel{T}"/>
+        /// </summary>
+        /// <param name="posProfileCreationDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("m2m/omnivore")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
+        public async Task<IActionResult> M2MPostOmnivore(
+            PosProfileCreationModel<PosCredentialsConfigurationOmnivoreCreationDto> posProfileCreationDto)
+        {
+            var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
+            return Ok(posProfileCreateResult);
         }
     }
 }

@@ -1,101 +1,69 @@
-﻿using Azure;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Azure;
 using Azure.Security.KeyVault.Secrets;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using ClientWebAppService.PosProfile.Services;
+using ClientWebAppService.PosProfile.Services.Credentials;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Security.Secrets;
 using CXI.Contracts.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models.Create;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
-using MongoDB.Driver;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xunit;
-using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
 
 namespace ClientWebAppService.PosProfile.Tests
 {
     public class PosProfileServiceTests
     {
-        private const string SecretNotFoundErrorCode = "SecretNotFound";
-
-        private IPosProfileService _posProfileService;
-        private readonly Mock<IPosProfileRepository> _posProfileRepositoryMock;
-        private readonly Mock<ISecretSetter> _secretSetterMock;
-        private readonly Mock<ILogger<PosProfileService>> _loggerMock;
-        private readonly Mock<Microsoft.Extensions.Configuration.IConfiguration> _configurationMock;
-        private readonly Mock<ISecretClient> _secretClientMock;
-
         public PosProfileServiceTests()
         {
             _posProfileRepositoryMock = new Mock<IPosProfileRepository>();
             _configurationMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
             _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
-            _secretSetterMock = new Mock<ISecretSetter>();
             _loggerMock = new Mock<ILogger<PosProfileService>>();
             _secretClientMock = new Mock<ISecretClient>();
+            _posCredentialsServiceResolver = new Mock<IPosCredentialsServiceResolver>();
 
             _posProfileService = new PosProfileService(
                 _posProfileRepositoryMock.Object,
-                _secretSetterMock.Object,
                 _loggerMock.Object,
                 _configurationMock.Object,
-                _secretClientMock.Object);
+                _secretClientMock.Object,
+                _posCredentialsServiceResolver.Object);
         }
 
-        [Fact]
-        public async Task GetPosProfileAsync_ProfileNotExist_NotFoundExceptionThrowed()
-        {
-            var testInput = "testId";
+        private const string SecretNotFoundErrorCode = "SecretNotFound";
 
-            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                                     .ReturnsAsync(default(Models.PosProfile));
-
-            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
-            var result = await invocation.Should().ThrowAsync<NotFoundException>();
-        }
-
-
-        [Fact]
-        public async Task GetPosProfileAsync_CorrectParametersPassed_NotNullResultReturned()
-        {
-            var testInput = "testId";
-
-            var posProfile = new Models.PosProfile
-            {
-                PartnerId = testInput,
-                Id = new ObjectId(),
-                PosConfiguration = Enumerable.Empty<PosCredentialsConfiguration>().ToArray()
-            };
-
-            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                                     .ReturnsAsync(posProfile);
-
-            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
-            var result = await invocation.Should().NotThrowAsync();
-
-            result.Subject
-                .Should()
-                .NotBeNull();
-        }
+        private readonly IPosProfileService _posProfileService;
+        private readonly Mock<IPosProfileRepository> _posProfileRepositoryMock;
+        private readonly Mock<ILogger<PosProfileService>> _loggerMock;
+        private readonly Mock<Microsoft.Extensions.Configuration.IConfiguration> _configurationMock;
+        private readonly Mock<ISecretClient> _secretClientMock;
+        private readonly Mock<IPosCredentialsServiceResolver> _posCredentialsServiceResolver;
 
         [Fact]
         public async Task CreatePosProfileAsync_CorrectParametersPassed_SuccessfulResultReturned()
         {
-            var creationDto = new PosProfileCreationModel(
-                "partnerId",
-                new List<Models.PosCredentialsConfigurationDto>
-                {
-                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
-                }
-            );
+            var creationDto = new PosProfileCreationModel<PosCredentialsConfigurationSquareCreationDto>()
+            {
+                PartnerId = "partnerId",
+                PosConfigurations = new PosCredentialsConfigurationSquareCreationDto(
+                    "Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
+            };
+
+            var service = new Mock<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
+            service.Setup(x => x.Process("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
+                () => new PosCredentialsConfiguration() { PosType = "Square", MerchantId = "merchantId" });
+            _posCredentialsServiceResolver.Setup(x => x.Resolve(creationDto.PosConfigurations)).Returns(service.Object);
 
             var invocation = _posProfileService.Invoking(x => x.CreatePosProfileAndSecretsAsync(creationDto));
 
@@ -103,109 +71,18 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task CreatePosProfileAsync_CorrectParametersPassed_SecretSetterSetInvokedTwiceWithCorrectParameters()
+        public async Task DeletePosProfileAndSecretsAsync_PosProfilesNotFound_Success()
         {
-            var date = DateTime.ParseExact("2021-09-30T23:00:00.00Z",
-                "yyyy-MM-dd'T'HH:mm:ss.ff'Z'",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal |
-                DateTimeStyles.AdjustToUniversal);
-
-            var creationDto = new PosProfileCreationModel(
-                "partnerId",
-                new List<Models.PosCredentialsConfigurationDto>
-                {
-                    new Models.PosCredentialsConfigurationDto("square", "AccessToken", "RefreshToken", date, "merchantId")
-                }
-            );
-
-            var keyVaultItemNameExpected = $"partnerId-square";
-            var keyVaultItemValueExpected = @"{""AccessToken"":{""Value"":""AccessToken"",""ExpirationDate"":""2021-09-30T23:00:00Z""},""RefreshToken"":{""Value"":""RefreshToken"",""ExpirationDate"":null}}";
-
-            await _posProfileService.CreatePosProfileAndSecretsAsync(creationDto);
-
-            _secretSetterMock.Verify(
-                a => a.Set(
-                    It.Is<string>(x => x == keyVaultItemNameExpected), It.Is<string>(x => x == keyVaultItemValueExpected), null)
-            );
-
-            _secretSetterMock.Verify(ss => ss.Set("di-square-partnerId-tokeninfo", "Bearer AccessToken", null));
-        }
-
-        [Fact]
-        public async Task CreatePosProfileAsync_RepositoryMethodReturnsError_PayloadLoggedAndExceptionHandledAndLogged()
-        {
-            var exceptionMessage = "exceptionMessage";
-            _posProfileRepositoryMock.Setup(
-                    x => x.InsertOne(It.IsAny<Models.PosProfile>()))
-                .Throws(new MongoException(exceptionMessage));
-
-            var creationDto = new PosProfileCreationModel(
-                "partnerId",
-                new List<Models.PosCredentialsConfigurationDto>
-                {
-                    new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
-                }
-            );
-
-            try
-            {
-                await _posProfileService.CreatePosProfileAndSecretsAsync(creationDto);
-            }
-            catch (Exception e)
-            {
-                //ignored
-            }
-
-            _loggerMock.VerifyLogWasCalled("partnerId", LogLevel.Error);
-        }
-
-        [Fact]
-        public async Task UpdatePosProfileAsync_CorrectParametersPassed_RepositoryInvoked()
-        {
-            var partnerId = "partnerId";
-            var posCredentialsConfigurationsList = new List<PosCredentialsConfigurationDto> {
-                new PosCredentialsConfigurationDto(PosType : "square", KeyVaultReference : "test", "merchantId")};
-
-            var updateDto = new PosProfileUpdateModel
-            {
-                PosConfigurations = posCredentialsConfigurationsList,
-                IsHistoricalDataIngested = true
-            };
-
-            await _posProfileService.UpdatePosProfileAsync(partnerId, updateDto);
-
-            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true)));
-        }
-
-        [Fact]
-        public async Task GetPosProfilesAsync_PartnerNotFound_ExceptionThrowed()
-        {
-            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
-
-            var invocation = _posProfileService.Invoking(x => x.GetPosProfilesAsync(posProfileSearchCriteria));
-
-            await invocation.Should().ThrowAsync<NotFoundException>();
-        }
-
-        [Fact]
-        public async Task GetPosProfilesAsync_IsHistoricalDataIngestedPassed_FilterByCalled()
-        {
-            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
-
-            _posProfileRepositoryMock.Verify();
-
-            try
-            {
-                await _posProfileService.GetPosProfilesAsync(posProfileSearchCriteria);
-            }
-            catch (Exception e)
-            {
-                //ignored
-            }
+            var partnerId = "test-partner-id";
 
             _posProfileRepositoryMock
-                .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile>());
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+
+            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Never);
+            _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Never);
         }
 
         [Fact]
@@ -270,21 +147,6 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task DeletePosProfileAndSecretsAsync_PosProfilesNotFound_Success()
-        {
-            var partnerId = "test-partner-id";
-
-            _posProfileRepositoryMock
-                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                .ReturnsAsync(new List<Models.PosProfile>());
-
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
-            
-            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Never);
-            _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Never);
-        }
-
-        [Fact]
         public async Task GetAccesTokenForPartner_CorrectParametersPassed_Success()
         {
             var partnerId = "test-partner-id";
@@ -299,10 +161,12 @@ namespace ClientWebAppService.PosProfile.Tests
                 }
             };
 
-            var secretValue = _posProfileService.ComposePosConfigurationSecretPayload(
-                new Models.PosCredentialsConfigurationDto("posType", "accessToken", "refreshToken", DateTime.UtcNow, "merchantId"));
+            var posProfileSecretConfiguration =
+                new PosProfileSecretConfiguration(
+                    new AccessToken(Value: "accessToken", DateTime.UtcNow),
+                    new RefreshToken(Value: "refreshToken", null));
 
-            var secret = new KeyVaultSecret("secretName", secretValue);
+            var secret = new KeyVaultSecret("secretName", JsonConvert.SerializeObject(posProfileSecretConfiguration));
 
             _posProfileRepositoryMock
                 .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
@@ -315,6 +179,15 @@ namespace ClientWebAppService.PosProfile.Tests
             var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
 
             Assert.NotEmpty(accessToken);
+        }
+
+        [Fact]
+        public async Task GetAccesTokenForPartner_EmptyPosProfile_ThrowsValidationException()
+        {
+            var partnerId = "";
+
+            await Assert.ThrowsAsync<ValidationException>(
+                async () => await _posProfileService.GetAccesTokenForPartner(partnerId));
         }
 
         [Fact]
@@ -332,41 +205,103 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task GetAccesTokenForPartner_EmptyPosProfile_ThrowsValidationException()
+        public async Task GetByMerchantId_PosProfileExist_IsSuccess()
         {
-            var partnerId = "";
+            var merchantId = "merchantId";
+            var posProfile = new Models.PosProfile
+            {
+                PartnerId = "partnerId",
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration
+                    {
+                        MerchantId = merchantId,
+                        PosType = "posType",
+                        KeyVaultReference = "reference"
+                    }
+                }
+            };
 
-            await Assert.ThrowsAsync<ValidationException>(
-                async () => await _posProfileService.GetAccesTokenForPartner(partnerId));
+            _posProfileRepositoryMock
+                .Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(posProfile);
+
+            await _posProfileService.GetByMerchantId(merchantId);
         }
 
         [Fact]
-        public async Task GetPosProfilesByPartnerId_ProfilesExist_ShouldReturnPosProfilesDto()
+        public async Task GetByMerchantId_PosProfileNotExist_ReturnsNotFoundException()
         {
-            // Arrange
-            var partnerId = "partnerId";
+            var merchantId = "merchantId";
 
-            _posProfileRepositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                .ReturnsAsync(new List<Models.PosProfile>
-                {
-                    new()
-                    {
-                        PartnerId = partnerId,
-                        PosConfiguration = new List<PosCredentialsConfiguration>
-                        {
-                            new()
-                            {
-                                KeyVaultReference = "ref", PosType = "square"
-                            }
-                        }
-                    }
-                });
+            await Assert.ThrowsAsync<NotFoundException>(
+                async () => await _posProfileService.GetByMerchantId(merchantId));
+        }
 
-            // Act
-            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
 
-            // Assert
-            result.Should().AllBeOfType<PosProfileDto>();
+        [Fact]
+        public async Task GetPosProfileAsync_CorrectParametersPassed_NotNullResultReturned()
+        {
+            var testInput = "testId";
+
+            var posProfile = new Models.PosProfile
+            {
+                PartnerId = testInput,
+                Id = new ObjectId(),
+                PosConfiguration = Enumerable.Empty<PosCredentialsConfiguration>().ToArray()
+            };
+
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(posProfile);
+
+            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
+            var result = await invocation.Should().NotThrowAsync();
+
+            result.Subject
+                .Should()
+                .NotBeNull();
+        }
+
+        [Fact]
+        public async Task GetPosProfileAsync_ProfileNotExist_NotFoundExceptionThrowed()
+        {
+            var testInput = "testId";
+
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(default(Models.PosProfile));
+
+            var invocation = _posProfileService.Invoking(x => x.FindPosProfileByPartnerIdAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task GetPosProfilesAsync_IsHistoricalDataIngestedPassed_FilterByCalled()
+        {
+            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
+
+            _posProfileRepositoryMock.Verify();
+
+            try
+            {
+                await _posProfileService.GetPosProfilesAsync(posProfileSearchCriteria);
+            }
+            catch (Exception e)
+            {
+                //ignored
+            }
+
+            _posProfileRepositoryMock
+                .Verify(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
+        }
+
+        [Fact]
+        public async Task GetPosProfilesAsync_PartnerNotFound_ExceptionThrowed()
+        {
+            var posProfileSearchCriteria = new PosProfileSearchCriteriaModel(isHistoricalDataIngested: true);
+
+            var invocation = _posProfileService.Invoking(x => x.GetPosProfilesAsync(posProfileSearchCriteria));
+
+            await invocation.Should().ThrowAsync<NotFoundException>();
         }
 
         [Fact]
@@ -383,37 +318,82 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task GetByMerchantId_PosProfileNotExist_ReturnsNotFoundException()
+        public async Task GetPosProfilesByPartnerId_ProfilesExist_ShouldReturnPosProfilesDto()
         {
-            var merchantId = "merchantId";
+            // Arrange
+            var partnerId = "partnerId";
 
-            await Assert.ThrowsAsync<NotFoundException>(
-                async () => await _posProfileService.GetByMerchantId(merchantId));
+            _posProfileRepositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(
+                    new List<Models.PosProfile>
+                    {
+                        new()
+                        {
+                            PartnerId = partnerId,
+                            PosConfiguration = new List<PosCredentialsConfiguration>
+                            {
+                                new()
+                                {
+                                    KeyVaultReference = "ref", PosType = "square"
+                                }
+                            }
+                        }
+                    });
+
+            // Act
+            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+
+            // Assert
+            result.Should().AllBeOfType<PosProfileDto>();
         }
 
+
+        //[Fact]
+        //public async Task CreatePosProfileAsync_RepositoryMethodReturnsError_PayloadLoggedAndExceptionHandledAndLogged()
+        //{
+        //    var exceptionMessage = "exceptionMessage";
+        //    _posProfileRepositoryMock.Setup(
+        //            x => x.InsertOne(It.IsAny<Models.PosProfile>()))
+        //        .Throws(new MongoException(exceptionMessage));
+
+        //    var creationDto = new PosProfileCreationModel(
+        //        "partnerId",
+        //        new List<Models.PosCredentialsConfigurationDto>
+        //        {
+        //            new Models.PosCredentialsConfigurationDto("Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
+        //        }
+        //    );
+
+        //    try
+        //    {
+        //        await _posProfileService.CreatePosProfileAndSecretsAsync(creationDto);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        //ignored
+        //    }
+
+        //    _loggerMock.VerifyLogWasCalled("partnerId", LogLevel.Error);
+        //}
+
         [Fact]
-        public async Task GetByMerchantId_PosProfileExist_IsSuccess()
+        public async Task UpdatePosProfileAsync_CorrectParametersPassed_RepositoryInvoked()
         {
-            var merchantId = "merchantId";
-            var posProfile = new Models.PosProfile
+            var partnerId = "partnerId";
+            var posCredentialsConfigurationsList = new List<PosCredentialsConfigurationDto>
             {
-                PartnerId = "partnerId",
-                PosConfiguration = new List<PosCredentialsConfiguration> 
-                { 
-                    new PosCredentialsConfiguration 
-                    { 
-                        MerchantId = merchantId, 
-                        PosType = "posType", 
-                        KeyVaultReference = "reference" 
-                    } 
-                }
+                new PosCredentialsConfigurationDto(PosType: "square", KeyVaultReference: "test", "merchantId")
             };
 
-            _posProfileRepositoryMock
-                .Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                .ReturnsAsync(posProfile);
+            var updateDto = new PosProfileUpdateModel
+            {
+                PosConfigurations = posCredentialsConfigurationsList,
+                IsHistoricalDataIngested = true
+            };
 
-            await _posProfileService.GetByMerchantId(merchantId);
+            await _posProfileService.UpdatePosProfileAsync(partnerId, updateDto);
+
+            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true)));
         }
     }
 }
