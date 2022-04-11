@@ -9,6 +9,12 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
     /// </summary>
     public class OmnivorePosCredentialsService : IPosCredentialsService<PosCredentialsConfigurationOmnivoreCreationDto>
     {
+        /// <summary>
+        ///     Converting omnivore create credentials to PosCredentialsConfiguration
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="posConfigurations"></param>
+        /// <returns></returns>
         public Task<PosCredentialsConfiguration> Process(string partnerId, PosCredentialsConfigurationOmnivoreCreationDto posConfigurations)
         {
 

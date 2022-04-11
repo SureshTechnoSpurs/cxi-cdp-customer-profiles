@@ -27,6 +27,12 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
             _logger = logger;
         }
 
+        /// <summary>
+        ///     Convert square create dto to PosCredentialsConfiguration and save bearer tokens to key-vault
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="posConfigurationDto"></param>
+        /// <returns></returns>
         public async Task<PosCredentialsConfiguration> Process(string partnerId, PosCredentialsConfigurationSquareCreationDto posConfigurationDto)
         {
             var savedSecretNames = new List<string>();
