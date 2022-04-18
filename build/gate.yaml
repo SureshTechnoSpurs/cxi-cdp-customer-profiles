@@ -1,0 +1,168 @@
+trigger: none
+
+pool:
+ vmImage: ubuntu-latest
+
+
+variables:
+- group: default
+- group: common    
+- name: repo1
+  value: cxi-cdp-customer-profiles-partner-profile
+- name: repo2
+  value: cxi-cdp-customer-profiles-pos-profile
+- name: repo3
+  value: cxi-cdp-customer-profiles-user-profile
+ 
+
+stages:
+ - stage: Build
+   displayName: Build image
+   jobs:
+    - job: Build
+      displayName: Build
+      steps:
+      - task: Docker@2
+        displayName: Build an image partner-profile
+        inputs:
+          containerRegistry: 'ado-2-acr-npr'
+          repository: '$(repo1)'
+          command: 'build'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'
+      - task: Docker@2
+        displayName: Build an image pos-profile
+        inputs:
+          containerRegistry: 'ado-2-acr-npr'
+          repository: '$(repo2)'
+          command: 'build'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'
+      - task: Docker@2
+        displayName: Build an image user-profile
+        inputs:
+          containerRegistry: 'ado-2-acr-npr'
+          repository: '$(repo3)'
+          command: 'build'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'  
+
+
+      - script: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy  
+        displayName: 'Download and install trivy'
+
+      - task: CmdLine@2
+        displayName: "Run trivy scan"
+        inputs:
+          script: |
+              trivy --version
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo1)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo1):$(Build.BuildNumber) 
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo2)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo2):$(Build.BuildNumber) 
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo3)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo3):$(Build.BuildNumber)
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
+      - task: DotNetCoreCLI@2
+        displayName: Restore sln
+        inputs:
+          command: 'restore'
+          projects: '**/*.sln'
+          feedsToUse: 'select'
+          vstsFeed: '7744d0ac-6bc1-4039-b0b8-2543d12c2f99/bd556fee-e25e-4028-b725-eb2949647238'
+
+      - task: DotNetCoreCLI@2
+        displayName: Build sln
+        inputs:
+          command: 'build'
+          projects: 'src/ClientWebAppService.CustomerProfiles.sln'
+          arguments: '--no-restore --configuration $(BuildConfiguration)'
+      - task: DotNetCoreCLI@2
+        displayName: "PartnerProfile.Business.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.PartnerProfile.Business.Tests/ClientWebAppService.PartnerProfile.Business.Tests.csproj'
+          testRunTitle: 'PartnerProfile.Business.Tests.csproj'
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
+
+      - task: DotNetCoreCLI@2
+        displayName: "PosProfile.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.PosProfile.Tests/ClientWebAppService.PosProfile.Tests.csproj'
+          testRunTitle: 'PosProfile.Tests.csproj'    
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
+
+      - task: DotNetCoreCLI@2
+        displayName: "UserProfile.Business.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.UserProfile.Business.Tests/ClientWebAppService.UserProfile.Business.Tests.csproj'
+          testRunTitle: 'UserProfile.Business.Tests.csproj' 
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true   
+
+      - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool'  
+        displayName: 'Install ReportGenerator tool'  
+
+      - script: 'reportgenerator -reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/coverlet/reports -reporttypes:"Cobertura"'  
+        displayName: 'Create reports'  
+        
+      - task: PublishCodeCoverageResults@1  
+        displayName: 'Publish code coverage'  
+        inputs:  
+          codeCoverageTool: Cobertura  
+          summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'      
+
+      - task: BuildQualityChecks@8
+        displayName: Build Quality Checks
+        inputs:
+          checkCoverage: true
+          coverageFailOption: 'fixed'
+          coverageType: 'lines'
+          coverageThreshold: '70'
+          buildConfiguration: '$(BuildConfiguration)'       
+
+      - task: dependency-check-build-task@6
+        continueOnError: true
+        inputs:
+          projectName: 'customer-profiles-app'
+          scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0/*.dll'
+          additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0-windows/*.dll'
+          format: 'HTML, JSON, JUNIT'
+          enableVerbose: true
+          enableExperimental: true
+          failOnCVSS: '8'
+    
+      - task: PublishTestResults@2
+        displayName: 'Publish OWASP Dependency Check security scan results'
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: 'dependency-check/*junit.xml'
+          searchFolder: '$(Common.TestResultsDirectory)'
+          testRunTitle: 'Dependency Check'
+          buildConfiguration: '$(BuildConfiguration)'
+
+
+

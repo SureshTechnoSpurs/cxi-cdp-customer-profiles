@@ -11,106 +11,32 @@ trigger: none
 
 variables:
 - group: default
-- name: version.MajorMinor
-  value: '0.1' # Manually adjust the version number as needed for semantic versioning. Revision is auto-incremented.
-- name: version.Revision
-  value: $[counter(variables['version.MajorMinor'], 0)]
-- name: versionNumber
-  value: $[format('{0}.{1}', variables['version.MajorMinor'], variables['version.Revision'])]
+- name: repo1
+  value: cxi-cdp-customer-profiles-partner-profile
+- name: repo2
+  value: cxi-cdp-customer-profiles-pos-profile
+- name: repo3
+  value: cxi-cdp-customer-profiles-user-profile
+- name : tag
+  value:  $(resources.pipeline.cxi-cdp-customer-profiles.runName)  
 
+resources:
+    repositories:
+    - repository: templates
+      type : git
+      name : cxi-build-templates
 
-name: $(versionNumber)
-
+    pipelines:
+      - pipeline: cxi-cdp-customer-profiles
+        source: cxi-cdp-customer-profiles
+        trigger: none  
 
 pool:
  vmImage: ubuntu-latest
 
-resources:
- repositories:
-   - repository: templates
-     type : git
-     name : cxi-build-templates
-
-
 stages:
- - stage: Build
-   displayName: Build images
-   jobs:
-    - job: Build
-      displayName: Build images
-      steps:
-      - task: Docker@2
-        displayName: Build an image partner-profile
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-partner-profile'
-          command: 'build'
-          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
-          buildContext: '$(Build.SourcesDirectory)/src/'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-          arguments: '--build-arg PAT=$(PAT)'
-      - task: Docker@2
-        displayName: Build an image pos-profile
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-pos-profile'
-          command: 'build'
-          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
-          buildContext: '$(Build.SourcesDirectory)/src/'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-          arguments: '--build-arg PAT=$(PAT)'
-      - task: Docker@2
-        displayName: Build an image user-profile
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-user-profile'
-          command: 'build'
-          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
-          buildContext: '$(Build.SourcesDirectory)/src/'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-          arguments: '--build-arg PAT=$(PAT)'
-
-      - task: Docker@2
-        displayName: Push an image partner-profile
-        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-partner-profile'
-          command: 'push'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-      - task: Docker@2
-        displayName: Push an image pos-profile
-        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-pos-profile'
-          command: 'push'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-      - task: Docker@2
-        displayName: Push an image user-profile
-        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
-        inputs:
-          containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-user-profile'
-          command: 'push'
-          tags: |
-            $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)
-
-
  - stage: deploy_stage
    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq('${{ parameters.Environment }}', 'stg'))  
-   dependsOn: Build
    displayName: Deploy to Kubernetes Stage
    jobs:
     - deployment: deploy
@@ -122,6 +48,8 @@ stages:
         runOnce:
           deploy:
             steps:
+            - download: none
+            - script: echo "##vso[build.updatebuildnumber]$(tag)"  
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
@@ -137,8 +65,8 @@ stages:
                     application.name=customer-profiles-partner-profile,\
                     application.env=stg,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo1),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
@@ -151,8 +79,8 @@ stages:
                     application.name=customer-profiles-pos-profile,\
                     application.env=stg,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-pos-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo2),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
@@ -165,8 +93,8 @@ stages:
                     application.name=customer-profiles-user-profile,\
                     application.env=stg,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-user-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo3),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
@@ -176,7 +104,6 @@ stages:
 
  - stage: deploy_sqa
    condition: eq('${{ parameters.Environment }}', 'sqa')
-   dependsOn: Build
    displayName: Deploy to Kubernetes Sqa
    jobs:
     - deployment: deploy
@@ -188,6 +115,8 @@ stages:
         runOnce:
           deploy:
             steps:
+            - download: none
+            - script: echo "##vso[build.updatebuildnumber]$(tag)"  
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
@@ -203,8 +132,8 @@ stages:
                     application.name=customer-profiles-pos-profile,\
                     application.env=sqa,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-pos-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo1),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
@@ -217,8 +146,8 @@ stages:
                     application.name=customer-profiles-user-profile,\
                     application.env=sqa,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-user-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo2),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
@@ -231,8 +160,8 @@ stages:
                     application.name=customer-profiles-partner-profile,\
                     application.env=sqa,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.container.image.name=$(repo3),\
+                    deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
