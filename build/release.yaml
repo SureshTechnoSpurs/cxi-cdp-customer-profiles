@@ -146,7 +146,7 @@ stages:
                     application.name=customer-profiles-user-profile,\
                     application.env=sqa,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=$(repo2),\
+                    deployment.container.image.name=$(repo3),\
                     deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
@@ -160,7 +160,7 @@ stages:
                     application.name=customer-profiles-partner-profile,\
                     application.env=sqa,\
                     deployment.container.registry=$(registry),\
-                    deployment.container.image.name=$(repo3),\
+                    deployment.container.image.name=$(repo2),\
                     deployment.container.image.tag=$(tag),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
