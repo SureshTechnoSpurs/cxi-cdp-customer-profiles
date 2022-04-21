@@ -34,5 +34,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("profiles")]
         public IEnumerable<string> UserProfiles { get; set; } = new List<string>();
+
+        [BsonElement("is_active")]
+        public bool? IsActive { get; set; }
     }
 }

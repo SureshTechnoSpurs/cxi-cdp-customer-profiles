@@ -1,5 +1,6 @@
 ﻿using ClientWebAppService.PosProfile.Services;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Contracts.PosProfile.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -30,6 +31,16 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             var posProfileIds = await _posTypeService.GetPosProfileIdsByPosTypeAsync(posType);
             return Ok(posProfileIds);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("partnerPosType")]
+        [ProducesResponseType(typeof(List<PosTypePartnerDto>), 200)]
+        [ProducesResponseType(typeof(NotFoundException), 404)]
+        public async Task<IActionResult> GetPosTypeByPartnerIdsAsync([FromBody] PosTypeActivePartnerModel posTypeActivePartner)
+        {
+            var partnerPosTypes = await _posTypeService.GetPosTypeByPartnerIdsAsync(posTypeActivePartner);
+            return Ok(partnerPosTypes);
         }
     }
 }

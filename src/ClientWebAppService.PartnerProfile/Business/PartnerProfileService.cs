@@ -110,7 +110,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     AmountOfLocations = updateModel.AmountOfLocations,
                     Address = updateModel.Address,
                     UserProfiles = updateModel.UserProfileEmails,
-                    ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted
+                    ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
+                    IsActive = updateModel.ServiceAgreementAccepted
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -144,5 +145,38 @@ namespace ClientWebAppService.PartnerProfile.Business
 
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles);
+
+        /// <inheritdoc cref = "IPartnerProfileService.SearchAllPartnersByActiveM2MAsync(bool?)" />
+        public async Task<List<string>> SearchAllPartnersByActiveM2MAsync(bool? active)
+        {
+            _logger.LogInformation("Getting all partner for a given search criteria");
+
+            var activePartner = await _partnerRepository.FilterBy(active != null ? partner => partner.IsActive == active : null);
+            var partnerIds = activePartner.Select(x=> x.PartnerId).ToList();
+
+            return partnerIds;
+        }
+
+        /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerByActiveAsync(PartnerActivePartnerIdModel)" />
+        public async Task<List<string>> SearchPartnerByActiveAsync(PartnerActivePartnerIdModel partnerActivePartnerId)
+        {
+            _logger.LogInformation("Getting all partner for a given search criteria");
+            IEnumerable<Partner> activePartner = new List<Partner>();
+
+            string partnerId = partnerActivePartnerId.PartnerId;
+            bool? active = partnerActivePartnerId.IsActive;
+            if (active != null)
+            {
+                activePartner = await _partnerRepository.FilterBy(partner => partner.PartnerId == partnerId && partner.IsActive == active);
+            }
+            else
+            {
+                activePartner = await _partnerRepository.FilterBy(partner => partner.PartnerId == partnerId);
+            }
+            
+            var partnerIds = activePartner.Select(x => x.PartnerId).ToList();
+
+            return partnerIds;
+        }
     }
 }

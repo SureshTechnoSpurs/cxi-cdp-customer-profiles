@@ -81,5 +81,25 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("Search/{active?}")]
+        [ProducesResponseType(typeof(List<string>), 200)]
+        public async Task<IActionResult> SearchAllPartnersByActiveM2MAsync([FromRoute] bool? active = null)
+        {
+            var result = await _partnerProfileService.SearchAllPartnersByActiveM2MAsync(active);
+
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("Search")]
+        [ProducesResponseType(typeof(List<string>), 200)]
+        public async Task<IActionResult> SearchPartnersByPosType([FromBody] PartnerActivePartnerIdModel partnerActivePartnerId)
+        {
+            var result = await _partnerProfileService.SearchPartnerByActiveAsync(partnerActivePartnerId);
+
+            return Ok(result);
+        }
     }
 }

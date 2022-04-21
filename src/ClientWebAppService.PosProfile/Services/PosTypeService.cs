@@ -1,6 +1,8 @@
 ﻿using ClientWebAppService.PosProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Contracts.PosProfile.Models;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +38,42 @@ namespace ClientWebAppService.PosProfile.Services
             _logger.LogInformation($"Successfully fetched parnters for Pos Type = {posType}");
 
             return posProfiles;
+        }
+
+        /// <inheritdoc cref="IPosTypeService.GetPosTypeByPartnerIdsAsync"/>
+        public async Task<List<PosTypePartnerDto>> GetPosTypeByPartnerIdsAsync(PosTypeActivePartnerModel posTypeActivePartner)
+        {
+            var partnerIds = posTypeActivePartner.PartnerIds;
+            var posType = posTypeActivePartner.PosType;
+
+            _logger.LogInformation($"Fetching parnters for Pos Type = {posType}");
+
+            IEnumerable<Models.PosProfile> posProfiles = new List<Models.PosProfile>();
+
+            if(!String.IsNullOrEmpty(posType))
+            {
+                posProfiles = await _posProfileRepository.FilterBy(posProfile => partnerIds.Contains(posProfile.PartnerId)
+                                    && posProfile.PosConfiguration != null && posProfile.PosConfiguration.Any(pcfg => pcfg.PosType == posType));
+            }
+            else
+            {
+                posProfiles = await _posProfileRepository.FilterBy(posProfile => partnerIds.Contains(posProfile.PartnerId));
+            }
+
+            if (posProfiles == null)
+            {
+                throw new NotFoundException($"PosProfile not found.");
+            }
+            var posTypes = new List<PosTypePartnerDto>();
+            foreach (var posProfile in posProfiles)
+            {
+                posTypes.Add(new PosTypePartnerDto(
+                        posProfile.PartnerId,
+                        posProfile.PosConfiguration.Select(x => new string(x.PosType))
+                    ));
+            }
+            
+            return posTypes;
         }
     }
 }

@@ -123,7 +123,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" });
+            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" },true);
 
             var invocation = _service.Invoking(x => x.UpdateProfileAsync("testId", testInput));
 
@@ -158,6 +158,42 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             // Assert
             await act.Should().ThrowAsync<NotFoundException>().WithMessage("Partner profiles don't exist.");
+        }
+
+        [Fact]
+        public async Task GetPartnerIds_VerifyIdExistsWithActiveTrue_ReturnPartnerIds()
+        {
+            _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new List<Partner>
+                {
+                    new()
+                    {
+                        PartnerId = "partnerId"
+                    }
+                });
+
+            var result = await _service.SearchAllPartnersByActiveM2MAsync(true);
+
+            result.Should().NotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task GetPartnerIds_VerifyPassedIdExist_ReturnPartnerIds()
+        {
+            var partnerModel = new PartnerActivePartnerIdModel ("partnerId", true );
+            _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new List<Partner>
+                {
+                    new()
+                    {
+                        PartnerId = "partnerId",
+                        IsActive = true
+                    }
+                });
+
+            var result = await _service.SearchPartnerByActiveAsync(partnerModel);
+
+            result.Should().NotBeNullOrEmpty();
         }
     }
 }

@@ -1,18 +1,17 @@
-﻿using Moq;
-using Xunit;
-using System.Linq.Expressions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ClientWebAppService.PosProfile.DataAccess;
-using ClientWebAppService.PosProfile.Models;
+﻿using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Services;
+using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Contracts.PosProfile.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using CXI.Common.ExceptionHandling.Primitives;
-using MongoDB.Bson;
+using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace ClientWebAppService.PosProfile.Tests
 {
@@ -78,6 +77,22 @@ namespace ClientWebAppService.PosProfile.Tests
             await _posTypeService.GetPosProfileIdsByPosTypeAsync(posType);
 
             _posProfileRepositoryMock.Verify(x => x.FilterBy<string>(It.IsAny<Expression<Func<Models.PosProfile, string>>>(), It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
+        }
+
+        [Fact]
+        public async Task GetPosTypeByPartnerIdsAsync_PassedPosTypePartnerId_ReturnPosType()
+        {
+            var posType = "square";
+            var squarePosProfiles = new List<string> { "cxi-usa-test1", "cxi-usa-test2" };
+            var posTypeActiveModel = new PosTypeActivePartnerModel(squarePosProfiles, posType);
+
+            _posProfileRepositoryMock.Setup(
+                  x => x.FilterBy<string>(It.IsAny<Expression<Func<Models.PosProfile, string>>>(),
+                  It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(squarePosProfiles);
+
+            var result = await _posTypeService.GetPosTypeByPartnerIdsAsync(posTypeActiveModel);
+            result.Should().AllBeOfType<PosTypePartnerDto>();
         }
     }
 }
