@@ -1,8 +1,8 @@
 ﻿using System;
-using ClientWebAppService.PosProfile.Models;
-using CXI.Contracts.PosProfile.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CXI.Contracts.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models.Create;
 
 namespace ClientWebAppService.PosProfile.Services
 {
@@ -15,9 +15,10 @@ namespace ClientWebAppService.PosProfile.Services
         /// Creates POS Profile for particular partner as combination of record in MongoDB
         /// and a key vault record
         /// </summary>
-        /// <param name="posProfileDto"></param>
+        /// <param name="posProfileCreationDto"></param>
         /// <returns></returns>
-        Task<PosProfileDto> CreatePosProfileAndSecretsAsync(PosProfileCreationModel posProfileDto);
+        Task<PosProfileDto> CreatePosProfileAndSecretsAsync<T>(PosProfileCreationModel<T> posProfileCreationDto)
+            where T : IPosCredentialsConfigurationBaseDto;
 
         /// <summary>
         /// Returns POS Profile by <paramref name="partnerId"/>\
@@ -60,13 +61,6 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="partnerId"></param>
         /// <returns></returns>
         Task<string> GetAccesTokenForPartner(string partnerId);
-
-        /// <summary>
-        /// Gets secret payload
-        /// </summary>
-        /// <param name="posCredentialsConfiguration"></param>
-        /// <returns></returns>
-        string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration);
 
         /// <summary>
         /// Gets PosProfile by specific MerchantId

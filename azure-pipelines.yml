@@ -19,6 +19,14 @@ variables:
   value: $[counter(variables['version.MajorMinor'], 0)]
 - name: versionNumber
   value: $[format('{0}.{1}', variables['version.MajorMinor'], variables['version.Revision'])]
+- name: repo1
+  value: cxi-cdp-customer-profiles-partner-profile
+- name: repo2
+  value: cxi-cdp-customer-profiles-pos-profile
+- name: repo3
+  value: cxi-cdp-customer-profiles-user-profile
+ 
+
 name: $(versionNumber)  
 
 stages:
@@ -32,7 +40,7 @@ stages:
         displayName: Build an image partner-profile
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-partner-profile'
+          repository: '$(repo1)'
           command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PartnerProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
@@ -44,7 +52,7 @@ stages:
         displayName: Build an image pos-profile
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-pos-profile'
+          repository: '$(repo2)'
           command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.PosProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
@@ -56,7 +64,7 @@ stages:
         displayName: Build an image user-profile
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-user-profile'
+          repository: '$(repo3)'
           command: 'build'
           dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.UserProfile/Dockerfile'
           buildContext: '$(Build.SourcesDirectory)/src/'
@@ -79,9 +87,9 @@ stages:
         inputs:
           script: |
               trivy --version
-              trivy i -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-partner-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-partner-profile:$(Build.BuildNumber) 
-              trivy i -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-pos-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-pos-profile:$(Build.BuildNumber) 
-              trivy i -f table -o $(Build.ArtifactStagingDirectory)/cxi-cdp-customer-profiles-user-profile-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/cxi-cdp-customer-profiles-user-profile:$(Build.BuildNumber)
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo1)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo1):$(Build.BuildNumber) 
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo2)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo2):$(Build.BuildNumber) 
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo3)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo3):$(Build.BuildNumber)
 
       - task: PublishBuildArtifacts@1
         inputs:
@@ -149,7 +157,7 @@ stages:
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-partner-profile'
+          repository: '$(repo1)'
           command: 'push'
           tags: |
             $(Build.BuildNumber)
@@ -159,7 +167,7 @@ stages:
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-pos-profile'
+          repository: '$(repo2)'
           command: 'push'
           tags: |
             $(Build.BuildNumber)
@@ -169,7 +177,7 @@ stages:
         condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
         inputs:
           containerRegistry: 'ado-2-acr-npr'
-          repository: 'cxi-cdp-customer-profiles-user-profile'
+          repository: '$(repo3)'
           command: 'push'
           tags: |
             $(Build.BuildNumber)
@@ -216,6 +224,70 @@ stages:
         testRunTitle: 'Dependency Check'
         buildConfiguration: '$(BuildConfiguration)'
 
+ - stage: deploy_dev
+   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+   displayName: Deploy to Kubernetes Dev
+   jobs:
+    - deployment: deploy
+      displayName: Deploy
+      environment: 'Kubernetes_Dev'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: none
+            - template: HelmDeploy.yaml@templates
+              parameters:
+                kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
+                namespace: 'dev-customer-profiles'
+                acrname: 'acrnpreastus2mgmt'
+                azureservice: 'cxi-devops'
+                acrrepo: 'cxi-default:20220329.1'
+                chartPath: '$(build.stagingdirectory)/cxi-default/'
+                components:
+                - componentname: 'customer-profiles-partner-profile'
+                  releasename: 'customer-profiles-partner-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-partner-profile,\
+                    application.env=dev,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo1),\
+                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                - componentname: 'customer-profiles-pos-profile'
+                  releasename: 'customer-profiles-pos-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-pos-profile,\
+                    application.env=dev,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo2),\
+                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                - componentname: 'customer-profiles-user-profile'
+                  releasename: 'customer-profiles-user-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-user-profile,\
+                    application.env=dev,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo3),\
+                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=1,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+
  - stage: Sonar_Qube
    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
    pool: kube-agent
@@ -234,68 +306,5 @@ stages:
           inputs:
            pollingTimeoutSec: '300'        
            
- - stage: deploy_dev
-   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
-   displayName: Deploy to Kubernetes Dev
-   jobs:
-    - deployment: deploy
-      displayName: Deploy
-      environment: 'Kubernetes_Dev'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-            - template: HelmDeploy.yaml@templates
-              parameters:
-                kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                namespace: 'dev-customer-profiles'
-                acrname: 'acrnpreastus2mgmt'
-                azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20220329.1'
-                chartPath: '$(build.stagingdirectory)/cxi-default/'
-                components:
-                - componentname: 'customer-profiles-partner-profile'
-                  releasename: 'customer-profiles-partner-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-partner-profile,\
-                    application.env=dev,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-partner-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
-                - componentname: 'customer-profiles-pos-profile'
-                  releasename: 'customer-profiles-pos-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-pos-profile,\
-                    application.env=dev,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-pos-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
-                - componentname: 'customer-profiles-user-profile'
-                  releasename: 'customer-profiles-user-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-user-profile,\
-                    application.env=dev,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=cxi-cdp-customer-profiles-user-profile,\
-                    deployment.container.image.tag=$(Build.BuildNumber),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
-                 
-                    
-    
+
+

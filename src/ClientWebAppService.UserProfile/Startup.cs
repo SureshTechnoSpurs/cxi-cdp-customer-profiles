@@ -2,7 +2,7 @@ using CXI.Common.ExceptionHandling;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
 using GL.MSA.Core.HealthCheck.HealthCheckExtentions;
-using GL.MSA.Tracing.TraceFactory;
+using CXI.Common.ApplicationInsights;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

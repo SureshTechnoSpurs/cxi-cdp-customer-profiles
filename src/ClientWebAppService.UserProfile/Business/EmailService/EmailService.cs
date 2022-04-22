@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using CXI.Common.Utilities;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -34,14 +35,14 @@ namespace ClientWebAppService.UserProfile.Business
         {
             var inviteUrl = BuildInvitationUrl(email);
 
-            string htmlTemplate = File.ReadAllText(EmailTemplatePath);
+            string htmlTemplate = File.ReadAllText(EmailTemplatePath);            
 
             var emailMessage = new EmailDataMessage
             {
                 To = email,
                 Subject = EmailSubject,
                 HtmlContent = string.Format(htmlTemplate, inviteUrl),
-                CorrelationId = Guid.NewGuid()
+                CorrelationId = GetCorrelationIdForMessage()
             };
 
             await _producer.SendMessages(new string[] { emailMessage.Serialize() });
@@ -83,6 +84,12 @@ namespace ClientWebAppService.UserProfile.Business
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
 
             return jwtHandler.WriteToken(token);
+        }
+
+        private Guid GetCorrelationIdForMessage()
+        {
+            var correaltionid = TelemetryHelper.GetCorrelationIdForCurrentActivity();
+            return Guid.TryParse(correaltionid, out var messageCorrelationId) ? messageCorrelationId : Guid.NewGuid();      
         }
     }
 }

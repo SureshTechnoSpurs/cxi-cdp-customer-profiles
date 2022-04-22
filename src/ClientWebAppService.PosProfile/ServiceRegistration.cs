@@ -4,13 +4,15 @@ using Azure.Core;
 using Azure.Identity;
 using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Services;
+using ClientWebAppService.PosProfile.Services.Credentials;
 using CXI.Common.Authorization;
 using CXI.Common.MongoDb.Extensions;
 using CXI.Common.Security.Secrets;
+using CXI.Contracts.PosProfile.Models.Create;
 using FluentValidation.AspNetCore;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
-using GL.MSA.Tracing.TraceFactory;
+using CXI.Common.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +45,7 @@ namespace ClientWebAppService.PosProfile
                 .AddCheck<LivenessHealthCheck>(name: "live",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new[] { "live" })
-                .AddMongoDb(mongodbConnectionString: configuration["Mongo:ConnectionString"],
+                .AddMongoDb(configuration["Mongo:ConnectionString"],
                     name: "MongoDB",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new string[] { "mongoDB", "ready" });
@@ -76,6 +78,10 @@ namespace ClientWebAppService.PosProfile
             services.AddSingleton<ISecretConfiguration>(azureCredential);
             services.AddSingleton<ISecretClient, AzureKeyVaultSecretClient>();
             services.AddSingleton<ISecretSetter, AzureKeyVaultSecretSetter>();
+
+            services.AddTransient<IPosCredentialsServiceResolver, PosCredentialsServiceResolver>();
+            services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>, SquarePosCredentialsService>();
+            services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationOmnivoreCreationDto> ,OmnivorePosCredentialsService >();
 
             return services;
         }

@@ -5,6 +5,7 @@ using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
 using CXI.Common.Security.Secrets;
 using CXI.Contracts.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ClientWebAppService.PosProfile.Services.Credentials;
 using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
 
 namespace ClientWebAppService.PosProfile.Services
@@ -19,93 +21,58 @@ namespace ClientWebAppService.PosProfile.Services
     /// <inheritdoc cref="IPosProfileService"/>
     public class PosProfileService : IPosProfileService
     {
-        private const string AuthenticationScheme = "Bearer";
         private const string SecretNotFoundErrorCode = "SecretNotFound";
 
         private readonly IPosProfileRepository _posProfileRepository;
-        private readonly ISecretSetter _secretSetter;
         private readonly ILogger<PosProfileService> _logger;
         private readonly IConfiguration _configuration;
         private readonly ISecretClient _secretClient;
+        private readonly IPosCredentialsServiceResolver _credentialsServiceResolver;
 
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="posProfileRepository">DAO object for accessing PosProfile MongoDB collection</param>
-        /// <param name="secretSetter">Encapsulates create operation for Key Vault secrets</param>
+        /// <param name="credentialsServiceResolver"></param>
         /// <param name="logger">Logger</param>
         /// <param name="configuration"></param>
         /// <param name="secretClient"></param>
         public PosProfileService(
-            IPosProfileRepository posProfileRepository, 
-            ISecretSetter secretSetter, 
+            IPosProfileRepository posProfileRepository,
             ILogger<PosProfileService> logger, 
             IConfiguration configuration,
-            ISecretClient secretClient)
+            ISecretClient secretClient,
+            IPosCredentialsServiceResolver credentialsServiceResolver)
         {
             _posProfileRepository = posProfileRepository;
-            _secretSetter = secretSetter;
             _logger = logger;
             _configuration = configuration;
             _secretClient = secretClient;
+            _credentialsServiceResolver = credentialsServiceResolver;
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
-        public async Task<PosProfileDto> CreatePosProfileAndSecretsAsync(PosProfileCreationModel posProfileCreationDto)
+        public async Task<PosProfileDto> CreatePosProfileAndSecretsAsync<T>(PosProfileCreationModel<T> posProfileCreationDto) where T: IPosCredentialsConfigurationBaseDto
         {
-            Models.PosProfile posProfile;
-            var savedSecretNames = new List<string>();
+            VerifyHelper.NotNull(posProfileCreationDto, nameof(posProfileCreationDto));
 
-            try
+            _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
+
+            int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
+
+            var posProfile = new Models.PosProfile
             {
-                _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
+                PartnerId = posProfileCreationDto.PartnerId,
+                PosConfiguration = new List<PosCredentialsConfiguration>(),
+                HistoricalIngestDaysPeriod = defaultHistoricalIngestPeriod
+            };
 
-                int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
+            var posCredentialsService = _credentialsServiceResolver.Resolve(posProfileCreationDto.PosConfigurations);
 
-                posProfile = new Models.PosProfile
-                {
-                    PartnerId = posProfileCreationDto.PartnerId,
-                    PosConfiguration = new List<PosCredentialsConfiguration>(),
-                    HistoricalIngestDaysPeriod = defaultHistoricalIngestPeriod
-                };
+            ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(
+                await posCredentialsService.Process(posProfileCreationDto.PartnerId, posProfileCreationDto.PosConfigurations));
 
-                foreach (var posConfigurationDto in posProfileCreationDto.PosConfigurations)
-                {
-                    string posConfigurationJsonSecret = this.ComposePosConfigurationSecretPayload(posConfigurationDto);
-                    var posConfigurationSecretName = GetPosConfigurationSecretName(posProfileCreationDto.PartnerId, posConfigurationDto.PosType);
-
-                    ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(new PosCredentialsConfiguration
-                    {
-                        PosType = posConfigurationDto.PosType,
-                        KeyVaultReference = posConfigurationSecretName,
-                        MerchantId = posConfigurationDto.MerchantId
-                    });
-
-                    _secretSetter.Set(posConfigurationSecretName, posConfigurationJsonSecret, null);
-                    savedSecretNames.Add(posConfigurationSecretName);
-
-                    var tokenInfo = ComposeSecretPayloadForDataCollectService(posConfigurationDto.PosType, posProfileCreationDto.PartnerId, posConfigurationDto.AccessToken);    
-                    _secretSetter.Set(tokenInfo.keyVaultSecretName, tokenInfo.keyVaultSecretValue, null);
-                    savedSecretNames.Add(tokenInfo.keyVaultSecretName);
-                }
-
-                await _posProfileRepository.InsertOne(posProfile);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError($"CreatePosProfileAsync - Attempted to create profile for ${posProfileCreationDto.PartnerId}, Exception message - {exception.Message}");
-
-                if (savedSecretNames.Any())
-                {
-                    _logger.LogInformation($"Revert secrets for partnerId = {posProfileCreationDto.PartnerId}");
-                    foreach (var secretName in savedSecretNames)
-                    {
-                        await _secretClient.DeleteSecretAsync(secretName);
-                    }
-                }
-
-                throw;
-            }
+            await _posProfileRepository.InsertOne(posProfile);
 
             _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
 
@@ -283,23 +250,6 @@ namespace ClientWebAppService.PosProfile.Services
                 _logger.LogError($"UpdatePosProfileAsync - Attempted to update profile for partnerId = {partnerId}, Exception message - {exception.Message}");
                 throw;
             }
-        }
-
-        /// <inheritdoc cref="ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto)" />
-        public string ComposePosConfigurationSecretPayload(Models.PosCredentialsConfigurationDto posCredentialsConfiguration)
-        {
-            var posProfileSecretConfiguration = 
-                new PosProfileSecretConfiguration(
-                    new AccessToken(Value: posCredentialsConfiguration.AccessToken, posCredentialsConfiguration.ExpirationDate),
-                    new RefreshToken(Value: posCredentialsConfiguration.RefreshToken, null));
-
-            return JsonConvert.SerializeObject(posProfileSecretConfiguration);
-        }
-
-        private (string keyVaultSecretName, string keyVaultSecretValue) ComposeSecretPayloadForDataCollectService(string posType, string partnerId, string accessToken)
-        {
-            var secretName = GetPosConfigurationDataIngestionSecretName(partnerId, posType);
-            return (secretName, $"{AuthenticationScheme} {accessToken}");
         }
 
         private string GetPosConfigurationSecretName(string partnerId, string posType)

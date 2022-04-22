@@ -7,7 +7,7 @@ using CXI.Common.MongoDb.Extensions;
 using CXI.Contracts.PosProfile;
 using GL.MSA.Core.HealthCheck.Concrete;
 using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
-using GL.MSA.Tracing.TraceFactory;
+using CXI.Common.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;

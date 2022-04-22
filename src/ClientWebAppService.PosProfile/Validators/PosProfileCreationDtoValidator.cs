@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using ClientWebAppService.PosProfile.Models;
+using CXI.Contracts.PosProfile.Models.Create;
 using FluentValidation;
 
 namespace ClientWebAppService.PosProfile.Validators
@@ -8,19 +8,31 @@ namespace ClientWebAppService.PosProfile.Validators
     /// Validator for <see cref="PosProfileCreationModel"/>
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class PosProfileCreationDtoValidator : AbstractValidator<PosProfileCreationModel>
+    public class PosProfileCreationSquareDtoValidator : AbstractValidator<PosProfileCreationModel<PosCredentialsConfigurationSquareCreationDto>>
     {
-        public PosProfileCreationDtoValidator()
+        public PosProfileCreationSquareDtoValidator()
         {
             RuleFor(p => p.PartnerId).NotEmpty();
-            RuleForEach(p => p.PosConfigurations)
-                .ChildRules(p =>
-                {
-                    p.RuleFor(pc => pc.PosType).NotEmpty();
-                    p.RuleFor(pc => pc.AccessToken).NotEmpty();
-                    p.RuleFor(pc => pc.ExpirationDate).NotEmpty();
-                    p.RuleFor(pc => pc.RefreshToken).NotEmpty();
-                });
+            RuleFor(p => p.PosConfigurations)
+                .ChildRules(
+                    p =>
+                    {
+                        p.RuleFor(pc => pc.PosType).NotEmpty();
+                        p.RuleFor(pc => pc.AccessToken).NotEmpty();
+                        p.RuleFor(pc => pc.ExpirationDate).NotEmpty();
+                        p.RuleFor(pc => pc.RefreshToken).NotEmpty();
+                    });
+        }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class PosProfileCreationOmnivoreDtoValidator : AbstractValidator<PosProfileCreationModel<PosCredentialsConfigurationOmnivoreCreationDto>>
+    {
+        public PosProfileCreationOmnivoreDtoValidator()
+        {
+            RuleFor(p => p.PartnerId).NotEmpty();
+            RuleFor(p => p.PosConfigurations)
+                .ChildRules(p => { p.RuleFor(pc => pc.PosType).NotEmpty(); });
         }
     }
 }

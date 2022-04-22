@@ -1,0 +1,113 @@
+parameters:
+  - name: Environment
+    type: string
+    default: prd
+    displayName: Environment specification
+    values:
+      - prd
+
+trigger: none
+
+variables:
+- group: default
+- name: repo1
+  value: cxi-cdp-customer-profiles-partner-profile
+- name: repo2
+  value: cxi-cdp-customer-profiles-pos-profile
+- name: repo3
+  value: cxi-cdp-customer-profiles-user-profile
+- name : tag
+  value:  $(resources.pipeline.cxi-cdp-customer-profiles.runName)  
+
+resources:
+    repositories:
+    - repository: templates
+      type : git
+      name : cxi-build-templates
+
+    pipelines:
+      - pipeline: cxi-cdp-customer-profiles
+        source: cxi-cdp-customer-profiles-stg-sqa
+        trigger: none  
+
+pool:
+ vmImage: ubuntu-latest
+
+stages:
+
+ - stage: deploy_prd
+   condition: eq('${{ parameters.Environment }}', 'prd')
+   displayName: Deploy to Kubernetes Prd
+   jobs:
+    - deployment: deploy
+      displayName: Deploy
+      variables:
+      - group: common-prd
+      environment: 'Kubernetes_Prd'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: none
+            - script: echo "##vso[build.updatebuildnumber]$(tag)"      
+            - task: AzureCLI@2
+              inputs:
+                    azureSubscription: 'cxi-devops'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      echo $(tag)
+                      az acr import --name $(registry).azurecr.io --source acrnpreastus2mgmt.azurecr.io/$(repo1):$(tag) --force
+                      az acr import --name $(registry).azurecr.io --source acrnpreastus2mgmt.azurecr.io/$(repo2):$(tag) --force
+                      az acr import --name $(registry).azurecr.io --source acrnpreastus2mgmt.azurecr.io/$(repo3):$(tag) --force
+            - template: HelmDeploy.yaml@templates
+              parameters:
+                kubernetesServiceConnectionName: 'Kub_CXI_Cluster_PRD'
+                namespace: 'customer-profiles'
+                acrname: '$(registry)'
+                azureservice: 'cxi-devops'
+                acrrepo: 'cxi-default:20220329.1'
+                chartPath: '$(build.stagingdirectory)/cxi-default/'
+                components:
+                - componentname: 'customer-profiles-partner-profile'
+                  releasename: 'customer-profiles-partner-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-partner-profile,\
+                    application.env=prd,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo1),\
+                    deployment.container.image.tag=$(tag),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                - componentname: 'customer-profiles-pos-profile'
+                  releasename: 'customer-profiles-pos-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-pos-profile,\
+                    application.env=prd,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo2),\
+                    deployment.container.image.tag=$(tag),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                - componentname: 'customer-profiles-user-profile'
+                  releasename: 'customer-profiles-user-profile'
+                  overridevalues: "
+                    application.name=customer-profiles-user-profile,\
+                    application.env=prd,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo3),\
+                    deployment.container.image.tag=$(tag),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.replicaCount=2,\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"                       
