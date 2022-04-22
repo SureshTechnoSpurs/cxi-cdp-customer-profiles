@@ -30,7 +30,7 @@
 		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.ResiliencyPolicy" Version="1.0.0" />
-		<PackageReference Include="CXI.Common.ApplicationInsights" Version="1.0.0" />
+		<PackageReference Include="CXI.Common.ApplicationInsights" Version="1.0.1" />
 		<PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.15" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
