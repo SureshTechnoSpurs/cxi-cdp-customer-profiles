@@ -111,7 +111,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                     Address = updateModel.Address,
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
-                    IsActive = updateModel.ServiceAgreementAccepted
+                    IsActive = updateModel.IsActive
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
