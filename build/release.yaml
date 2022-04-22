@@ -1,3 +1,4 @@
+name: $(Date:MMddyyyy)$(Rev:.r)-${{ parameters.Environment }}
 parameters:
   - name: Environment
     type: string
@@ -35,15 +36,14 @@ pool:
  vmImage: ubuntu-latest
 
 stages:
- - stage: deploy_stage
-   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq('${{ parameters.Environment }}', 'stg'))  
-   displayName: Deploy to Kubernetes Stage
+ - stage: deploy_stage 
+   displayName: Deploy to Kubernetes ${{ parameters.Environment }}
    jobs:
     - deployment: deploy
-      displayName: Deploy
+      displayName: Deploy to ${{ parameters.Environment }}
       variables:
-      - group: common-stg
-      environment: 'Kubernetes_Stg'
+      - group: common-${{ parameters.Environment }}
+      environment: 'Kubernetes_${{ parameters.Environment }}'
       strategy:
         runOnce:
           deploy:
@@ -53,7 +53,7 @@ stages:
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                namespace: 'stg-customer-profiles'
+                namespace: '${{ parameters.Environment }}-customer-profiles'
                 acrname: '$(registry)'
                 azureservice: 'cxi-devops'
                 acrrepo: 'cxi-default:20220329.1'
@@ -63,7 +63,7 @@ stages:
                   releasename: 'customer-profiles-partner-profile'
                   overridevalues: "
                     application.name=customer-profiles-partner-profile,\
-                    application.env=stg,\
+                    application.env=${{ parameters.Environment }},\
                     deployment.container.registry=$(registry),\
                     deployment.container.image.name=$(repo1),\
                     deployment.container.image.tag=$(tag),\
@@ -77,7 +77,7 @@ stages:
                   releasename: 'customer-profiles-pos-profile'
                   overridevalues: "
                     application.name=customer-profiles-pos-profile,\
-                    application.env=stg,\
+                    application.env=${{ parameters.Environment }},\
                     deployment.container.registry=$(registry),\
                     deployment.container.image.name=$(repo2),\
                     deployment.container.image.tag=$(tag),\
@@ -91,7 +91,7 @@ stages:
                   releasename: 'customer-profiles-user-profile'
                   overridevalues: "
                     application.name=customer-profiles-user-profile,\
-                    application.env=stg,\
+                    application.env=${{ parameters.Environment }},\
                     deployment.container.registry=$(registry),\
                     deployment.container.image.name=$(repo3),\
                     deployment.container.image.tag=$(tag),\
@@ -100,72 +100,4 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"     
-
- - stage: deploy_sqa
-   condition: eq('${{ parameters.Environment }}', 'sqa')
-   displayName: Deploy to Kubernetes Sqa
-   jobs:
-    - deployment: deploy
-      displayName: Deploy
-      variables:
-      - group: common-sqa
-      environment: 'Kubernetes_Sqa'
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-            - download: none
-            - script: echo "##vso[build.updatebuildnumber]$(tag)"  
-            - template: HelmDeploy.yaml@templates
-              parameters:
-                kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                namespace: 'sqa-customer-profiles'
-                acrname: '$(registry)'
-                azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20220329.1'
-                chartPath: '$(build.stagingdirectory)/cxi-default/'
-                components:
-                - componentname: 'customer-profiles-pos-profile'
-                  releasename: 'customer-profiles-pos-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-pos-profile,\
-                    application.env=sqa,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=$(repo1),\
-                    deployment.container.image.tag=$(tag),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
-                - componentname: 'customer-profiles-user-profile'
-                  releasename: 'customer-profiles-user-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-user-profile,\
-                    application.env=sqa,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=$(repo3),\
-                    deployment.container.image.tag=$(tag),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"     
-                - componentname: 'customer-profiles-partner-profile'
-                  releasename: 'customer-profiles-partner-profile'
-                  overridevalues: "
-                    application.name=customer-profiles-partner-profile,\
-                    application.env=sqa,\
-                    deployment.container.registry=$(registry),\
-                    deployment.container.image.name=$(repo2),\
-                    deployment.container.image.tag=$(tag),\
-                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
-                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
-                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
-                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
-                    deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)" 
-                
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
