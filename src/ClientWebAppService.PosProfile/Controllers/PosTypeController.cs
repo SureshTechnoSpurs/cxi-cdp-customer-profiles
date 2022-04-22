@@ -34,12 +34,12 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpPost("partnerPosType")]
-        [ProducesResponseType(typeof(List<PosTypePartnerDto>), 200)]
+        [HttpPost("partnersearch")]
+        [ProducesResponseType(typeof(List<PartnerPosTypesDto>), 200)]
         [ProducesResponseType(typeof(NotFoundException), 404)]
-        public async Task<IActionResult> GetPosTypeByPartnerIdsAsync([FromBody] PosTypeActivePartnerModel posTypeActivePartner)
+        public async Task<IActionResult> GetPosTypeByPartnerIdsAsync([FromBody] PartnerPosTypesSearchModel partnerPosTypesSearchModel)
         {
-            var partnerPosTypes = await _posTypeService.GetPosTypeByPartnerIdsAsync(posTypeActivePartner);
+            var partnerPosTypes = await _posTypeService.GetPosTypeByPartnerIdsAsync(partnerPosTypesSearchModel);
             return Ok(partnerPosTypes);
         }
     }

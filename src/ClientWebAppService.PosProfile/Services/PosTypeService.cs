@@ -41,12 +41,12 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc cref="IPosTypeService.GetPosTypeByPartnerIdsAsync"/>
-        public async Task<List<PosTypePartnerDto>> GetPosTypeByPartnerIdsAsync(PosTypeActivePartnerModel posTypeActivePartner)
+        public async Task<List<PartnerPosTypesDto>> GetPosTypeByPartnerIdsAsync(PartnerPosTypesSearchModel partnerPosTypesSearchModel)
         {
-            var partnerIds = posTypeActivePartner.PartnerIds;
-            var posType = posTypeActivePartner.PosType;
+            var partnerIds = partnerPosTypesSearchModel.PartnerIds;
+            var posType = partnerPosTypesSearchModel.PosType;
 
-            _logger.LogInformation($"Fetching parnters for Pos Type = {posType}");
+            _logger.LogInformation($"Fetching partner and pos information for Pos Type = {posType}");
 
             IEnumerable<Models.PosProfile> posProfiles = new List<Models.PosProfile>();
 
@@ -62,17 +62,19 @@ namespace ClientWebAppService.PosProfile.Services
 
             if (posProfiles == null)
             {
-                throw new NotFoundException($"PosProfile not found.");
+                throw new NotFoundException($"Pos Profile information not found.");
             }
-            var posTypes = new List<PosTypePartnerDto>();
+            var posTypes = new List<PartnerPosTypesDto>();
             foreach (var posProfile in posProfiles)
             {
-                posTypes.Add(new PosTypePartnerDto(
+                posTypes.Add(new PartnerPosTypesDto(
                         posProfile.PartnerId,
                         posProfile.PosConfiguration.Select(x => new string(x.PosType))
                     ));
             }
-            
+
+            _logger.LogInformation($"Suceesfully feched partner and pos information for Pos Type = {posType}");
+
             return posTypes;
         }
     }

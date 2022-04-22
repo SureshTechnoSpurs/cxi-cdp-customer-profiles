@@ -11,12 +11,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// Fetches POS partner IDs by POS type.
         /// </summary>
         Task<IEnumerable<string>> GetPosProfileIdsByPosTypeAsync(string posType);
+
         /// <summary>
         /// Fetches POS type by partner IDs.
         /// </summary>
-        /// <param name="partnerIds"></param>
-        /// <param name="posType"></param>
+        /// <param name="partnerPosTypesSearchModel"></param>
         /// <returns></returns>
-        Task<List<PosTypePartnerDto>> GetPosTypeByPartnerIdsAsync(PosTypeActivePartnerModel posTypeActivePartner);
+        Task<List<PartnerPosTypesDto>> GetPosTypeByPartnerIdsAsync(PartnerPosTypesSearchModel partnerPosTypesSearchModel);
     }
 }

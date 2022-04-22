@@ -172,26 +172,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
                     }
                 });
 
-            var result = await _service.SearchAllPartnersByActiveM2MAsync(true);
-
-            result.Should().NotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public async Task GetPartnerIds_VerifyPassedIdExist_ReturnPartnerIds()
-        {
-            var partnerModel = new PartnerActivePartnerIdModel ("partnerId", true );
-            _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Partner, bool>>>()))
-                .ReturnsAsync(new List<Partner>
-                {
-                    new()
-                    {
-                        PartnerId = "partnerId",
-                        IsActive = true
-                    }
-                });
-
-            var result = await _service.SearchPartnerByActiveAsync(partnerModel);
+            var result = await _service.SearchPartnersAsync(true);
 
             result.Should().NotBeNullOrEmpty();
         }

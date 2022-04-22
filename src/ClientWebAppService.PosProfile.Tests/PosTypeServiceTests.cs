@@ -83,16 +83,16 @@ namespace ClientWebAppService.PosProfile.Tests
         public async Task GetPosTypeByPartnerIdsAsync_PassedPosTypePartnerId_ReturnPosType()
         {
             var posType = "square";
-            var squarePosProfiles = new List<string> { "cxi-usa-test1", "cxi-usa-test2" };
-            var posTypeActiveModel = new PosTypeActivePartnerModel(squarePosProfiles, posType);
+            var partnerIds = new List<string> { "cxi-usa-test1", "cxi-usa-test2" };
+            var partnerPosTypesSearchModel = new PartnerPosTypesSearchModel(partnerIds, posType);
 
             _posProfileRepositoryMock.Setup(
                   x => x.FilterBy<string>(It.IsAny<Expression<Func<Models.PosProfile, string>>>(),
                   It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
-                .ReturnsAsync(squarePosProfiles);
+                .ReturnsAsync(partnerIds);
 
-            var result = await _posTypeService.GetPosTypeByPartnerIdsAsync(posTypeActiveModel);
-            result.Should().AllBeOfType<PosTypePartnerDto>();
+            var result = await _posTypeService.GetPosTypeByPartnerIdsAsync(partnerPosTypesSearchModel);
+            result.Should().AllBeOfType<PartnerPosTypesDto>();
         }
     }
 }

@@ -38,12 +38,8 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <summary>
         /// Fetches active partners by specified POS type.
         /// </summary>
-        //Task<IEnumerable<PartnerPosTypeDto>> SearchAllPartnersByPosTypeAsync(string? posType, bool? active);
-        Task<List<string>> SearchAllPartnersByActiveM2MAsync(bool? active);
-
-        /// <summary>
-        /// Fetches active partners by specified POS type.
-        /// </summary>
-        Task<List<string>> SearchPartnerByActiveAsync(PartnerActivePartnerIdModel partnerActivePartnerId);
+        /// <param name="active"></param>
+        /// <returns></returns>
+        Task<List<string>> SearchPartnersAsync(bool? active);
     }
 }
