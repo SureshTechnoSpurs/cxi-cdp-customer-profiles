@@ -36,7 +36,6 @@ namespace ClientWebAppService.PosProfile.Controllers
         [Authorize(Policy = Constants.M2MPolicy)]
         [HttpPost("partnersearch")]
         [ProducesResponseType(typeof(List<PartnerPosTypesDto>), 200)]
-        [ProducesResponseType(typeof(NotFoundException), 404)]
         public async Task<IActionResult> SearchPosTypes([FromBody] PartnerPosTypesSearchModel partnerPosTypesSearchModel)
         {
             var partnerPosTypes = await _posTypeService.SearchPosTypes(partnerPosTypesSearchModel);
