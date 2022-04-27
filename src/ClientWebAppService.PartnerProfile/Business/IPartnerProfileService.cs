@@ -40,6 +40,6 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         /// <param name="active"></param>
         /// <returns></returns>
-        Task<List<string>> SearchPartnersAsync(bool? active);
+        Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active);
     }
 }

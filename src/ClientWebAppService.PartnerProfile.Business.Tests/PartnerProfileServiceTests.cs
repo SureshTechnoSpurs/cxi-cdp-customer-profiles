@@ -172,7 +172,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
                     }
                 });
 
-            var result = await _service.SearchPartnersAsync(true);
+            var result = await _service.SearchPartnerIdsByActiveStateAsync(true);
 
             result.Should().NotBeNullOrEmpty();
         }
