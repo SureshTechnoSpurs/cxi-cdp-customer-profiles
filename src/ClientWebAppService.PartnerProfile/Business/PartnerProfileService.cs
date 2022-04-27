@@ -110,7 +110,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     AmountOfLocations = updateModel.AmountOfLocations,
                     Address = updateModel.Address,
                     UserProfiles = updateModel.UserProfileEmails,
-                    ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted
+                    ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
+                    IsActive = updateModel.IsActive
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -144,5 +145,18 @@ namespace ClientWebAppService.PartnerProfile.Business
 
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles);
+
+        /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
+        public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
+        {
+            _logger.LogInformation($"Get partner information with active : {active}");
+
+            var activePartner = await _partnerRepository.FilterBy(active != null ? partner => partner.IsActive == active : null);
+            var partnerIds = activePartner.Select(x=> x.PartnerId).ToList();
+
+            _logger.LogInformation($"Successfully got partner information with active : {active}");
+
+            return partnerIds;
+        }
     }
 }
