@@ -80,7 +80,7 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task GetPosTypeByPartnerIdsAsync_PassedPosTypePartnerId_ReturnPosType()
+        public async Task SearchPosTypes_PassedPosTypePartnerId_ReturnPosType()
         {
             var posType = "square";
             var partnerIds = new List<string> { "cxi-usa-test1", "cxi-usa-test2" };
@@ -91,7 +91,7 @@ namespace ClientWebAppService.PosProfile.Tests
                   It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
                 .ReturnsAsync(partnerIds);
 
-            var result = await _posTypeService.GetPosTypeByPartnerIdsAsync(partnerPosTypesSearchModel);
+            var result = await _posTypeService.SearchPosTypes(partnerPosTypesSearchModel);
             result.Should().AllBeOfType<PartnerPosTypesDto>();
         }
     }

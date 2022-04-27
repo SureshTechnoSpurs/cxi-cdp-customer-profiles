@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+	<changeSet id="Service_Agreement_Bool_added" author="Mykhailo.Buianskyi">
+		<ext:runCommand>
+			<ext:command>
+				{ update: "partner_profiles",
+				updates: [{ q: { }, u: { $set: { "is_active" :true } }, multi: true }] }
+			</ext:command>
+		</ext:runCommand>
+		<ext:runCommand>
+			<ext:command>
+				{ 
+				collMod: "partner_profiles",
+				validator: {
+					$jsonSchema: {
+						bsonType: "object",
+						required: ["_id", "partner_name", "address", "partner_type"],
+						properties: {
+							_id: {
+								bsonType: "objectId"
+								},
+							partner_id: {
+								bsonType: "string"
+								},
+							partner_name: {
+								bsonType: "string"
+								},
+							address: {
+								bsonType: "string"
+								},
+							amount_of_locations: {
+								bsonType: "int"
+								},
+							partner_type: {
+								bsonType: "string"
+								},
+							profiles: {
+								bsonType: "array"
+								},
+							service_agreement_accepted: {
+								bsonType: "bool"
+								},
+							is_active: {
+								bsonType: "bool"
+								}
+							}
+						}
+					},
+				validationAction: "warn",
+				validationLevel: "strict"
+				}
+			</ext:command>
+		</ext:runCommand>
+	</changeSet>
+</databaseChangeLog>

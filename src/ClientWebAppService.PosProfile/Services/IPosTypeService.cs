@@ -17,6 +17,6 @@ namespace ClientWebAppService.PosProfile.Services
         /// </summary>
         /// <param name="partnerPosTypesSearchModel"></param>
         /// <returns></returns>
-        Task<List<PartnerPosTypesDto>> GetPosTypeByPartnerIdsAsync(PartnerPosTypesSearchModel partnerPosTypesSearchModel);
+        Task<List<PartnerPosTypesDto>> SearchPosTypes(PartnerPosTypesSearchModel partnerPosTypesSearchModel);
     }
 }

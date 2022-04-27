@@ -9,4 +9,5 @@ http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/
 http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
 	<include file="20220119150804_initial.xml" relativeToChangelogFile="true"/> 
 	<include file="20220317160053_serviceAgreementAccepted_added.xml" relativeToChangelogFile="true"/>
+	<include file="20220418160053_isActive_added.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

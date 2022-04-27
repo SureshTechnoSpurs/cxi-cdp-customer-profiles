@@ -37,9 +37,9 @@ namespace ClientWebAppService.PosProfile.Controllers
         [HttpPost("partnersearch")]
         [ProducesResponseType(typeof(List<PartnerPosTypesDto>), 200)]
         [ProducesResponseType(typeof(NotFoundException), 404)]
-        public async Task<IActionResult> GetPosTypeByPartnerIdsAsync([FromBody] PartnerPosTypesSearchModel partnerPosTypesSearchModel)
+        public async Task<IActionResult> SearchPosTypes([FromBody] PartnerPosTypesSearchModel partnerPosTypesSearchModel)
         {
-            var partnerPosTypes = await _posTypeService.GetPosTypeByPartnerIdsAsync(partnerPosTypesSearchModel);
+            var partnerPosTypes = await _posTypeService.SearchPosTypes(partnerPosTypesSearchModel);
             return Ok(partnerPosTypes);
         }
     }

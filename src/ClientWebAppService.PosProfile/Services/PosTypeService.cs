@@ -40,8 +40,8 @@ namespace ClientWebAppService.PosProfile.Services
             return posProfiles;
         }
 
-        /// <inheritdoc cref="IPosTypeService.GetPosTypeByPartnerIdsAsync"/>
-        public async Task<List<PartnerPosTypesDto>> GetPosTypeByPartnerIdsAsync(PartnerPosTypesSearchModel partnerPosTypesSearchModel)
+        /// <inheritdoc cref="IPosTypeService.SearchPosTypes(PartnerPosTypesSearchModel)"/>
+        public async Task<List<PartnerPosTypesDto>> SearchPosTypes(PartnerPosTypesSearchModel partnerPosTypesSearchModel)
         {
             var partnerIds = partnerPosTypesSearchModel.PartnerIds;
             var posType = partnerPosTypesSearchModel.PosType;
@@ -62,7 +62,7 @@ namespace ClientWebAppService.PosProfile.Services
 
             if (posProfiles == null)
             {
-                throw new NotFoundException($"Pos Profile information not found.");
+                return new List<PartnerPosTypesDto>();
             }
             var posTypes = new List<PartnerPosTypesDto>();
             foreach (var posProfile in posProfiles)
