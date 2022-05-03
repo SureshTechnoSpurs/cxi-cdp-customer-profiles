@@ -30,7 +30,11 @@ namespace ClientWebAppService.PartnerProfile
             services.RegisterService(Configuration, new LoggerFactory().CreateLogger<Startup>());
 
             services.AddControllers()
-                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
+                    .AddFluentValidation(fv =>
+                    {
+                        fv.RegisterValidatorsFromAssemblyContaining<Program>();
+                        fv.ImplicitlyValidateChildProperties = true;
+                    });
 
             services.AddApiVersioning(options =>
             {

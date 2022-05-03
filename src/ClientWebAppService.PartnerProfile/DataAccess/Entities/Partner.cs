@@ -1,4 +1,5 @@
 ﻿using CXI.Common.MongoDb;
+using CXI.Contracts.PartnerProfile.Models;
 using GL.MSA.Core.NoSql.Attributes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -36,6 +37,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         public IEnumerable<string> UserProfiles { get; set; } = new List<string>();
 
         [BsonElement("is_active")]
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
+
+        [BsonElement("subscription")]
+        public Subscription Subscription { get; set; } = new Subscription();
     }
 }

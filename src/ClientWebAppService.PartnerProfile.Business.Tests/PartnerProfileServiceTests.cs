@@ -123,7 +123,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" },true);
+            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" }, true, new Subscription());
 
             var invocation = _service.Invoking(x => x.UpdateProfileAsync("testId", testInput));
 

@@ -49,7 +49,13 @@ namespace ClientWebAppService.PartnerProfile.Business
                     Address = creationModel.Address,
                     PartnerId = PartnerProfileUtils.GetPartnerIdByName(creationModel.Name),
                     PartnerType = PartnerProfileUtils.DefaultPartnerType,
-                    ServiceAgreementAccepted = false
+                    ServiceAgreementAccepted = false,
+                    Subscription = new Subscription
+                    {
+                        SubscriptionId = string.Empty,
+                        State = null,
+                        LastBilledDate = null
+                    }
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -111,7 +117,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     Address = updateModel.Address,
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
-                    IsActive = updateModel.IsActive
+                    IsActive = updateModel.IsActive,
+                    Subscription = updateModel.Subscription
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -144,7 +151,9 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         private PartnerProfileDto Map(Partner partner) =>
-            new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType, partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles);
+            new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
+                partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
+                partner.IsActive, partner.Subscription);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
