@@ -153,7 +153,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription);
+                partner.IsActive, partner.Subscription, partner.Id.CreationTime);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)

@@ -395,5 +395,38 @@ namespace ClientWebAppService.PosProfile.Tests
 
             _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, It.Is<Models.PosProfile>(x => x.IsHistoricalDataIngested == true)));
         }
+
+        [Fact]
+        public async Task GetPosProfilesByPartnerIdsAsync_CorrectInput_Success()
+        {
+            // Arrange
+
+            var partnerId = "test-partner-id";
+            _posProfileRepositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(
+                    new List<Models.PosProfile>
+                    {
+                        new()
+                        {
+                            PartnerId = partnerId,
+                            PosConfiguration = new List<PosCredentialsConfiguration>
+                            {
+                                new()
+                                {
+                                    KeyVaultReference = "ref", PosType = "square"
+                                }
+                            }
+                        }
+                    });
+
+            // Act
+
+            var result = await _posProfileService.GetPosProfilesByPartnerIdsAsync(new List<string> { partnerId });
+
+            // Assert
+
+            result.Should().NotBeEmpty();
+            result.First().PartnerId.Should().Be(partnerId);
+        }
     }
 }
