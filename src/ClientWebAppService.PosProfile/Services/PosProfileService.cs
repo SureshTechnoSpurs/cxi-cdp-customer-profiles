@@ -227,6 +227,21 @@ namespace ClientWebAppService.PosProfile.Services
             });
         }
 
+        /// <inheritdoc cref="GetPosProfilesByPartnerIdsAsync(IEnumerable{string})"/>
+        public async Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerIdsAsync(IEnumerable<string> partnerIds)
+        {
+            VerifyHelper.NotNull(partnerIds, nameof(partnerIds));
+
+            var result = await _posProfileRepository.FilterBy(x => partnerIds.Contains(x.PartnerId));
+
+            return result.Select(x => new PosProfileDto(
+                x.PartnerId, 
+                x.PosConfiguration.Select(pc => new PosCredentialsConfigurationDto(
+                    pc.PosType, 
+                    pc.KeyVaultReference, 
+                    pc.MerchantId))));
+        }
+
         /// <inheritdoc cref="IPosProfileService.UpdatePosProfileAsync"/>
         public async Task UpdatePosProfileAsync(string partnerId, PosProfileUpdateModel updateModel)
         {

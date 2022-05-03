@@ -68,5 +68,12 @@ namespace ClientWebAppService.PosProfile.Services
         /// <param name="merchantId"></param>
         /// <returns></returns>
         Task<PosProfileDto> GetByMerchantId(string merchantId);
+
+        /// <summary>
+        /// Gets Pos Profiles by partnerIds
+        /// </summary>
+        /// <param name="partnerIds"></param>
+        /// <returns></returns>
+        Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerIdsAsync(IEnumerable<string> partnerIds);
     }
 }

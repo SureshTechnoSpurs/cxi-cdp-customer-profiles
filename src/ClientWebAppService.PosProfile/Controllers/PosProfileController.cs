@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Services;
@@ -183,6 +184,22 @@ namespace ClientWebAppService.PosProfile.Controllers
         {
             var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
             return Ok(posProfileCreateResult);
+        }
+
+        /// <summary>
+        /// Gets Pos Profiles by partnerIds
+        /// </summary>
+        /// <param name="partnerIds"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("m2m/getbypartnerids")]
+        [ProducesResponseType(typeof(IEnumerable<PosProfileDto>), 200)]
+        public async Task<IActionResult> M2MGetPosProfilesByPartnerIds(IEnumerable<string> partnerIds)
+        {
+            VerifyHelper.NotNull(partnerIds, nameof(partnerIds));
+
+            var posProfiles = await _posProfileService.GetPosProfilesByPartnerIdsAsync(partnerIds);
+            return Ok(posProfiles);
         }
     }
 }
