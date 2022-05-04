@@ -9,7 +9,6 @@ using CXI.Contracts.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace ClientWebAppService.PosProfile.Controllers
 {
@@ -73,7 +72,7 @@ namespace ClientWebAppService.PosProfile.Controllers
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
 
             var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
-            return Ok(JsonConvert.SerializeObject(accessToken));
+            return Ok(accessToken);
         }
 
         /// <summary>
