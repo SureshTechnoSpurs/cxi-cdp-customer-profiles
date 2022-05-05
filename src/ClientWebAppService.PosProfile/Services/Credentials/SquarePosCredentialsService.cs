@@ -48,6 +48,8 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
                 _secretSetter.Set(tokenInfo.keyVaultSecretName, tokenInfo.keyVaultSecretValue, null);
                 savedSecretNames.Add(tokenInfo.keyVaultSecretName);
 
+                _logger.LogInformation($"Processing posProfile with partnerId={partnerId}, merchantId={posConfigurationDto.MerchantId}");
+
                 return new PosCredentialsConfiguration
                 {
                     PosType = posConfigurationDto.PosType,

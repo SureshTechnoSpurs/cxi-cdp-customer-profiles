@@ -176,5 +176,32 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             result.Should().NotBeNullOrEmpty();
         }
+
+        [Fact]
+        public async Task GetPartnerProfilesPaginatedAsync_ProfilesExist_ShouldReturnPartnerProfilePaginatedDto()
+        {
+            // Arrange
+
+            _repositoryMock
+                .Setup(x => x.GetPaginatedList(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new CXI.Common.Models.PaginatedResponse<Partner>
+                {
+                    Items = new List<Partner>
+                    {
+                        new Partner { PartnerId = "" }
+                    },
+                    PageIndex = 1,
+                    PageSize = 1,
+                    TotalCount = 1,
+                    TotalPages = 1
+                });
+
+            // Act
+            var result = await _service.GetPartnerProfilesPaginatedAsync(1, 1);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().NotBeEmpty();
+        }
     }
 }

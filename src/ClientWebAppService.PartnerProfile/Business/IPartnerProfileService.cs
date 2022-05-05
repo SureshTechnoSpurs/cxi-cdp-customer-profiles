@@ -41,5 +41,13 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="active"></param>
         /// <returns></returns>
         Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active);
+
+        /// <summary>
+        /// Gets PartnerProfiles Paginated records
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize);
     }
 }
