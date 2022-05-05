@@ -76,7 +76,7 @@ namespace ClientWebAppService.PosProfile.Controllers
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
 
             var accessToken = await _posProfileService.GetAccesTokenForPartner(partnerId);
-            return Ok(JsonConvert.SerializeObject(accessToken));
+            return Ok(accessToken);
         }
 
         /// <summary>
