@@ -221,7 +221,7 @@ namespace ClientWebAppService.PosProfile.Services
             return posProfiles.Select(x =>
             {
                 return new PosProfileSearchDto(x.PartnerId,
-                                               x.PosConfiguration?.Select(pc => pc.PosType),
+                                               x.PosConfiguration?.Select(pc => new PosCredentialsConfigurationDto(pc.PosType, pc.KeyVaultReference, pc.MerchantId)),
                                                x.IsHistoricalDataIngested,
                                                x.HistoricalIngestDaysPeriod);
             });
