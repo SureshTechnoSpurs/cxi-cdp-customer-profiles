@@ -247,18 +247,18 @@ stages:
             - task: DownloadPipelineArtifact@2
               inputs:
                 buildType: 'current'
-                targetPath: '$(Build.StagingDirectory)'
+                targetPath: '$(Build.SourcesDirectory)'
                 artifactName: 'migrations'
             - task: ExtractFiles@1
               displayName: Extract Files
               inputs:
                 archiveFilePatterns: '*.tar'
-                destinationFolder: '$(Build.StagingDirectory)'
+                destinationFolder: '$(Build.SourcesDirectory)'
                 cleanDestinationFolder: false
                 overwriteExistingFiles: false
               
             - script: ls -la
-              workingDirectory: $(Build.StagingDirectory)
+              workingDirectory: $(Build.SourcesDirectory)
 
             - template: HelmDeploy.yaml@templates
               parameters:
