@@ -252,7 +252,7 @@ stages:
             - task: ExtractFiles@1
               displayName: Extract Files
               inputs:
-                archiveFilePatterns: '**/*.tar'
+                archiveFilePatterns: '*.tar'
                 destinationFolder: '$(Build.StagingDirectory)'
                 cleanDestinationFolder: false
                 overwriteExistingFiles: false
