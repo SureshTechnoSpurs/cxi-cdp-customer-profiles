@@ -233,7 +233,7 @@ stages:
         buildConfiguration: '$(BuildConfiguration)'
 
  - stage: deploy_dev
-   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+ #  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
    displayName: Deploy to Kubernetes Dev
    jobs:
     - deployment: deploy
