@@ -244,6 +244,13 @@ stages:
           deploy:
             steps:
             - download: none
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                targetPath: '$(Pipeline.Workspace)'
+                artifactName: 'migrations'
+                
+
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
