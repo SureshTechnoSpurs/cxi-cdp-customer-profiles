@@ -249,7 +249,7 @@ stages:
                 buildType: 'current'
                 targetPath: '$(Pipeline.Workspace)'
                 artifactName: 'migrations'
-            - script: tag -xf migrations.tag  & ls -la
+            - script: tar -xf migrations.tag  & ls -la
 
             - template: HelmDeploy.yaml@templates
               parameters:
