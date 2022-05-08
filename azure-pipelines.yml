@@ -259,7 +259,7 @@ stages:
               
             - script: ls -la
               workingDirectory: $(Build.SourcesDirectory)
-            - script: docker run -v /$(Build.SourcesDirectory):/liquibase/changelog liquibase/liquibase --url=jdbc::mongodb://cluster0.iuoic.mongodb.net --changeLogFile=/liquibase/changelog.xml --username=cxi_cdp_databricks_application_service_account --password=BYOqW3baiHFVY1z4 --log-level=error validate
+            - script: docker run -v /$(Build.SourcesDirectory):/liquibase/changelog liquibase/liquibase --url=jdbc::mongodb://cluster0.iuoic.mongodb.net --changeLogFile=/liquibase/changelog.xml --username=cxi_cdp_databricks_application_service_account --password=BYOqW3baiHFVY1z4 --log-level=debug validate
               displayName: liquibase validate
               workingDirectory: $(Build.SourcesDirectory)
             - script: docker run -v /$(Build.SourcesDirectory):/liquibase/changelog liquibase/liquibase --url=jdbc:mongodb://cluster0.iuoic.mongodb.net --changeLogFile=/liquibase/changelog.xml --username=cxi_cdp_databricks_application_service_account --password=BYOqW3baiHFVY1z4 tag v_$(Build.BuildNumber)
