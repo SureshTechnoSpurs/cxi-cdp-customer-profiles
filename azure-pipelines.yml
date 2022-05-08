@@ -249,7 +249,8 @@ stages:
                 buildType: 'current'
                 targetPath: '$(Build.StagingDirectory)'
                 artifactName: 'migrations'
-            - script: tar -xf $(Build.StagingDirectory)/migrations/migrations.tag  & echo ls
+            - script: tar -xf $(Build.StagingDirectory)/migrations/migrations.tag
+                      & ls -la
 
             - template: HelmDeploy.yaml@templates
               parameters:
