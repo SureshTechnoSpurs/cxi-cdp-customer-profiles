@@ -181,7 +181,15 @@ stages:
           command: 'push'
           tags: |
             $(Build.BuildNumber)
-            $(Build.SourceBranchName)-$(Build.BuildNumber)  
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+       
+      - task: PublishBuildArtifacts@1
+        displayName:  publish migratios
+        inputs:
+           PathtoPublish: 'migrations'
+           ArtifactName: 'migrations'
+           publishLocation: 'Container'
+           StoreAsTar: true
 
        
           
@@ -235,7 +243,13 @@ stages:
         runOnce:
           deploy:
             steps:
-            - download: none
+            #- download: none
+            - script: |
+                call c:\apps\liquibase\liquibase.bat --username=$(LBMSSQLUSERNAME) --password=$(LBMSSQLPASSWORD)  --url jdbc:sqlserver://localhost:1433;database=cyclopsbi_${{ parameters.env }}; --labels=$(labels) validate
+                call c:\apps\liquibase\liquibase.bat --username=$(LBMSSQLUSERNAME) --password=$(LBMSSQLPASSWORD)  --url jdbc:sqlserver://localhost:1433;database=cyclopsbi_${{ parameters.env }}; tag JOBID_$(Build.BuildId)
+                call c:\apps\liquibase\liquibase.bat --username=$(LBMSSQLUSERNAME) --password=$(LBMSSQLPASSWORD)  --url jdbc:sqlserver://localhost:1433;database=cyclopsbi_${{ parameters.env }}; --labels=$(labels) status --verbose
+                workingDirectory: Liquibase
+                displayName: 'Verify Changes'
             - template: HelmDeploy.yaml@templates
               parameters:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
