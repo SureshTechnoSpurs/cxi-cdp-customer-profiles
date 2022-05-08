@@ -252,14 +252,13 @@ stages:
             - task: ExtractFiles@1
               displayName: Extract Files
               inputs:
-                archiveFilePatterns: '*.tar'
+                archiveFilePatterns: '**/*.tar'
                 destinationFolder: '$(Build.StagingDirectory)'
                 cleanDestinationFolder: false
                 overwriteExistingFiles: false
               
-
-            - script: cd $(Build.StagingDirectory)
-                      & ls -la
+            - script: ls -la
+              workingDirectory: $(Build.StagingDirectory)
 
             - template: HelmDeploy.yaml@templates
               parameters:
