@@ -247,9 +247,9 @@ stages:
             - task: DownloadPipelineArtifact@2
               inputs:
                 buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
+                targetPath: '$(Build.StagingDirectory)'
                 artifactName: 'migrations'
-            - script: tar -xf migrations.tag  & echo ls
+            - script: tar -xf $(Build.StagingDirectory)/migrations/migrations.tag  & echo ls
 
             - template: HelmDeploy.yaml@templates
               parameters:
