@@ -258,7 +258,7 @@ stages:
                 overwriteExistingFiles: false
               
 
-            - script: cd $(Build.StagingDirectory)/
+            - script: cd $(Build.StagingDirectory)
                       & ls -la
 
             - template: HelmDeploy.yaml@templates
