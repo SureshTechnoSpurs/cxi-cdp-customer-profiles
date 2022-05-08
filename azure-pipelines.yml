@@ -249,7 +249,7 @@ stages:
                 buildType: 'current'
                 targetPath: '$(Pipeline.Workspace)'
                 artifactName: 'migrations'
-                
+            - script:  cd $(Pipeline.Workspace) & ls -la
 
             - template: HelmDeploy.yaml@templates
               parameters:
