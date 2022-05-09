@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ClientWebAppService.PartnerProfile.Core;
+using CXI.Common.Helpers;
 
 namespace ClientWebAppService.PartnerProfile.Controllers
 {
@@ -41,13 +42,24 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
         [Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m")]
-        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(IEnumerable<PartnerProfileDto>), 200)]
+        [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
-        public async Task<IActionResult> M2MGet()
+        public async Task<IActionResult> M2MGet(int? pageIndex, int? pageSize)
         {
-            var result = await _partnerProfileService.GetPartnerProfilesAsync();
+            if (!pageIndex.HasValue && !pageSize.HasValue)
+            {
+                var result = await _partnerProfileService.GetPartnerProfilesAsync();
+                return Ok(result);
+            }
 
-            return Ok(result);
+            VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
+            VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
+
+            var paginatedResult = 
+                await _partnerProfileService.GetPartnerProfilesPaginatedAsync(pageIndex.Value, pageSize.Value);
+
+            return Ok(paginatedResult);
         }
 
         [HttpPost]

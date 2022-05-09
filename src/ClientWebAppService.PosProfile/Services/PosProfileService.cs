@@ -230,7 +230,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="GetPosProfilesByPartnerIdsAsync(IEnumerable{string})"/>
         public async Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerIdsAsync(IEnumerable<string> partnerIds)
         {
-            VerifyHelper.NotNull(partnerIds, nameof(partnerIds));
+            VerifyHelper.CollectionNotEmpty(partnerIds, nameof(partnerIds));
 
             var result = await _posProfileRepository.FilterBy(x => partnerIds.Contains(x.PartnerId));
 

@@ -2,6 +2,8 @@
 using ClientWebAppService.PartnerProfile.Business.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Common.Helpers;
+using CXI.Common.Models;
 using CXI.Contracts.PartnerProfile.Models;
 using CXI.Contracts.PosProfile;
 using Microsoft.Extensions.Logging;
@@ -103,6 +105,19 @@ namespace ClientWebAppService.PartnerProfile.Business
             return partnerProfiles.Select(Map);
         }
 
+        /// <inheritdoc cref="GetPartnerProfilesPaginatedAsync(int, int)"/>
+        public async Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize)
+        {
+            VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
+            VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
+
+            var partnerProfiles = await _partnerRepository.GetPaginatedList(pageIndex, pageSize);
+
+            VerifyHelper.NotNull(partnerProfiles, nameof(partnerProfiles));
+
+            return MapDto(partnerProfiles);
+        }
+
         ///<inheritdoc/>
         public async Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel)
         {
@@ -166,6 +181,18 @@ namespace ClientWebAppService.PartnerProfile.Business
             _logger.LogInformation($"Successfully got partner information with active : {active}");
 
             return partnerIds;
+        }
+
+        private PartnerProfilePaginatedDto MapDto(PaginatedResponse<Partner> model)
+        {
+            return new PartnerProfilePaginatedDto 
+            {
+                Items = model.Items.Select(Map),
+                PageIndex = model.PageIndex,
+                PageSize = model.PageSize,
+                TotalCount = model.TotalCount,
+                TotalPages = model.TotalPages
+            };
         }
     }
 }

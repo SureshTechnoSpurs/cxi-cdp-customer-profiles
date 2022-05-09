@@ -9,6 +9,8 @@ using CXI.Contracts.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace ClientWebAppService.PosProfile.Controllers
 {
@@ -23,10 +25,12 @@ namespace ClientWebAppService.PosProfile.Controllers
     public class PosProfileController : ControllerBase
     {
         private readonly IPosProfileService _posProfileService;
+        private readonly ILogger<PosProfileController> _logger;
 
-        public PosProfileController(IPosProfileService posProfileService)
+        public PosProfileController(IPosProfileService posProfileService, ILogger<PosProfileController> logger)
         {
             _posProfileService = posProfileService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -165,6 +169,10 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
         public async Task<IActionResult> M2MPostSquare(PosProfileCreationModel<PosCredentialsConfigurationSquareCreationDto> posProfileCreationDto)
         {
+            _logger.LogInformation(
+                $"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}, " +
+                $"merchantId = {posProfileCreationDto.PosConfigurations?.MerchantId}");
+
             var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
             return Ok(posProfileCreateResult);
         }
@@ -195,7 +203,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(IEnumerable<PosProfileDto>), 200)]
         public async Task<IActionResult> M2MGetPosProfilesByPartnerIds(IEnumerable<string> partnerIds)
         {
-            VerifyHelper.NotNull(partnerIds, nameof(partnerIds));
+            VerifyHelper.CollectionNotEmpty(partnerIds, nameof(partnerIds));
 
             var posProfiles = await _posProfileService.GetPosProfilesByPartnerIdsAsync(partnerIds);
             return Ok(posProfiles);
