@@ -163,7 +163,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="posProfileCreationDto"></param>
         /// <returns></returns>
-        //[Authorize(Policy = Constants.M2MPolicy)]
+        [Authorize(Policy = Constants.M2MPolicy)]
         [HttpPost("m2m/square")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
