@@ -191,7 +191,7 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc/>
-        public async Task<PosProfileDto> GetPosProfilesByPartnerId(string partnerId)
+        public async Task<PosProfileDto> GetPosProfileByPartnerId(string partnerId)
         {
             _logger.LogInformation($"Getting POS profiles for partnerId: {partnerId}.");
 

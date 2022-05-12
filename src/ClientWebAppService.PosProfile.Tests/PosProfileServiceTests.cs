@@ -327,7 +327,7 @@ namespace ClientWebAppService.PosProfile.Tests
             var partnerId = "partnerId";
 
             // Act
-            Func<Task> act = () => _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            Func<Task> act = () => _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             // Assert
             await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profiles for partnerId: {partnerId} not found.");
@@ -357,7 +357,7 @@ namespace ClientWebAppService.PosProfile.Tests
                     });
 
             // Act
-            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            var result = await _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             // Assert
             result.Should().BeOfType<PosProfileDto>();

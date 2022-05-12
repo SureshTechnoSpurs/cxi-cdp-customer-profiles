@@ -127,7 +127,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGetPosProfiles([FromRoute] string partnerId)
         {
-            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            var result = await _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             return Ok(result);
         }
@@ -163,7 +163,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="posProfileCreationDto"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpPost("m2m/square")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
