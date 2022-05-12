@@ -32,7 +32,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// Returns POS Profiles for <paramref name="partnerId"/>\
         /// </summary>
         /// <param name="partnerId"></param>
-        Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerId(string partnerId);
+        Task<PosProfileDto> GetPosProfilesByPartnerId(string partnerId);
 
         /// <summary>
         /// Fetches POS profiles specified by search criteria

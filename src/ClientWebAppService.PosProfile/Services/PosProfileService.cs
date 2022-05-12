@@ -58,6 +58,8 @@ namespace ClientWebAppService.PosProfile.Services
 
             _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
 
+            await ValidatePosConfiguration(posProfileCreationDto);
+
             int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
 
             var posProfile = new Models.PosProfile
@@ -80,6 +82,26 @@ namespace ClientWebAppService.PosProfile.Services
                                      posProfile.PosConfiguration.Select(x =>
                                         new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)
                                      ));
+        }
+
+        private async Task ValidatePosConfiguration<T>(PosProfileCreationModel<T> posProfileCreationDto) where T: IPosCredentialsConfigurationBaseDto
+        {
+            VerifyHelper.NotEmpty(posProfileCreationDto.PartnerId, nameof(posProfileCreationDto.PartnerId));
+
+            var partnerId = posProfileCreationDto.PartnerId;
+            var existingPosProfile = await FindPosProfileByPartnerIdAsync(partnerId);
+            if (existingPosProfile != null)
+            {
+                VerifyHelper.NotNull(posProfileCreationDto.PosConfigurations, nameof(posProfileCreationDto.PosConfigurations));
+                var posType = posProfileCreationDto.PosConfigurations.PosType;
+                foreach (var config in existingPosProfile.PosCredentialsConfigurations)
+                {
+                    if (posType == config.PosType)
+                    {
+                        throw new Exception($"Pos Configuration already exists for pos type : {posType}");
+                    }
+                }
+            }
         }
 
         /// <inheritdoc cref="DeletePosProfileAndSecretsAsync(string)"/>
@@ -169,21 +191,21 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerId(string partnerId)
+        public async Task<PosProfileDto> GetPosProfilesByPartnerId(string partnerId)
         {
             _logger.LogInformation($"Getting POS profiles for partnerId: {partnerId}.");
 
             var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
 
-            var posProfiles = result.ToList();
+            var posProfile = result.FirstOrDefault();
 
-            if (!posProfiles.Any())
+            if (posProfile == null)
             {
                 throw new NotFoundException($"Pos profiles for partnerId: {partnerId} not found.");
             }
 
-            return posProfiles.Select(posProfile => new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
-                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId))));
+            return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
+                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)));
         }
 
         /// <inheritdoc cref="GetByMerchantId(string)" />
