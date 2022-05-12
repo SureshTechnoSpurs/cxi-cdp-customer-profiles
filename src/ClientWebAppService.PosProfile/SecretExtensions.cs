@@ -1,9 +1,11 @@
-﻿using ClientWebAppService.PosProfile.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using ClientWebAppService.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models.Create;
 using Newtonsoft.Json;
 
 namespace ClientWebAppService.PosProfile
 {
+    [ExcludeFromCodeCoverage]
     public static class SecretExtensions
     {
         public static string GetPosConfigurationSecretName(string partnerId, string posType)
