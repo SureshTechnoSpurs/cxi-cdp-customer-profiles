@@ -15,7 +15,7 @@ namespace ClientWebAppService.PosProfile.Tests
         public OmnivorePosCredentialsServiceTests()
         {
             _secretSetter = new Mock<ISecretSetter>();
-            _credentialsService = new OmnivorePosCredentialsService();
+            _credentialsService = new OmnivorePosCredentialsService(_secretSetter.Object);
         }
 
         private readonly OmnivorePosCredentialsService _credentialsService;
