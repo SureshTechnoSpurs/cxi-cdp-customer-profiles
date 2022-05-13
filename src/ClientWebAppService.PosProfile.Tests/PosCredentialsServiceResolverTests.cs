@@ -23,7 +23,7 @@ namespace ClientWebAppService.PosProfile.Tests
             var sp = serviceCollection.BuildServiceProvider();
             _resolver = new PosCredentialsServiceResolver(sp);
 
-            var service = _resolver.Resolve(new PosCredentialsConfigurationOmnivoreCreationDto("omnivore"));
+            var service = _resolver.Resolve(new PosCredentialsConfigurationOmnivoreCreationDto("omnivore", new List<string>()));
             Assert.IsType<OmnivorePosCredentialsService>(service);
         }
 
@@ -34,7 +34,7 @@ namespace ClientWebAppService.PosProfile.Tests
             var sp = serviceCollection.BuildServiceProvider();
             _resolver = new PosCredentialsServiceResolver(sp);
 
-            var ex = Assert.Throws<KeyNotFoundException>(() => _resolver.Resolve(new PosCredentialsConfigurationOmnivoreCreationDto("omnivore")));
+            var ex = Assert.Throws<KeyNotFoundException>(() => _resolver.Resolve(new PosCredentialsConfigurationOmnivoreCreationDto("omnivore", new List<string>())));
             Assert.Equal($"service not found for type {nameof(PosCredentialsConfigurationOmnivoreCreationDto)}", ex.Message);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Services.Credentials;
 using CXI.Contracts.PosProfile.Models.Create;
 using Xunit;
@@ -18,7 +19,7 @@ namespace ClientWebAppService.PosProfile.Tests
         public async Task Process_CorrectParamsPassed_CorrectResult()
         {
             var posType = "omnivore";
-            var result = await _credentialsService.Process("partnerId", new PosCredentialsConfigurationOmnivoreCreationDto(posType));
+            var result = await _credentialsService.Process("partnerId", new PosCredentialsConfigurationOmnivoreCreationDto(posType, new List<string>()));
             
             Assert.NotNull(result);
             Assert.Equal("omnivore", result.PosType);
