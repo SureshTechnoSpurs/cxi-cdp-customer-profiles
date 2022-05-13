@@ -330,7 +330,7 @@ namespace ClientWebAppService.PosProfile.Tests
             Func<Task> act = () => _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             // Assert
-            await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profiles for partnerId: {partnerId} not found.");
+            await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profile for partnerId: {partnerId} not found.");
         }
 
         [Fact]
