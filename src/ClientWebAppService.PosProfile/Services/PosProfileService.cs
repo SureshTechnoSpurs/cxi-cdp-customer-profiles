@@ -58,8 +58,6 @@ namespace ClientWebAppService.PosProfile.Services
 
             _logger.LogInformation($"Creating new Pos Profile for partnerId = {posProfileCreationDto.PartnerId}");
 
-            await ValidatePosConfiguration(posProfileCreationDto);
-
             int.TryParse(_configuration.GetDefaultHistoricalIngestPeriod(), out var defaultHistoricalIngestPeriod);
 
             var posProfile = new Models.PosProfile
@@ -74,7 +72,7 @@ namespace ClientWebAppService.PosProfile.Services
             ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(
                 await posCredentialsService.Process(posProfileCreationDto.PartnerId, posProfileCreationDto.PosConfigurations));
 
-            await _posProfileRepository.InsertOne(posProfile);
+            await ValidateAndUpdatePosConfiguration(posProfile);
 
             _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
 
@@ -84,24 +82,54 @@ namespace ClientWebAppService.PosProfile.Services
                                      ));
         }
 
-        private async Task ValidatePosConfiguration<T>(PosProfileCreationModel<T> posProfileCreationDto) where T: IPosCredentialsConfigurationBaseDto
+        private async Task ValidateAndUpdatePosConfiguration(Models.PosProfile posProfile)
         {
-            VerifyHelper.NotEmpty(posProfileCreationDto.PartnerId, nameof(posProfileCreationDto.PartnerId));
+            VerifyHelper.NotEmpty(posProfile.PartnerId, nameof(posProfile.PartnerId));
 
-            var partnerId = posProfileCreationDto.PartnerId;
+            var partnerId = posProfile.PartnerId;
             var existingPosProfile = await FindPosProfileByPartnerIdAsync(partnerId);
             if (existingPosProfile != null)
             {
-                VerifyHelper.NotNull(posProfileCreationDto.PosConfigurations, nameof(posProfileCreationDto.PosConfigurations));
-                var posType = posProfileCreationDto.PosConfigurations.PosType;
-                foreach (var config in existingPosProfile.PosCredentialsConfigurations)
+                VerifyHelper.NotNull(posProfile.PosConfiguration, nameof(posProfile.PosConfiguration));
+                var newPosConfiguration = posProfile.PosConfiguration.First();
+                var posType = newPosConfiguration.PosType;
+                var existingPosTypes = existingPosProfile.PosCredentialsConfigurations.Select(x => x.PosType).ToList();
+
+                if (existingPosTypes.Contains(posType))
                 {
-                    if (posType == config.PosType)
-                    {
-                        throw new Exception($"Pos Configuration already exists for pos type : {posType}");
-                    }
+                    throw new Exception($"Pos Configuration already exists for pos type : {posType}");
                 }
+                else
+                {
+                    await UpdatePosConfiguration(posProfile, existingPosProfile, newPosConfiguration);
+                }
+
             }
+            else
+            {
+                await _posProfileRepository.InsertOne(posProfile);
+            }
+        }
+
+        private async Task UpdatePosConfiguration(Models.PosProfile posProfile, PosProfileDto existingPosProfile, PosCredentialsConfiguration newConfiguration)
+        {
+            var newPosConfigurations = new List<PosCredentialsConfiguration>();
+            var partnerId = posProfile.PartnerId;
+
+            foreach (var configuration in existingPosProfile.PosCredentialsConfigurations)
+            {
+                newPosConfigurations.Add(new PosCredentialsConfiguration
+                {
+                    PosType = configuration.PosType,
+                    KeyVaultReference = configuration.KeyVaultReference,
+                    MerchantId = configuration.MerchantId
+
+                });
+            }
+
+            newPosConfigurations.Add(newConfiguration);
+            posProfile.PosConfiguration = newPosConfigurations;
+            await _posProfileRepository.UpdateAsync(partnerId, posProfile);
         }
 
         /// <inheritdoc cref="DeletePosProfileAndSecretsAsync(string)"/>
@@ -193,7 +221,7 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc/>
         public async Task<PosProfileDto> GetPosProfileByPartnerId(string partnerId)
         {
-            _logger.LogInformation($"Getting POS profiles for partnerId: {partnerId}.");
+            _logger.LogInformation($"Getting POS profile for partnerId: {partnerId}.");
 
             var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
 
@@ -201,7 +229,7 @@ namespace ClientWebAppService.PosProfile.Services
 
             if (posProfile == null)
             {
-                throw new NotFoundException($"Pos profiles for partnerId: {partnerId} not found.");
+                throw new NotFoundException($"Pos profile for partnerId: {partnerId} not found.");
             }
 
             return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
