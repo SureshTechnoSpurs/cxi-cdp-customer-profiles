@@ -66,7 +66,7 @@ namespace ClientWebAppService.PosProfile.Services
                 PosConfiguration = new List<PosCredentialsConfiguration>(),
                 HistoricalIngestDaysPeriod = defaultHistoricalIngestPeriod
             };
-
+                
             var posCredentialsService = _credentialsServiceResolver.Resolve(posProfileCreationDto.PosConfigurations);
 
             ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(
