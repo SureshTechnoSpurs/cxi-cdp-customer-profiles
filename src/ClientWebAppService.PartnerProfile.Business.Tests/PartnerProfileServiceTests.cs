@@ -203,5 +203,24 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
         }
+
+        [Fact]
+        public async Task UpdatePartnerSubscriptionAsync_CorrectParametersPassed_SuccessfulResult()
+        {
+            _repositoryMock
+                .Setup(x => x.UpdateSubscriptionAsync(It.IsAny<string>(), It.IsAny<Subscription>()))
+                .Returns(Task.CompletedTask);
+
+            var updateModel = new SubscriptionUpdateModel 
+            {
+                LastBilledDate = DateTime.UtcNow,
+                State = SubscriptionState.Active,
+                SubscriptionId = 1
+            };
+
+            var invocation = _service.Invoking(x => x.UpdatePartnerSubscriptionAsync("testId", updateModel));
+
+            await invocation.Should().NotThrowAsync();
+        }
     }
 }
