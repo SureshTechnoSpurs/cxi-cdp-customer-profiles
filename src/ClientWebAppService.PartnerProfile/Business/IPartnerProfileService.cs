@@ -49,5 +49,13 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="pageSize"></param>
         /// <returns></returns>
         Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize);
+
+        /// <summary>
+        /// Update PartnerSubscription Async
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task UpdatePartnerSubscriptionAsync(string partnerId, SubscriptionUpdateModel model);
     }
 }
