@@ -56,7 +56,7 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
             VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
 
-            var paginatedResult = 
+            var paginatedResult =
                 await _partnerProfileService.GetPartnerProfilesPaginatedAsync(pageIndex.Value, pageSize.Value);
 
             return Ok(paginatedResult);
@@ -102,6 +102,19 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             var result = await _partnerProfileService.SearchPartnerIdsByActiveStateAsync(active);
 
             return Ok(result);
+        }
+
+        [HttpPut("{partnerId}/subscription")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> UpdateSubscription(
+            [FromRoute] string partnerId,
+            [FromBody] SubscriptionUpdateModel model)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotNull(model, nameof(model));
+
+            await _partnerProfileService.UpdatePartnerSubscriptionAsync(partnerId, model);
+            return Ok();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using CXI.Common.MongoDb;
+﻿using CXI.Common.Helpers;
+using CXI.Common.MongoDb;
+using CXI.Contracts.PartnerProfile.Models;
 using GL.MSA.Core.NoSql;
 using GL.MSA.Core.ResiliencyPolicy;
 using MongoDB.Bson;
@@ -45,6 +47,19 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
             var policy = GetDefaultPolicy();
 
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <inheritdoc cref="UpdateSubscriptionAsync(string, Subscription)"/>
+        public Task UpdateSubscriptionAsync(string partnerId, Subscription subscription)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotNull(subscription, nameof(subscription));
+
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+            var updateStrategy = Builders<Partner>.Update.Set(x => x.Subscription, subscription);
+
+            var policy = GetDefaultPolicy();
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
         }
     }

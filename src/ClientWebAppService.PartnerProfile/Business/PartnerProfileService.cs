@@ -146,6 +146,21 @@ namespace ClientWebAppService.PartnerProfile.Business
             }
         }
 
+        /// <inheritdoc cref="UpdatePartnerSubscriptionAsync(string, SubscriptionUpdateModel)"/>
+        public async Task UpdatePartnerSubscriptionAsync(string partnerId, SubscriptionUpdateModel model)
+        {
+            VerifyHelper.NotNull(model, nameof(model));
+
+            var subscription = new Subscription 
+            {
+                SubscriptionId = model.SubscriptionId.ToString(),
+                State = model.State,
+                LastBilledDate = model.LastBilledDate
+            };
+
+            await _partnerRepository.UpdateSubscriptionAsync(partnerId, subscription);
+        }
+
         ///<inheritdoc/>
         public async Task<IEnumerable<PosTypePartnerDto>> GetActivePartnersByPosTypeAsync(string posType)
         {
