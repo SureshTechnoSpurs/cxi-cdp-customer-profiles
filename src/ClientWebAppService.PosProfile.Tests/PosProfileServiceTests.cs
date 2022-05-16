@@ -60,10 +60,26 @@ namespace ClientWebAppService.PosProfile.Tests
                     "Square", "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
             };
 
+            var posProfile = new Models.PosProfile
+            {
+                PartnerId = "partnerId",
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration
+                    {
+                        MerchantId = "merchantId",
+                        PosType = "pssTpes",
+                        KeyVaultReference = "reference"
+                    }
+                }
+            };
+            
             var service = new Mock<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
             service.Setup(x => x.Process("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
                 () => new PosCredentialsConfiguration() { PosType = "Square", MerchantId = "merchantId" });
             _posCredentialsServiceResolver.Setup(x => x.Resolve(creationDto.PosConfigurations)).Returns(service.Object);
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+               .ReturnsAsync(posProfile);
 
             var invocation = _posProfileService.Invoking(x => x.CreatePosProfileAndSecretsAsync(creationDto));
 
@@ -311,10 +327,10 @@ namespace ClientWebAppService.PosProfile.Tests
             var partnerId = "partnerId";
 
             // Act
-            Func<Task> act = () => _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            Func<Task> act = () => _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             // Assert
-            await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profiles for partnerId: {partnerId} not found.");
+            await act.Should().ThrowAsync<NotFoundException>().WithMessage($"Pos profile for partnerId: {partnerId} not found.");
         }
 
         [Fact]
@@ -341,10 +357,10 @@ namespace ClientWebAppService.PosProfile.Tests
                     });
 
             // Act
-            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            var result = await _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             // Assert
-            result.Should().AllBeOfType<PosProfileDto>();
+            result.Should().BeOfType<PosProfileDto>();
         }
 
 
@@ -427,6 +443,43 @@ namespace ClientWebAppService.PosProfile.Tests
 
             result.Should().NotBeEmpty();
             result.First().PartnerId.Should().Be(partnerId);
+        }
+
+        [Fact]
+        public async Task CreatePosProfileAsync_PassedSamePostType_ReturnValidationError()
+        {
+            var posType = "Square";
+            var creationDto = new PosProfileCreationModel<PosCredentialsConfigurationSquareCreationDto>()
+            {
+                PartnerId = "partnerId",
+                PosConfigurations = new PosCredentialsConfigurationSquareCreationDto(
+                    posType, "AccessToken", "RefreshToken", DateTime.Today, "merchantId")
+            };
+
+            var posProfile = new Models.PosProfile
+            {
+                PartnerId = "partnerId",
+                PosConfiguration = new List<PosCredentialsConfiguration>
+                {
+                    new PosCredentialsConfiguration
+                    {
+                        MerchantId = "merchantId",
+                        PosType = posType,
+                        KeyVaultReference = "reference"
+                    }
+                }
+            };
+
+            var service = new Mock<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
+            service.Setup(x => x.Process("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
+                () => new PosCredentialsConfiguration() { PosType = "Square", MerchantId = "merchantId" });
+
+            _posCredentialsServiceResolver.Setup(x => x.Resolve(creationDto.PosConfigurations)).Returns(service.Object);
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+               .ReturnsAsync(posProfile);
+
+            var invocation = _posProfileService.Invoking(x => x.CreatePosProfileAndSecretsAsync(creationDto));
+            await invocation.Should().ThrowAsync<Exception>().WithMessage($"Pos Configuration already exists for pos type : {posType}");
         }
     }
 }

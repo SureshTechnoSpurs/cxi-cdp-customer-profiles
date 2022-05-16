@@ -72,7 +72,7 @@ namespace ClientWebAppService.PosProfile.Services
             ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(
                 await posCredentialsService.Process(posProfileCreationDto.PartnerId, posProfileCreationDto.PosConfigurations));
 
-            await _posProfileRepository.InsertOne(posProfile);
+            await ValidateAndUpdatePosConfiguration(posProfile);
 
             _logger.LogInformation($"Successfully created pos profiler for partnerId = {posProfileCreationDto.PartnerId}");
 
@@ -80,6 +80,56 @@ namespace ClientWebAppService.PosProfile.Services
                                      posProfile.PosConfiguration.Select(x =>
                                         new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)
                                      ));
+        }
+
+        private async Task ValidateAndUpdatePosConfiguration(Models.PosProfile posProfile)
+        {
+            VerifyHelper.NotEmpty(posProfile.PartnerId, nameof(posProfile.PartnerId));
+
+            var partnerId = posProfile.PartnerId;
+            var existingPosProfile = await FindPosProfileByPartnerIdAsync(partnerId);
+            if (existingPosProfile != null)
+            {
+                VerifyHelper.NotNull(posProfile.PosConfiguration, nameof(posProfile.PosConfiguration));
+                var newPosConfiguration = posProfile.PosConfiguration.First();
+                var posType = newPosConfiguration.PosType;
+                var existingPosTypes = existingPosProfile.PosCredentialsConfigurations.Select(x => x.PosType).ToList();
+
+                if (existingPosTypes.Contains(posType))
+                {
+                    throw new Exception($"Pos Configuration already exists for pos type : {posType}");
+                }
+                else
+                {
+                    await UpdatePosConfiguration(posProfile, existingPosProfile, newPosConfiguration);
+                }
+
+            }
+            else
+            {
+                await _posProfileRepository.InsertOne(posProfile);
+            }
+        }
+
+        private async Task UpdatePosConfiguration(Models.PosProfile posProfile, PosProfileDto existingPosProfile, PosCredentialsConfiguration newConfiguration)
+        {
+            var newPosConfigurations = new List<PosCredentialsConfiguration>();
+            var partnerId = posProfile.PartnerId;
+
+            foreach (var configuration in existingPosProfile.PosCredentialsConfigurations)
+            {
+                newPosConfigurations.Add(new PosCredentialsConfiguration
+                {
+                    PosType = configuration.PosType,
+                    KeyVaultReference = configuration.KeyVaultReference,
+                    MerchantId = configuration.MerchantId
+
+                });
+            }
+
+            newPosConfigurations.Add(newConfiguration);
+            posProfile.PosConfiguration = newPosConfigurations;
+            await _posProfileRepository.UpdateAsync(partnerId, posProfile);
         }
 
         /// <inheritdoc cref="DeletePosProfileAndSecretsAsync(string)"/>
@@ -169,21 +219,21 @@ namespace ClientWebAppService.PosProfile.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<PosProfileDto>> GetPosProfilesByPartnerId(string partnerId)
+        public async Task<PosProfileDto> GetPosProfileByPartnerId(string partnerId)
         {
-            _logger.LogInformation($"Getting POS profiles for partnerId: {partnerId}.");
+            _logger.LogInformation($"Getting POS profile for partnerId: {partnerId}.");
 
             var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
 
-            var posProfiles = result.ToList();
+            var posProfile = result.FirstOrDefault();
 
-            if (!posProfiles.Any())
+            if (posProfile == null)
             {
-                throw new NotFoundException($"Pos profiles for partnerId: {partnerId} not found.");
+                throw new NotFoundException($"Pos profile for partnerId: {partnerId} not found.");
             }
 
-            return posProfiles.Select(posProfile => new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
-                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId))));
+            return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
+                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)));
         }
 
         /// <inheritdoc cref="GetByMerchantId(string)" />

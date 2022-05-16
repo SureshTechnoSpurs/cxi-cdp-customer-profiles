@@ -123,11 +123,11 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerId"></param>
         [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpGet("m2m/{partnerId}/profiles")]
+        [HttpGet("m2m/{partnerId}/profile")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
-        public async Task<IActionResult> M2MGetPosProfiles([FromRoute] string partnerId)
+        public async Task<IActionResult> M2MGetPosProfile([FromRoute] string partnerId)
         {
-            var result = await _posProfileService.GetPosProfilesByPartnerId(partnerId);
+            var result = await _posProfileService.GetPosProfileByPartnerId(partnerId);
 
             return Ok(result);
         }
