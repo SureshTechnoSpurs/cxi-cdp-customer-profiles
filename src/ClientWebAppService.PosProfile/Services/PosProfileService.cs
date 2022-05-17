@@ -209,13 +209,17 @@ namespace ClientWebAppService.PosProfile.Services
         {
             _logger.LogInformation($"Find pos profile for partnerId = {partnerId}");
 
-            var posProfile = await _posProfileRepository.FindOne(pp => pp.PartnerId != null && pp.PartnerId.Equals(partnerId));
+            var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
 
-            return posProfile != null ? new PosProfileDto(posProfile.PartnerId,
-                                                          posProfile.PosConfiguration.Select(x =>
-                                                             new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)))
-                : throw new NotFoundException($"PosProfile with partnerId:{partnerId} not found.")
-                                      ;
+            var posProfile = result.FirstOrDefault();
+
+            if (posProfile == null)
+            {
+                return null;
+            }
+
+            return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
+                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)));
         }
 
         /// <inheritdoc/>
@@ -225,15 +229,14 @@ namespace ClientWebAppService.PosProfile.Services
 
             var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
 
-            var posProfile = result.FirstOrDefault();
+            var posProfile = await FindPosProfileByPartnerIdAsync(partnerId);
 
             if (posProfile == null)
             {
                 throw new NotFoundException($"Pos profile for partnerId: {partnerId} not found.");
             }
 
-            return new PosProfileDto(posProfile.PartnerId, posProfile.PosConfiguration.Select(x =>
-                    new PosCredentialsConfigurationDto(x.PosType, x.KeyVaultReference, x.MerchantId)));
+            return posProfile;
         }
 
         /// <inheritdoc cref="GetByMerchantId(string)" />
