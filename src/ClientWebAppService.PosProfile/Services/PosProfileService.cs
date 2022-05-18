@@ -227,8 +227,6 @@ namespace ClientWebAppService.PosProfile.Services
         {
             _logger.LogInformation($"Getting POS profile for partnerId: {partnerId}.");
 
-            var result = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
-
             var posProfile = await FindPosProfileByPartnerIdAsync(partnerId);
 
             if (posProfile == null)
