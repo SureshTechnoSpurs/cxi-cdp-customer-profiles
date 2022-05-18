@@ -43,7 +43,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> Get([FromRoute] string partnerId)
         {
-            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(partnerId);
+            var posProfileGetResult = await _posProfileService.GetPosProfileByPartnerId(partnerId);
             return Ok(posProfileGetResult);
         }
 
@@ -114,7 +114,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGet([FromRoute] string posProfileId)
         {
-            var posProfileGetResult = await _posProfileService.FindPosProfileByPartnerIdAsync(posProfileId);
+            var posProfileGetResult = await _posProfileService.GetPosProfileByPartnerId(posProfileId);
             return Ok(posProfileGetResult);
         }
 
