@@ -1,4 +1,5 @@
 ﻿using ClientWebAppService.UserProfile.Business;
+using ClientWebAppService.UserProfile.Core;
 using CXI.Common.ExceptionHandling;
 using CXI.Contracts.UserProfile.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +32,17 @@ namespace ClientWebAppService.UserProfile.Controllers
         [ProducesResponseType(typeof(UserProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
         public async Task<IActionResult> GetByEmail([FromRoute] string email)
+        {
+            var result = await _userProfileService.GetByEmailAsync(email);
+
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/{email}")]
+        [ProducesResponseType(typeof(UserProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetByEmailM2M([FromRoute] string email)
         {
             var result = await _userProfileService.GetByEmailAsync(email);
 

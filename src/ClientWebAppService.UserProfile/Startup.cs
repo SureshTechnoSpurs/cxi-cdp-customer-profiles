@@ -1,28 +1,17 @@
 using CXI.Common.ExceptionHandling;
-using GL.MSA.Core.HealthCheck.Concrete;
-using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
 using GL.MSA.Core.HealthCheck.HealthCheckExtentions;
 using CXI.Common.ApplicationInsights;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using CXI.Common.MongoDb.Extensions;
 using System;
-using ClientWebAppService.UserProfile.DataAccess;
 using System.Diagnostics.CodeAnalysis;
-using ClientWebAppService.UserProfile.Business;
 using Microsoft.Extensions.Logging;
-using FluentValidation.AspNetCore;
-using CXI.Common.MessageBrokers.Extentions;
-using Microsoft.AspNetCore.Http;
-using ClientWebAppService.UserProfile.Core;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using ClientWebAppService.UserProfile.Core.Extensions;
 
 namespace ClientWebAppService.UserProfile
 {
@@ -39,43 +28,7 @@ namespace ClientWebAppService.UserProfile
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(
-                         configureJwtBearerOptions:
-                             options =>
-                             {
-                                 Configuration.Bind("AzureAdB2C", options);
-                                 options.TokenValidationParameters.NameClaimType = "name";
-                             },
-                        configureMicrosoftIdentityOptions:
-                             options => { Configuration.Bind("AzureAdB2C", options); });
-
-            services.Configure<AdB2CInvitationOptions>(Configuration.GetSection("AzureAdB2C"));
-            services.Configure<AdB2CMicrosoftGraphOptions>(Configuration.GetSection("AzureAdB2C"));
-
-            services.AddControllers()
-                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
-
-            services.AddTraceExtentionDispatcher(Configuration)
-                    .AddHealthChecks()
-                    .AddCheck<LivenessHealthCheck>(name: "live",
-                                                 failureStatus: HealthStatus.Unhealthy,
-                                                 tags: new[] { "live" })
-                  .AddMongoDb(mongodbConnectionString: Configuration["Mongo:ConnectionString"],
-                              name: "MongoDB",
-                              failureStatus: HealthStatus.Unhealthy,
-                              tags: new string[] { "mongoDB", "ready" });
-
-            services.AddCxiMongoDb()
-                    .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
-                    .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
-                    .AddTransient<IUserProfileRepository, UserProfileRepository>()
-                    .AddTransient<IUserProfileService, UserProfileService>()
-                    .AddTransient<IEmailService, EmailService>()
-                    .AddTransient<IAzureADB2CDirectoryManager, AzureADB2CDirectoryManager>()
-                    .AddTransient<IAzureADB2CDirectoryRepository, AzureADB2CDirectoryRepository>();
-
-            services.AddProducer(Configuration);
+            services.RegisterService(Configuration, new LoggerFactory().CreateLogger<Startup>());
 
             services.AddApiVersioning(options =>
             {
