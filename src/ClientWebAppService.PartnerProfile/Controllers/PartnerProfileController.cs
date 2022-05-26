@@ -62,6 +62,16 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok(paginatedResult);
         }
 
+        [HttpPost("{partnerId}/complete")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> CompleteOnBoarding(string partnerId)
+        {
+            await _partnerProfileService.CompletePartnerOnBoardingAsync(partnerId);
+
+            return Accepted();
+        }
+
         [HttpPost]
         [ProducesResponseType(typeof(PartnerProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]

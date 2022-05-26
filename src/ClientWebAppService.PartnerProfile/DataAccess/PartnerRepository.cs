@@ -27,6 +27,17 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
             _collection.Indexes.CreateOne(uniqueAddressIndexDefinition);
         }
 
+        ///<inheritdoc/>
+        public Task CompletePartnerOnBoarding(string partnerId)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+            var updateStrategy = Builders<Partner>.Update.Set(x => x.IsOnBoarded, true);
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
         /// <summary>
         /// Update partner with <paramref name="partnerId"/> by new values from <paramref name="updatedPartner"/>
         /// </summary>

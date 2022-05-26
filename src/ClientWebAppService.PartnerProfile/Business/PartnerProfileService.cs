@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using ValidationException = CXI.Common.ExceptionHandling.Primitives.ValidationException;
 
 namespace ClientWebAppService.PartnerProfile.Business
@@ -162,6 +163,23 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         ///<inheritdoc/>
+        public async Task CompletePartnerOnBoardingAsync(string partnerId)
+        {
+            _logger.LogInformation($"Finalizing on-boarding for the partner with Id {partnerId}.");
+
+            var partner = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            if (partner is null)
+            {
+                throw new NotFoundException($"PartnerProfile with id: {partnerId} not found.");
+            }
+
+            await _partnerRepository.CompletePartnerOnBoarding(partnerId);
+
+            _logger.LogInformation($"Partner with Id {partnerId} was successfully on-boarded.");
+        }
+
+        ///<inheritdoc/>
         public async Task<IEnumerable<PosTypePartnerDto>> GetActivePartnersByPosTypeAsync(string posType)
         {
             if (string.IsNullOrWhiteSpace(posType))
@@ -183,7 +201,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription, partner.Id.CreationTime);
+                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
