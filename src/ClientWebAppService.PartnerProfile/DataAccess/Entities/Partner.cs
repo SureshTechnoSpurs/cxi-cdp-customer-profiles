@@ -39,6 +39,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         [BsonElement("is_active")]
         public bool IsActive { get; set; }
 
+        [BsonElement("is_on_boarded")]
+        public bool IsOnBoarded { get; set; }
+
         [BsonElement("subscription")]
         public Subscription Subscription { get; set; } = new Subscription();
     }

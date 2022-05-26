@@ -9,6 +9,13 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
     public interface IPartnerRepository :
         IBaseMongoRepository<Partner, ObjectId>
     {
+        /// <summary>
+        /// Complete partner on-boarding 
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        Task CompletePartnerOnBoarding(string partnerId);
+
         Task UpdateAsync(string partnerId, Partner updatedPartner);
 
         /// <summary>
