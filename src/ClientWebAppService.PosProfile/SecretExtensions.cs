@@ -10,7 +10,7 @@ namespace ClientWebAppService.PosProfile
     {
         public static string GetPosConfigurationSecretName(string partnerId, string posType)
         {
-            return $"{partnerId}-{posType}";
+            return $"{partnerId}-{posType.ToLower()}";
         }
 
         public static (string keyVaultSecretName, string keyVaultSecretValue) ComposeSecretPayloadForDataCollectService(

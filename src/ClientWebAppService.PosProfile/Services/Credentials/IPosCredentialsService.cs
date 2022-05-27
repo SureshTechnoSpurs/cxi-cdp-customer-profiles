@@ -17,6 +17,6 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
         /// <param name="partnerId"></param>
         /// <param name="posConfigurations"></param>
         /// <returns></returns>
-        public Task<PosCredentialsConfiguration> Process(string partnerId, T posConfigurations);
+        public Task<PosCredentialsConfiguration> OnboardingProcess(string partnerId, T posConfigurations);
     }
 }

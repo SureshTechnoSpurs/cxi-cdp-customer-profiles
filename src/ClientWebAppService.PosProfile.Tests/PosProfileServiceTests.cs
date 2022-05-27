@@ -32,6 +32,7 @@ namespace ClientWebAppService.PosProfile.Tests
             _loggerMock = new Mock<ILogger<PosProfileService>>();
             _secretClientMock = new Mock<ISecretClient>();
             _posCredentialsServiceResolver = new Mock<IPosCredentialsServiceResolver>();
+            _squareCredentialsOffboardingService = new Mock<IPosCredentialsOffboardingService>();
 
             _posProfileService = new PosProfileService(
                 _posProfileRepositoryMock.Object,
@@ -49,6 +50,7 @@ namespace ClientWebAppService.PosProfile.Tests
         private readonly Mock<Microsoft.Extensions.Configuration.IConfiguration> _configurationMock;
         private readonly Mock<ISecretClient> _secretClientMock;
         private readonly Mock<IPosCredentialsServiceResolver> _posCredentialsServiceResolver;
+        private readonly Mock<IPosCredentialsOffboardingService> _squareCredentialsOffboardingService;
 
         [Fact]
         public async Task CreatePosProfileAsync_CorrectParametersPassed_SuccessfulResultReturned()
@@ -75,7 +77,7 @@ namespace ClientWebAppService.PosProfile.Tests
             };
             
             var service = new Mock<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
-            service.Setup(x => x.Process("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
+            service.Setup(x => x.OnboardingProcess("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
                 () => new PosCredentialsConfiguration() { PosType = "Square", MerchantId = "merchantId" });
             _posCredentialsServiceResolver.Setup(x => x.Resolve(creationDto.PosConfigurations)).Returns(service.Object);
             _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
@@ -90,12 +92,17 @@ namespace ClientWebAppService.PosProfile.Tests
         public async Task DeletePosProfileAndSecretsAsync_PosProfilesNotFound_Success()
         {
             var partnerId = "test-partner-id";
+            var posType = "square";
+            var service = new Mock<IPosCredentialsOffboardingService>();
 
             _posProfileRepositoryMock
                 .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
                 .ReturnsAsync(new List<Models.PosProfile>());
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            _posCredentialsServiceResolver.Setup(x => x.ResolveOffboardingService(posType))
+                .Returns(service.Object);
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
 
             _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Never);
             _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Never);
@@ -104,31 +111,69 @@ namespace ClientWebAppService.PosProfile.Tests
         [Fact]
         public async Task DeletePosProfileAndSecretsAsync_RemovedSecretsAndPosProfile_Success()
         {
+            var service = new Mock<IPosCredentialsOffboardingService>();
             var partnerId = "test-partner-id";
+            var posType = "square";
             var posProfile = new Models.PosProfile
             {
                 Id = new ObjectId(),
                 PartnerId = partnerId,
                 PosConfiguration = new List<PosCredentialsConfiguration>
                 {
-                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = "square" }
+                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = posType }
                 }
             };
+
+            _posCredentialsServiceResolver.Setup(x => x.ResolveOffboardingService(posType))
+                .Returns(service.Object);
 
             _posProfileRepositoryMock
                 .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
                 .ReturnsAsync(new List<Models.PosProfile> { posProfile });
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
 
-            _secretClientMock.Verify(x => x.DeleteSecretAsync(It.IsAny<string>()), Times.Exactly(2));
             _posProfileRepositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()), Times.Once);
         }
 
         [Fact]
+        public async Task DeletePosProfileAndSecretsAsync_UpdatedPosProfile_Success()
+        {
+            var service = new Mock<IPosCredentialsOffboardingService>();
+            var partnerId = "test-partner-id";
+            var posType = "square";
+            var posType2 = "omnivore";
+            var posConfiguration = new List<PosCredentialsConfiguration>
+            {
+                new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = posType },
+                new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = posType2 }
+            };
+            var posProfile = new Models.PosProfile
+            {
+                Id = new ObjectId(),
+                PartnerId = partnerId,
+                PosConfiguration = posConfiguration
+            };
+
+            _posCredentialsServiceResolver.Setup(x => x.ResolveOffboardingService(posType))
+                .Returns(service.Object);
+
+            _posProfileRepositoryMock
+                .Setup(x => x.FilterBy(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()))
+                .ReturnsAsync(new List<Models.PosProfile> { posProfile });
+
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
+
+            posProfile.PosConfiguration = posConfiguration.Where(x => !x.PosType.Equals(posType));
+
+            _posProfileRepositoryMock.Verify(x => x.UpdateAsync(partnerId, posProfile), Times.Once);
+        }
+
+        [Fact(Skip = "Obsolete due to transfer logic to another service")]
         public async Task DeletePosProfileAndSecretsAsync_SecretNotFound_RequestFailedExceptionThrown()
         {
             var partnerId = "test-partner-id";
+            var posType = "square";
             var expectedMessage = $"Secret was not found in key vault for ${partnerId}";
             var exception = new RequestFailedException(1, expectedMessage, SecretNotFoundErrorCode, null);
             var posProfile = new Models.PosProfile
@@ -137,7 +182,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 PartnerId = partnerId,
                 PosConfiguration = new List<PosCredentialsConfiguration>
                 {
-                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = "square" }
+                    new PosCredentialsConfiguration { KeyVaultReference = "ref", PosType = posType }
                 }
             };
 
@@ -149,7 +194,7 @@ namespace ClientWebAppService.PosProfile.Tests
                 .Setup(x => x.DeleteSecretAsync(It.IsAny<string>()))
                 .Throws(exception);
 
-            await Assert.ThrowsAsync<RequestFailedException>(async () => await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId));
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType));
 
             _loggerMock.Verify(
                 x => x.Log(
@@ -471,7 +516,7 @@ namespace ClientWebAppService.PosProfile.Tests
             };
 
             var service = new Mock<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
-            service.Setup(x => x.Process("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
+            service.Setup(x => x.OnboardingProcess("partnerId", creationDto.PosConfigurations)).ReturnsAsync(
                 () => new PosCredentialsConfiguration() { PosType = "Square", MerchantId = "merchantId" });
 
             _posCredentialsServiceResolver.Setup(x => x.Resolve(creationDto.PosConfigurations)).Returns(service.Object);

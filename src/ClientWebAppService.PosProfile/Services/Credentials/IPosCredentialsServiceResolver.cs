@@ -6,5 +6,7 @@
     public interface IPosCredentialsServiceResolver
     {
         IPosCredentialsService<T> Resolve<T>(T _);
+
+        IPosCredentialsOffboardingService ResolveOffboardingService(string posType);
     }
 }

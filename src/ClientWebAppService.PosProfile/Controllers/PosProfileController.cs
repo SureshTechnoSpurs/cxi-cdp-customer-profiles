@@ -80,17 +80,19 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
-        /// DeleteByPartnerId
+        /// DeleteByPartnerId and posType
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [HttpDelete("partnerId/{partnerId}")]
+        [Authorize]
+        [HttpDelete("partnerId/{partnerId}/posType/{posType}")]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId, [FromQuery]string posType)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotEmpty(posType, nameof(posType));
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
             return Ok();
         }
 
@@ -148,13 +150,14 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpDelete("m2m/partnerId/{partnerId}")]
+        [HttpDelete("m2m/partnerId/{partnerId}/posType/{posType}")]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> M2mDeleteByPartnerId([FromRoute] string partnerId)
+        public async Task<IActionResult> M2mDeleteByPartnerId([FromRoute] string partnerId, [FromRoute] string posType)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotEmpty(posType, nameof(posType));
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
             return Ok();
         }
 
