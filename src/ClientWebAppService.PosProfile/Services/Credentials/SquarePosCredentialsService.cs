@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure;
 using ClientWebAppService.PosProfile.Models;
 using CXI.Common.Security.Secrets;
 using CXI.Contracts.PosProfile.Models.Create;
@@ -12,9 +13,11 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
     /// <summary>
     ///     Square realization for pos credentials service
     /// </summary>
-    public class SquarePosCredentialsService : IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>
+    public class SquarePosCredentialsService : IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>, IPosCredentialsOffboardingService
     {
         private const string AuthenticationScheme = "Bearer";
+        private const string SquarePosType = "square";
+        private const string SecretNotFoundErrorCode = "SecretNotFound";
 
         private readonly ISecretSetter _secretSetter;
         private readonly ISecretClient _secretClient;
@@ -27,13 +30,30 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
             _logger = logger;
         }
 
+        public async Task OffboardingProcess(string partnerId)
+        {
+            try
+            {
+                var posConfigurationSecretName = GetPosConfigurationSecretName(partnerId, SquarePosType);
+                await _secretClient.DeleteSecretAsync(posConfigurationSecretName);
+
+                var posConfigurationDataIngestionSecretName = GetPosConfigurationDataIngestionSecretName(partnerId, SquarePosType);
+                await _secretClient.DeleteSecretAsync(posConfigurationDataIngestionSecretName);
+            }
+            catch (RequestFailedException ex) when (ex.ErrorCode == SecretNotFoundErrorCode)
+            {
+                _logger.LogError(ex, $"Secret was not found in key vault for ${partnerId}");
+                throw;
+            }
+        }
+
         /// <summary>
         ///     Convert square create dto to PosCredentialsConfiguration and save bearer tokens to key-vault
         /// </summary>
         /// <param name="partnerId"></param>
         /// <param name="posConfigurationDto"></param>
         /// <returns></returns>
-        public async Task<PosCredentialsConfiguration> Process(string partnerId, PosCredentialsConfigurationSquareCreationDto posConfigurationDto)
+        public async Task<PosCredentialsConfiguration> OnboardingProcess(string partnerId, PosCredentialsConfigurationSquareCreationDto posConfigurationDto)
         {
             var savedSecretNames = new List<string>();
             try
@@ -72,6 +92,16 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
 
                 throw;
             }
+        }
+
+        private string GetPosConfigurationSecretName(string partnerId, string posType)
+        {
+            return $"{partnerId}-{posType}";
+        }
+
+        private string GetPosConfigurationDataIngestionSecretName(string partnerId, string posType)
+        {
+            return $"di-{posType}-{partnerId}-tokeninfo";
         }
     }
 }

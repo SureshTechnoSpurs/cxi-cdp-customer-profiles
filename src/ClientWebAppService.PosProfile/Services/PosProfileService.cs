@@ -1,5 +1,4 @@
-﻿using Azure;
-using ClientWebAppService.PosProfile.DataAccess;
+﻿using ClientWebAppService.PosProfile.DataAccess;
 using ClientWebAppService.PosProfile.Models;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
@@ -21,8 +20,6 @@ namespace ClientWebAppService.PosProfile.Services
     /// <inheritdoc cref="IPosProfileService"/>
     public class PosProfileService : IPosProfileService
     {
-        private const string SecretNotFoundErrorCode = "SecretNotFound";
-
         private readonly IPosProfileRepository _posProfileRepository;
         private readonly ILogger<PosProfileService> _logger;
         private readonly IConfiguration _configuration;
@@ -70,7 +67,7 @@ namespace ClientWebAppService.PosProfile.Services
             var posCredentialsService = _credentialsServiceResolver.Resolve(posProfileCreationDto.PosConfigurations);
 
             ((List<PosCredentialsConfiguration>)posProfile.PosConfiguration).Add(
-                await posCredentialsService.Process(posProfileCreationDto.PartnerId, posProfileCreationDto.PosConfigurations));
+                await posCredentialsService.OnboardingProcess(posProfileCreationDto.PartnerId, posProfileCreationDto.PosConfigurations));
 
             await ValidateAndUpdatePosConfiguration(posProfile);
 
@@ -132,42 +129,37 @@ namespace ClientWebAppService.PosProfile.Services
             await _posProfileRepository.UpdateAsync(partnerId, posProfile);
         }
 
-        /// <inheritdoc cref="DeletePosProfileAndSecretsAsync(string)"/>
-        public async Task DeletePosProfileAndSecretsAsync(string partnerId)
+        /// <inheritdoc cref="DeletePosProfileAndSecretsAsync(string, string)"/>
+        public async Task DeletePosProfileAndSecretsAsync(string partnerId, string posType)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotEmpty(posType, nameof(posType));
 
-            _logger.LogInformation($"Removing PosProfile and secrets for partnerId = {partnerId}");
+            _logger.LogInformation($"Removing PosProfile and secrets for partnerId = {partnerId} and posType = {posType}");
 
             try
             {
-                var posProfiles = await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId);
-                if (!posProfiles.Any())
+                var posProfile = (await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId)).FirstOrDefault();
+                if (posProfile == null)
                 {
                     return;
                 }
 
-                foreach (var posProfile in posProfiles)
+                var posCredentialsService = _credentialsServiceResolver.ResolveOffboardingService(posType);
+                await posCredentialsService.OffboardingProcess(partnerId);
+
+                if (posProfile.PosConfiguration == null ||
+                    posProfile.PosConfiguration.All(c => c.PosType.Equals(posType, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (posProfile.PosConfiguration != null)
-                    {
-                        foreach (PosCredentialsConfiguration posCredentialsConfiguration in posProfile.PosConfiguration)
-                        {
-                            var posConfigurationSecretName = GetPosConfigurationSecretName(partnerId, posCredentialsConfiguration.PosType);
-                            await _secretClient.DeleteSecretAsync(posConfigurationSecretName);
-
-                            var posConfigurationDataIngestionSecretName = GetPosConfigurationDataIngestionSecretName(partnerId, posCredentialsConfiguration.PosType);
-                            await _secretClient.DeleteSecretAsync(posConfigurationDataIngestionSecretName);
-                        }
-                    }
+                    await _posProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
                 }
+                else
+                {
+                    posProfile.PosConfiguration =
+                        posProfile.PosConfiguration.Where(c => !c.PosType.Equals(posType, StringComparison.OrdinalIgnoreCase));
 
-                await _posProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
-            }
-            catch (RequestFailedException ex) when (ex.ErrorCode == SecretNotFoundErrorCode)
-            {
-                _logger.LogError(ex, $"Secret was not found in key vault for ${partnerId}");
-                throw;
+                    await _posProfileRepository.UpdateAsync(partnerId, posProfile);
+                }
             }
             catch (Exception ex)
             {
@@ -316,16 +308,6 @@ namespace ClientWebAppService.PosProfile.Services
                 _logger.LogError($"UpdatePosProfileAsync - Attempted to update profile for partnerId = {partnerId}, Exception message - {exception.Message}");
                 throw;
             }
-        }
-
-        private string GetPosConfigurationSecretName(string partnerId, string posType)
-        {
-            return $"{partnerId}-{posType}";
-        }
-
-        private string GetPosConfigurationDataIngestionSecretName(string partnerId, string posType)
-        {
-            return $"di-{posType}-{partnerId}-tokeninfo";
         }
     }
 }

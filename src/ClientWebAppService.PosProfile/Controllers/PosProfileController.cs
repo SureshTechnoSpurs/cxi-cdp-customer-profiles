@@ -80,21 +80,22 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
-        /// DeleteByPartnerId
+        /// DeleteByPartnerId and posType
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [HttpDelete("partnerId/{partnerId}")]
+        [HttpDelete("partnerId/{partnerId}/posType/{posType}")]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId, [FromQuery]string posType)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotEmpty(posType, nameof(posType));
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
             return Ok();
         }
 
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("search")]
         [ProducesResponseType(typeof(PosProfileSearchDto), 200)]
         public async Task<IActionResult> Search([FromQuery] PosProfileSearchCriteriaModel searchCriteria)
@@ -109,7 +110,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// <param name="posProfileId"></param>
         /// <returns></returns>`
         [Obsolete("Partner may have more than 1 Pos. Use M2MGetPosProfiles")]
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{posProfileId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGet([FromRoute] string posProfileId)
@@ -122,7 +123,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// Only for M2M - Returns POS profiles by specified partner Id
         /// </summary>
         /// <param name="partnerId"></param>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{partnerId}/profile")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGetPosProfile([FromRoute] string partnerId)
@@ -138,7 +139,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// <param name="posProfileId"></param>
         /// <param name="profileUpdateModel"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpPut("m2m/{posProfileId}")]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
         public async Task<IActionResult> M2MPut([FromRoute] string posProfileId, [FromBody] PosProfileUpdateModel profileUpdateModel)
@@ -147,14 +148,15 @@ namespace ClientWebAppService.PosProfile.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpDelete("m2m/partnerId/{partnerId}")]
+        //[Authorize(Policy = Constants.M2MPolicy)]
+        [HttpDelete("m2m/partnerId/{partnerId}/posType/{posType}")]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> M2mDeleteByPartnerId([FromRoute] string partnerId)
+        public async Task<IActionResult> M2mDeleteByPartnerId([FromRoute] string partnerId, [FromRoute] string posType)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+            VerifyHelper.NotEmpty(posType, nameof(posType));
 
-            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId);
+            await _posProfileService.DeletePosProfileAndSecretsAsync(partnerId, posType);
             return Ok();
         }
 
@@ -182,7 +184,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="posProfileCreationDto"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpPost("m2m/omnivore")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemDetails), 400)]

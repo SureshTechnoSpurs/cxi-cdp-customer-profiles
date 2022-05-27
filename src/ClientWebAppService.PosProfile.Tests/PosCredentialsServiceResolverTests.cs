@@ -7,6 +7,7 @@ using ClientWebAppService.PosProfile.Services.Credentials;
 using CXI.Common.Security.Secrets;
 using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -20,8 +21,12 @@ namespace ClientWebAppService.PosProfile.Tests
         public void Resolve_ServiceExistInCollection_ServiceCorrectTypeReturned()
         {
             var secretSetter = new Mock<ISecretSetter>();
+            var secretClient = new Mock<ISecretClient>();
+            var logger = new Mock<ILogger<OmnivorePosCredentialsService>>();
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddTransient<ISecretSetter>(_ => secretSetter.Object);
+            serviceCollection.AddTransient<ISecretClient>(_ => secretClient.Object);
+            serviceCollection.AddTransient(_ => logger.Object);
             serviceCollection.AddTransient<IPosCredentialsService<PosCredentialsConfigurationOmnivoreCreationDto>, OmnivorePosCredentialsService>();
             var sp = serviceCollection.BuildServiceProvider();
             _resolver = new PosCredentialsServiceResolver(sp);

@@ -52,8 +52,9 @@ namespace ClientWebAppService.PosProfile.Services
         /// Removes posProfile record and keyVault secrets related to particular partner
         /// </summary>
         /// <param name="partnerId"></param>
+        /// <param name="posType"></param>
         /// <returns></returns>
-        Task DeletePosProfileAndSecretsAsync(string partnerId);
+        Task DeletePosProfileAndSecretsAsync(string partnerId, string posType);
 
         /// <summary>
         /// Obtains accessToken from keyVaul for particalar PartnerId
