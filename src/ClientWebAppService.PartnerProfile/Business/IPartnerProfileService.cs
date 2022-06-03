@@ -64,5 +64,12 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="partnerId"></param>
         /// <returns></returns>
         Task CompletePartnerOnBoardingAsync(string partnerId);
+
+        /// <summary>
+        /// Bulk Update PartnerSubscription Async
+        /// </summary>
+        /// <param name="subscriptionPartnerIdDtos"></param>
+        /// <returns></returns>
+        Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
     }
 }
