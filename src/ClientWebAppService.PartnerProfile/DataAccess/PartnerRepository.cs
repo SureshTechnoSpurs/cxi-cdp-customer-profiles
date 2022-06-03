@@ -5,6 +5,7 @@ using GL.MSA.Core.NoSql;
 using GL.MSA.Core.ResiliencyPolicy;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
@@ -72,6 +73,23 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
             var policy = GetDefaultPolicy();
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <inheritdoc cref="UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
+        public Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        {
+            var bulkUpdateModel = new List<WriteModel<Partner>>();
+
+            foreach (var record in subscriptionPartnerIdDtos)
+            {
+                var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == record.PartnerId);
+                var updateStrategy = Builders<Partner>.Update.Set(x => x.Subscription, record.Subscription);
+
+                var updateOne = new UpdateOneModel<Partner>(filter, updateStrategy) { IsUpsert = true };
+                bulkUpdateModel.Add(updateOne);
+            }
+            var policy = GetDefaultPolicy();
+            return policy.ExecuteAsync(() => _collection.BulkWriteAsync(bulkUpdateModel));
         }
     }
 }

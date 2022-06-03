@@ -1,6 +1,7 @@
 ﻿using CXI.Common.MongoDb;
 using CXI.Contracts.PartnerProfile.Models;
 using MongoDB.Bson;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.PartnerProfile.DataAccess
@@ -25,5 +26,12 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         /// <param name="subscription"></param>
         /// <returns></returns>
         Task UpdateSubscriptionAsync(string partnerId, Subscription subscription);
+
+        /// <summary>
+        /// Bulk Update Subscriptions Async
+        /// </summary>
+        /// <param name="subscriptionPartnerIdDtos"></param>
+        /// <returns></returns>
+        Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
     }
 }

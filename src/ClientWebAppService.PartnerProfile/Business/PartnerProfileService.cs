@@ -227,5 +227,11 @@ namespace ClientWebAppService.PartnerProfile.Business
                 TotalPages = model.TotalPages
             };
         }
+
+        /// <inheritdoc cref="UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
+        public async Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        {
+            await _partnerRepository.UpdateSubscriptionsAsync(subscriptionPartnerIdDtos);
+        }
     }
 }

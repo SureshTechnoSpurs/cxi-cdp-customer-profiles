@@ -126,5 +126,15 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             await _partnerProfileService.UpdatePartnerSubscriptionAsync(partnerId, model);
             return Ok();
         }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPut("m2m/subscriptions")]
+        [ProducesResponseType(typeof(List<SubscriptionPartnerIdDto>), 200)]
+        public async Task<IActionResult> UpdatePartnerSubscriptionsAsync([FromBody] List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        {
+            await _partnerProfileService.UpdatePartnerSubscriptionsAsync(subscriptionPartnerIdDtos);
+
+            return Ok();
+        }
     }
 }
