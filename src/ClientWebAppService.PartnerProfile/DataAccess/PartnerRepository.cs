@@ -21,11 +21,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
             : base(dataContext, policyProvider)
         {
             var uniqueParnerIdIndexDefinition = new CreateIndexModel<Partner>(Builders<Partner>.IndexKeys.Ascending(x => x.PartnerId), new CreateIndexOptions { Unique = true });
-            var uniqueNameIndexDefinition = new CreateIndexModel<Partner>(Builders<Partner>.IndexKeys.Ascending(x => x.PartnerName), new CreateIndexOptions { Unique = true });
-            var uniqueAddressIndexDefinition = new CreateIndexModel<Partner>(Builders<Partner>.IndexKeys.Ascending(x => x.Address), new CreateIndexOptions { Unique = true });
+            var uniqueNameAndAddressIndexDefinition = new CreateIndexModel<Partner>(Builders<Partner>.IndexKeys.Ascending(x => x.PartnerName).Descending(x => x.Address), new CreateIndexOptions { Unique = true });
             _collection.Indexes.CreateOne(uniqueParnerIdIndexDefinition);
-            _collection.Indexes.CreateOne(uniqueNameIndexDefinition);
-            _collection.Indexes.CreateOne(uniqueAddressIndexDefinition);
+            _collection.Indexes.CreateOne(uniqueNameAndAddressIndexDefinition);
         }
 
         ///<inheritdoc/>
