@@ -7,21 +7,24 @@ xmlns:pro="http://www.liquibase.org/xml/ns/pro"
 xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
 http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
 http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
-<changeSet id="address_index_removed" author="Suresh Baskaran">
-		<ext:runCommand>
-			<ext:command>
-				{ dropIndexes: "partner_profiles", index: "partner_id_uniq_index", comment: "removed partner_id_uniq_index index" }
-			</ext:command>
-		</ext:runCommand>
+	<changeSet id="address_index_removed" author="Suresh Baskaran">
 		<ext:runCommand>
 			<ext:command>
 				{ dropIndexes: "partner_profiles", index: "address_uniq_index", comment: "removed address_uniq_index index" }
 			</ext:command>
 		</ext:runCommand>
+		
 		<ext:runCommand>
 			<ext:command>
 				{ dropIndexes: "partner_profiles", index: "partner_name_index", comment: "removed partner_name_index index" }
 			</ext:command>
 		</ext:runCommand>
+		
+		<ext:runCommand>
+			<ext:command>
+				{ createIndexes: 'partner_profiles', indexes: [ { key: { partner_name: 1 , address: 1 }, name: 'partner_name_address_uniq_index', unique: true } ] }
+			</ext:command>
+		</ext:runCommand>
+		
 	</changeSet>
 </databaseChangeLog>
