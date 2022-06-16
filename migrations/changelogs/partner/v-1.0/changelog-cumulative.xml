@@ -11,4 +11,5 @@ http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibas
 	<include file="20220317160053_serviceAgreementAccepted_added.xml" relativeToChangelogFile="true"/>
 	<include file="20220418160053_isActive_added.xml" relativeToChangelogFile="true"/> 
 	<include file="20220428170249_SubscriptionObject_Added.xml" relativeToChangelogFile="true"/>
+	<include file="20220609141530_remove_index_partnerProfile.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
