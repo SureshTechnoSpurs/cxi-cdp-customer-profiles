@@ -56,7 +56,8 @@ namespace ClientWebAppService.PosProfile
                     .AddMongoResiliencyFor<Models.PosProfile>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                 .AddTransient<IPosProfileRepository, PosProfileRepository>()
                 .AddTransient<IPosProfileService, PosProfileService>()
-                .AddTransient<IPosTypeService, PosTypeService>();
+                .AddTransient<IPosTypeService, PosTypeService>()
+                .AddTransient<IParBrinkService, ParBrinkService>();
 
             services.AddApiVersioning(options =>
             {
