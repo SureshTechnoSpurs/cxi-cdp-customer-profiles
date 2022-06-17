@@ -31,11 +31,10 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpGet("m2m/locations/{partnerId}")]
+        [HttpGet("locations/{partnerId}")]
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(ParBrinkKeyReferenceModel), 200)]
-        public async Task<IActionResult> M2MGetParBrinkLocations([FromRoute] string partnerId)
+        public async Task<IActionResult> GetParBrinkLocations([FromRoute] string partnerId)
         {
             var result = await _parBrinkService.GetParBrinkLocationsAsync(partnerId);
 
@@ -48,11 +47,10 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// <param name="partnerId"></param>
         /// <param name="parBrinkKeyReferenceModel"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
-        [HttpPost("m2m/locations/{partnerId}")]
+        [HttpPost("locations/{partnerId}")]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
         [ProducesResponseType(202)]
-        public async Task<IActionResult> M2MSetParBrinkLocations([FromRoute] string partnerId, [FromBody] ParBrinkKeyReferenceModel parBrinkKeyReferenceModel)
+        public async Task<IActionResult> SetParBrinkLocations([FromRoute] string partnerId, [FromBody] ParBrinkKeyReferenceModel parBrinkKeyReferenceModel)
         {
             var result = await _parBrinkService.SetParBrinkLocationsAsync(partnerId, parBrinkKeyReferenceModel);
 
