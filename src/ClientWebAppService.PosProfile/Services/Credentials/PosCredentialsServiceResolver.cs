@@ -36,7 +36,13 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
                         .GetService<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>>();
                     VerifyHelper.NotNull(squareService, nameof(IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>));
                     return (IPosCredentialsOffboardingService)squareService;
-                
+
+                case "olo":
+                    var oloService = _serviceProvider
+                        .GetService<IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>>();
+                    VerifyHelper.NotNull(oloService, nameof(IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>));
+                    return (IPosCredentialsOffboardingService)oloService;
+
                 default:
                     throw new KeyNotFoundException($"service not found for type {posType}");
 
