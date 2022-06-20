@@ -59,8 +59,9 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="IParBrinkService.SetParBrinkLocationsAsync(string, ParBrinkKeyReferenceModel)"/> 
         public async Task<bool> SetParBrinkLocationsAsync(string partnerId, ParBrinkKeyReferenceModel parBrinkKeyReferenceModel)
         {
-            _logger.LogInformation($"Getting Par Brink Locations for the Partner with partnerId: {partnerId}");
+            _logger.LogInformation($"Setting Par Brink Locations for the Partner with partnerId: {partnerId}");
 
+            var isSuccess = false;
             VerifyHelper.NotNull(partnerId, nameof(partnerId));
 
             var keyVaultReference = await GetParBrinkKeyVaultReference(partnerId);
@@ -68,10 +69,10 @@ namespace ClientWebAppService.PosProfile.Services
             {
                 var secretValue = JsonConvert.SerializeObject(parBrinkKeyReferenceModel);
                 _secretClient.SetSecret(keyVaultReference, secretValue);
+                isSuccess = true;
+                _logger.LogInformation($"Successfully updated the Par Brink Locations for the Partner with partnerId: {partnerId}");
             }
-
-            _logger.LogInformation($"Successfully got the Par Brink Locations for the Partner with partnerId: {partnerId}");
-            return true;
+            return isSuccess;
         }
 
         private async Task<string> GetParBrinkKeyVaultReference(string partnerId)
