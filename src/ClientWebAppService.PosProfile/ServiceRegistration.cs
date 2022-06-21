@@ -84,6 +84,7 @@ namespace ClientWebAppService.PosProfile
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>, SquarePosCredentialsService>();
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationOmnivoreCreationDto>, OmnivorePosCredentialsService>();
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationParBrinkCreationDto>, ParBrinkPosCredentialsService>();
+            services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>, OloPosCredentialsService>();
 
             return services;
         }

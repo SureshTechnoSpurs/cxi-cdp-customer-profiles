@@ -37,6 +37,13 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
                     VerifyHelper.NotNull(squareService, nameof(IPosCredentialsService<PosCredentialsConfigurationSquareCreationDto>));
                     return (IPosCredentialsOffboardingService)squareService;
 
+                case "olo":
+                    var oloService = _serviceProvider
+                        .GetService<IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>>();
+                    VerifyHelper.NotNull(oloService, nameof(IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>));
+                    return (IPosCredentialsOffboardingService)oloService;
+
+
                 case "parbrink":
                     var parBrinkService = _serviceProvider
                         .GetService<IPosCredentialsService<PosCredentialsConfigurationParBrinkCreationDto>>();
