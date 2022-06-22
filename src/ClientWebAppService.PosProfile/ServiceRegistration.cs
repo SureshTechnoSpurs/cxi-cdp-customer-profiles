@@ -49,16 +49,16 @@ namespace ClientWebAppService.PosProfile
                     name: "MongoDB",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new string[] { "mongoDB", "ready" });
-            
-            
+
+
             services.AddCxiMongoDb()
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.PosProfile")
                     .AddMongoResiliencyFor<Models.PosProfile>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                 .AddTransient<IPosProfileRepository, PosProfileRepository>()
                 .AddTransient<IPosProfileService, PosProfileService>()
                 .AddTransient<IPosTypeService, PosTypeService>()
-                .AddTransient<IParBrinkService, ParBrinkService>();
-
+                .AddTransient<IKeyVaultReferenceService, KeyVaultReferenceService>();
+            
             services.AddApiVersioning(options =>
             {
                 options.AssumeDefaultVersionWhenUnspecified = true;

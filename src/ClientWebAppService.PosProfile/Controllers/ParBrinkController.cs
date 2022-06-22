@@ -19,11 +19,12 @@ namespace ClientWebAppService.PosProfile.Controllers
     [ExcludeFromCodeCoverage]
     public class ParBrinkController : ControllerBase
     {
-        private readonly IParBrinkService _parBrinkService;
+        private readonly IKeyVaultReferenceService _keyVaultReferenceService;
+        private const string PosType = "parbrink";
 
-        public ParBrinkController(IParBrinkService parBrinkService)
+        public ParBrinkController(IKeyVaultReferenceService keyVaultReferenceService)
         {
-            _parBrinkService = parBrinkService;
+            _keyVaultReferenceService = keyVaultReferenceService;
         }
 
         /// <summary>
@@ -36,7 +37,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(typeof(ParBrinkKeyReferenceModel), 200)]
         public async Task<IActionResult> GetParBrinkLocations([FromRoute] string partnerId)
         {
-            var result = await _parBrinkService.GetParBrinkLocationsAsync(partnerId);
+            var result = await _keyVaultReferenceService.GetKeyVaultValueByReferenceAsync<ParBrinkKeyReferenceModel>(partnerId, PosType);
 
             return Ok(result);
         }
@@ -52,7 +53,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         [ProducesResponseType(202)]
         public async Task<IActionResult> SetParBrinkLocations([FromRoute] string partnerId, [FromBody] ParBrinkKeyReferenceModel parBrinkKeyReferenceModel)
         {
-            var result = await _parBrinkService.SetParBrinkLocationsAsync(partnerId, parBrinkKeyReferenceModel);
+            var result = await _keyVaultReferenceService.SetKeyVaultValueByReferenceAsync<ParBrinkKeyReferenceModel>(partnerId, PosType, parBrinkKeyReferenceModel);
 
             return Ok(result);
         }
