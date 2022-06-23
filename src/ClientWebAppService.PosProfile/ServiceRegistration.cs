@@ -27,7 +27,7 @@ namespace ClientWebAppService.PosProfile
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            services.AddAzureAdB2CUserAuthentication(configuration, logger);
+            services.AddADAndADB2CAuthorization(configuration);
             services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
             services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
 
