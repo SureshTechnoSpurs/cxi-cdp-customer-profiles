@@ -257,5 +257,15 @@ namespace ClientWebAppService.PosProfile.Controllers
             var posProfiles = await _posProfileService.GetPosProfilesByPartnerIdsAsync(partnerIds);
             return Ok(posProfiles);
         }
+
+        [HttpPost("getbypartnerids")]
+        [ProducesResponseType(typeof(IEnumerable<PosProfileDto>), 200)]
+        public async Task<IActionResult> GetPosProfilesByPartnerIds(IEnumerable<string> partnerIds)
+        {
+            VerifyHelper.CollectionNotEmpty(partnerIds, nameof(partnerIds));
+
+            var posProfiles = await _posProfileService.GetPosProfilesByPartnerIdsAsync(partnerIds);
+            return Ok(posProfiles);
+        }
     }
 }

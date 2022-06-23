@@ -62,6 +62,27 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok(paginatedResult);
         }
 
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<PartnerProfileDto>), 200)]
+        [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPaginated(int? pageIndex, int? pageSize)
+        {
+            if (!pageIndex.HasValue && !pageSize.HasValue)
+            {
+                var result = await _partnerProfileService.GetPartnerProfilesAsync();
+                return Ok(result);
+            }
+
+            VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
+            VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
+
+            var paginatedResult =
+                await _partnerProfileService.GetPartnerProfilesPaginatedAsync(pageIndex.Value, pageSize.Value);
+
+            return Ok(paginatedResult);
+        }
+
         [HttpPost("{partnerId}/complete")]
         [ProducesResponseType(typeof(PartnerProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
