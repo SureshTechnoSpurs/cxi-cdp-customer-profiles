@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CXI.Common" Version="1.0.22" />
+    <PackageReference Include="CXI.Common" Version="1.0.23" />
     <PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.3" />
     <PackageReference Include="CXI.Common.MongoDb" Version="1.0.2" />
     <PackageReference Include="CXI.Common.Security" Version="1.0.3" />
-    <PackageReference Include="CXI.Contracts.PosProfile" Version="1.0.19" />
+    <PackageReference Include="CXI.Contracts.PosProfile" Version="1.0.23" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
     <PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
     <PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
