@@ -3,6 +3,7 @@ using ClientWebAppService.PosProfile.Models;
 using CXI.Common.Security.Secrets;
 using CXI.Contracts.PosProfile.Models.Create;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.PosProfile.Services.Credentials
@@ -10,6 +11,7 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
     /// <summary>
     /// ToastPosCredentialsService
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class ToastPosCredentialsService : 
         IPosCredentialsService<PosCredentialsConfigurationToastCreationDto>, IPosCredentialsOffboardingService
     {
