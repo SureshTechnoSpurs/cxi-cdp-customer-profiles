@@ -228,6 +228,21 @@ namespace ClientWebAppService.PosProfile.Controllers
         }
 
         /// <summary>
+        /// Creates POS profile based on <see cref="PosProfileCreationModel{T}"/>
+        /// </summary>
+        /// <param name="posProfileCreationDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPost("m2m/toast")]
+        [ProducesResponseType(typeof(PosProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
+        public async Task<IActionResult> M2MPostToast(PosProfileCreationModel<PosCredentialsConfigurationToastCreationDto> posProfileCreationDto)
+        {
+            var posProfileCreateResult = await _posProfileService.CreatePosProfileAndSecretsAsync(posProfileCreationDto);
+            return Ok(posProfileCreateResult);
+        }
+
+        /// <summary>
         /// Gets Pos Profiles by partnerIds
         /// </summary>
         /// <param name="partnerIds"></param>

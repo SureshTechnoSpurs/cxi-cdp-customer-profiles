@@ -50,6 +50,12 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
                     VerifyHelper.NotNull(parBrinkService, nameof(IPosCredentialsService<PosCredentialsConfigurationParBrinkCreationDto>));
                     return (IPosCredentialsOffboardingService)parBrinkService;
 
+                case "toast":
+                    var toastService = _serviceProvider
+                        .GetService<IPosCredentialsService<PosCredentialsConfigurationToastCreationDto>>();
+                    VerifyHelper.NotNull(toastService, nameof(IPosCredentialsService<PosCredentialsConfigurationToastCreationDto>));
+                    return (IPosCredentialsOffboardingService)toastService;
+
                 default:
                     throw new KeyNotFoundException($"service not found for type {posType}");
 
