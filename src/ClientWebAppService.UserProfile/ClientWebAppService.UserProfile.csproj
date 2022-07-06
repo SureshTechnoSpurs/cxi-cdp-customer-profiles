@@ -18,10 +18,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Identity" Version="1.4.1" />
-		<PackageReference Include="CXI.Common" Version="1.0.17" />
+		<PackageReference Include="CXI.Common" Version="1.0.23" />
 		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.2" />
 		<PackageReference Include="CXI.Common.MessageBrokers" Version="1.0.1" />
-		<PackageReference Include="CXI.Common.Security" Version="1.0.3" />
+		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
 		<PackageReference Include="CXI.Common.Utilities" Version="1.0.1" />
 		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.3" />
 		<PackageReference Include="CXI.MessageBroker.Messages" Version="1.0.9" />
