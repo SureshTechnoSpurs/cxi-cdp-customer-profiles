@@ -11,7 +11,6 @@ namespace ClientWebAppService.PosProfile.Services.Credentials
     /// <summary>
     /// ToastPosCredentialsService
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class ToastPosCredentialsService : 
         IPosCredentialsService<PosCredentialsConfigurationToastCreationDto>, IPosCredentialsOffboardingService
     {
