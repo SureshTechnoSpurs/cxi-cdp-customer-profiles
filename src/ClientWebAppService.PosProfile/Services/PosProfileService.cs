@@ -295,7 +295,7 @@ namespace ClientWebAppService.PosProfile.Services
                 var posProfile = new Models.PosProfile
                 {
                     PosConfiguration = updateModel.PosConfigurations
-                        .Select(x => new PosCredentialsConfiguration { KeyVaultReference = x.KeyVaultReference, PosType = x.PosType }),
+                        .Select(x => new PosCredentialsConfiguration { KeyVaultReference = x.KeyVaultReference, PosType = x.PosType, MerchantId = x.MerchantId }),
                     IsHistoricalDataIngested = updateModel.IsHistoricalDataIngested
                 };
 
