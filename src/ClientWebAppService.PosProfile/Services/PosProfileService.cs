@@ -237,7 +237,7 @@ namespace ClientWebAppService.PosProfile.Services
             var posProfile = await _posProfileRepository.FindOne(x => x.PosConfiguration.Any(c => c.MerchantId == merchantId));
             if (posProfile == null)
             {
-                throw new NotFoundException($"PosProfile with merchantId:{merchantId} not found.");
+                return null;
             }
 
             return new PosProfileDto(
