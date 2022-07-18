@@ -50,7 +50,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                     Builders<Partner>.Update.Set(x => x.ServiceAgreementAccepted, updatedPartner.ServiceAgreementAccepted),
                     Builders<Partner>.Update.Set(x => x.UserProfiles, updatedPartner.UserProfiles),
                     Builders<Partner>.Update.Set(x => x.IsActive, updatedPartner.IsActive),
-                    Builders<Partner>.Update.Set(x => x.Subscription, updatedPartner.Subscription));
+                    Builders<Partner>.Update.Set(x => x.Subscription, updatedPartner.Subscription),
+                    Builders<Partner>.Update.Set(x => x.ServiceAgreementVersion, updatedPartner.ServiceAgreementVersion),
+                    Builders<Partner>.Update.Set(x => x.ServiceAgreementAcceptedDate, updatedPartner.ServiceAgreementAcceptedDate));
 
             var policy = GetDefaultPolicy();
 

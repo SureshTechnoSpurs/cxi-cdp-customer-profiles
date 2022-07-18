@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
+	<changeSet id="serviceAgreementVersionAndDate_Added" author="Suresh Baskaran">
+		<ext:runCommand>
+			<ext:command>
+				{ update: "partner_profiles",
+				updates: [{ q: { }, u: { $set: { "service_agreement_version" :null, "service_agreement_accepted_date" :null } }, multi: true }] }
+			</ext:command>
+		</ext:runCommand>
+		<ext:runCommand>
+			<ext:command>
+				{ 
+				collMod: "partner_profiles",
+				validator: {
+					$jsonSchema: {
+						bsonType: "object",
+						required: ["_id", "partner_name", "address", "partner_type"],
+						properties: {
+							_id: {
+								bsonType: "objectId"
+								},
+							partner_id: {
+								bsonType: "string"
+								},
+							partner_name: {
+								bsonType: "string"
+								},
+							address: {
+								bsonType: "string"
+								},
+							amount_of_locations: {
+								bsonType: "int"
+								},
+							partner_type: {
+								bsonType: "string"
+								},
+							profiles: {
+								bsonType: "array"
+								},
+							service_agreement_accepted: {
+								bsonType: "bool"
+								},
+							is_active: {
+								bsonType: "bool"
+								},
+							subscription : {
+								 bsonType: "object",
+								  properties : {
+									subscription_id : {
+										bsonType: ["string", "null"]
+										},
+									last_billed_date : {
+										bsonType: ["date", "null"]
+										},
+									state : {
+										enum: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "null"]
+										}
+								  }
+								},
+							is_on_boarded: {
+								bsonType: "bool"
+								},
+							service_agreement_version: {
+								bsonType: ["string", "null"]
+								},
+							service_agreement_accepted_date: {
+								bsonType: ["date", "null"]
+								}
+							}
+						}
+					},
+				validationAction: "warn",
+				validationLevel: "strict"
+				}
+			</ext:command>
+		</ext:runCommand>
+	</changeSet>
+</databaseChangeLog>

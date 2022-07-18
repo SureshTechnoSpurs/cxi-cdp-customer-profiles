@@ -3,7 +3,7 @@ using ClientWebAppService.PartnerProfile.Business.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
-using CXI.Common.Models;
+using CXI.Common.Models.Pagination;
 using CXI.Contracts.PartnerProfile.Models;
 using CXI.Contracts.PosProfile;
 using Microsoft.Extensions.Logging;
@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MongoDB.Bson;
 using ValidationException = CXI.Common.ExceptionHandling.Primitives.ValidationException;
 
 namespace ClientWebAppService.PartnerProfile.Business
@@ -58,7 +57,9 @@ namespace ClientWebAppService.PartnerProfile.Business
                         SubscriptionId = string.Empty,
                         State = null,
                         LastBilledDate = null
-                    }
+                    },
+                    ServiceAgreementVersion = string.Empty,
+                    ServiceAgreementAcceptedDate = null
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -112,7 +113,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
             VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
 
-            var partnerProfiles = await _partnerRepository.GetPaginatedList(pageIndex, pageSize);
+            var partnerProfiles = await _partnerRepository.GetPaginatedList(new PaginationRequest() { PageIndex = pageIndex, PageSize = pageSize });
 
             VerifyHelper.NotNull(partnerProfiles, nameof(partnerProfiles));
 
@@ -134,7 +135,9 @@ namespace ClientWebAppService.PartnerProfile.Business
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
                     IsActive = updateModel.IsActive,
-                    Subscription = updateModel.Subscription
+                    Subscription = updateModel.Subscription,
+                    ServiceAgreementVersion = updateModel.ServiceAgreementVersion,
+                    ServiceAgreementAcceptedDate = updateModel.ServiceAgreementAcceptedDate
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -201,7 +204,8 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded);
+                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded,
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)

@@ -11,6 +11,7 @@ using ClientWebAppService.PartnerProfile.Business.Utils;
 using Microsoft.Extensions.Logging;
 using CXI.Contracts.PosProfile;
 using CXI.Contracts.PartnerProfile.Models;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.PartnerProfile.Business.Tests
 {
@@ -123,7 +124,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" }, true, new Subscription());
+            var testInput = new PartnerProfileUpdateModel("test", "test", 10, "test", true, new[] { "test@mail.com" }, true, new Subscription(), "v2", null);
 
             var invocation = _service.Invoking(x => x.UpdateProfileAsync("testId", testInput));
 
@@ -183,8 +184,8 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             // Arrange
 
             _repositoryMock
-                .Setup(x => x.GetPaginatedList(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<Expression<Func<Partner, bool>>>()))
-                .ReturnsAsync(new CXI.Common.Models.PaginatedResponse<Partner>
+                .Setup(x => x.GetPaginatedList(It.IsAny<PaginationRequest>(), It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new PaginatedResponse<Partner>
                 {
                     Items = new List<Partner>
                     {
