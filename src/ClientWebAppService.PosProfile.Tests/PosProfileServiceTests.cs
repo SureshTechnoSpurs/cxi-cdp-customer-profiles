@@ -291,12 +291,13 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
-        public async Task GetByMerchantId_PosProfileNotExist_ReturnsNotFoundException()
+        public async Task GetByMerchantId_PosProfileNotExist_ReturnsNull()
         {
             var merchantId = "merchantId";
 
-            await Assert.ThrowsAsync<NotFoundException>(
-                async () => await _posProfileService.GetByMerchantId(merchantId));
+            var result = await _posProfileService.GetByMerchantId(merchantId);
+
+            Assert.Null(result);
         }
 
 
