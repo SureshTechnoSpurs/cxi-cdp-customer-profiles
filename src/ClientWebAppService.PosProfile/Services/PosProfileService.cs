@@ -171,6 +171,8 @@ namespace ClientWebAppService.PosProfile.Services
         /// <inheritdoc cref="GetAccesTokenForPartner(string)" />
         public async Task<string> GetAccesTokenForPartner(string partnerId)
         {
+            // tech debt: current method is square - specific and should be moved to another place / service
+
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
 
             var posProfile = (await _posProfileRepository.FilterBy(x => x.PartnerId == partnerId)).FirstOrDefault();
@@ -179,7 +181,7 @@ namespace ClientWebAppService.PosProfile.Services
                 return null;
             }
 
-            var posConfiguration = posProfile.PosConfiguration?.FirstOrDefault();
+            var posConfiguration = posProfile.PosConfiguration?.Where(x => x.PosType == "square").FirstOrDefault();
             if (posConfiguration == null)
             {
                 return null;
