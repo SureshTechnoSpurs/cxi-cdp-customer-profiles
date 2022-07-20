@@ -181,7 +181,7 @@ namespace ClientWebAppService.PosProfile.Services
                 return null;
             }
 
-            var posConfiguration = posProfile.PosConfiguration?.Where(x => x.PosType == "square").FirstOrDefault();
+            var posConfiguration = posProfile.PosConfiguration?.FirstOrDefault(x => x.PosType == "square");
             if (posConfiguration == null)
             {
                 return null;
