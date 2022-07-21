@@ -130,7 +130,7 @@ stages:
                   - template: HelmRollback.yaml@templates
                     parameters:
                       kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
-                      namespace: '${{ parameters.Environment }}-claims-resolver'
+                      namespace: '${{ parameters.Environment }}-customer-profiles'
                       components:
                       - componentname: '$(app)'
                         releasename: '$(app)'
