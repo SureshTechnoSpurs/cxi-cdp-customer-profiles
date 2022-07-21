@@ -132,5 +132,9 @@ stages:
                       kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
                       namespace: '${{ parameters.Environment }}-customer-profiles'
                       components:
-                      - componentname: '$(app)'
-                        releasename: '$(app)'
+                      - componentname: 'customer-profiles-partner-profile'
+                        releasename: 'customer-profiles-partner-profile'
+                      - componentname: 'customer-profiles-pos-profile'
+                        releasename: 'customer-profiles-pos-profile'
+                      - componentname: 'customer-profiles-user-profile'
+                        releasename: 'customer-profiles-user-profile'
