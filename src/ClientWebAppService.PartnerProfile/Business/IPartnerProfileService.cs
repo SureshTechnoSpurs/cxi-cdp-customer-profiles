@@ -71,5 +71,13 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="subscriptionPartnerIdDtos"></param>
         /// <returns></returns>
         Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
+
+        /// <summary>
+        /// Sets Partners isActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        Task SetPartnerStatusAsync(string partnerId, bool isActive);
     }
 }
