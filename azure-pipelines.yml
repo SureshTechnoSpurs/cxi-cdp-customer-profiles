@@ -290,7 +290,7 @@ stages:
 
  - stage: Sonar_Qube
    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-   pool: kube-agent
+   pool: self
    jobs:
      - job: 
        steps:
