@@ -27,6 +27,10 @@ resources:
       type : git
       name : cxi-build-templates
 
+    - repository: test-auto
+      type : git
+      name : cxi-cdp-test-auto  
+
     pipelines:
       - pipeline: cxi-cdp-customer-profiles
         source: cxi-cdp-customer-profiles
@@ -36,7 +40,7 @@ pool:
  vmImage: ubuntu-latest
 
 stages:
- - stage: deploy_stage 
+ - stage: deploy
    displayName: Deploy to Kubernetes ${{ parameters.Environment }}
    jobs:
     - deployment: deploy
@@ -101,3 +105,36 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
                     deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+
+ - template: AutoTests.yaml@templates
+   parameters:
+    env: ${{ parameters.Environment }}
+    filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
+    condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+      
+
+ - stage: rollback
+   pool:
+        vmImage: ubuntu-latest
+   displayName: Rollback
+   condition: failed()
+   jobs:
+          - deployment: rollback
+            displayName: Rollback
+            environment: 'Kubernetes_${{ parameters.Environment }}'
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                  - download: none
+                  - template: HelmRollback.yaml@templates
+                    parameters:
+                      kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
+                      namespace: '${{ parameters.Environment }}-customer-profiles'
+                      components:
+                      - componentname: 'customer-profiles-partner-profile'
+                        releasename: 'customer-profiles-partner-profile'
+                      - componentname: 'customer-profiles-pos-profile'
+                        releasename: 'customer-profiles-pos-profile'
+                      - componentname: 'customer-profiles-user-profile'
+                        releasename: 'customer-profiles-user-profile'
