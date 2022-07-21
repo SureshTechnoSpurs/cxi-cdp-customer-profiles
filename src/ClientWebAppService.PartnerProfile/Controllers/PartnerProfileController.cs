@@ -157,5 +157,15 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok();
         }
+
+        [HttpGet("find/{partnerId}")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> FindPartnerProfile([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.FindPartnerProfileAsync(partnerId);
+
+            return Ok(result);
+        }
     }
 }

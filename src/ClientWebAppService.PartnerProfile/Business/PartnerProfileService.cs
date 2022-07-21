@@ -237,5 +237,20 @@ namespace ClientWebAppService.PartnerProfile.Business
         {
             await _partnerRepository.UpdateSubscriptionsAsync(subscriptionPartnerIdDtos);
         }
+
+        ///<inheritdoc/>
+        public async Task<PartnerProfileDto?> FindPartnerProfileAsync(string partnerId)
+        {
+            _logger.LogInformation($"Get partner profile with id : {partnerId}.");
+
+            if (string.IsNullOrWhiteSpace(partnerId))
+            {
+                throw new ValidationException(nameof(partnerId), $"{nameof(partnerId)} should not be null or empty.");
+            }
+
+            var result = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            return result != null ? Map(result) : null;
+        }
     }
 }
