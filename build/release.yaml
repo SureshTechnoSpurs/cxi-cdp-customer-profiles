@@ -27,6 +27,10 @@ resources:
       type : git
       name : cxi-build-templates
 
+    - repository: test-auto
+      type : git
+      name : cxi-cdp-test-auto  
+
     pipelines:
       - pipeline: cxi-cdp-customer-profiles
         source: cxi-cdp-customer-profiles
