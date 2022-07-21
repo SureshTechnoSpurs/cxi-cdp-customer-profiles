@@ -40,7 +40,7 @@ pool:
  vmImage: ubuntu-latest
 
 stages:
- - stage: deploy_stage 
+ - stage: deploy
    displayName: Deploy to Kubernetes ${{ parameters.Environment }}
    jobs:
     - deployment: deploy
@@ -105,3 +105,32 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
                     deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+
+- template: AutoTests.yaml@templates
+    parameters:
+      env: ${{ parameters.Environment }}
+      filter: '--filter "TestCategory=Authorization"'
+      condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+  
+
+  - stage: rollback
+    pool:
+        vmImage: ubuntu-latest
+    displayName: Rollback
+    condition: failed()
+    jobs:
+          - deployment: rollback
+            displayName: Rollback
+            environment: 'Kubernetes_${{ parameters.Environment }}'
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                  - download: none
+                  - template: HelmRollback.yaml@templates
+                    parameters:
+                      kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
+                      namespace: '${{ parameters.Environment }}-claims-resolver'
+                      components:
+                      - componentname: '$(app)'
+                        releasename: '$(app)'
