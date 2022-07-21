@@ -233,5 +233,25 @@ namespace ClientWebAppService.PartnerProfile.Business
         {
             await _partnerRepository.UpdateSubscriptionsAsync(subscriptionPartnerIdDtos);
         }
+
+        /// <summary>
+        /// SetPartnerStatusAsync
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException"></exception>
+        public async Task SetPartnerStatusAsync(string partnerId, bool isActive)
+        {
+            var partner = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+            if (partner is null)
+            {
+                throw new NotFoundException($"PartnerProfile with id: {partnerId} not found.");
+            }
+
+            await _partnerRepository.SetStatus(partnerId, isActive);
+
+            _logger.LogInformation($"Partner with Id {partnerId} was activated.");
+        }
     }
 }
