@@ -106,19 +106,19 @@ stages:
                     deployment.replicaCount=2,\
                     deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
 
-- template: AutoTests.yaml@templates
-    parameters:
-      env: ${{ parameters.Environment }}
-      filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
-      condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
-  
+ - template: AutoTests.yaml@templates
+   parameters:
+   env: ${{ parameters.Environment }}
+   filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
+   condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+    
 
-  - stage: rollback
-    pool:
+ - stage: rollback
+   pool:
         vmImage: ubuntu-latest
-    displayName: Rollback
-    condition: failed()
-    jobs:
+   displayName: Rollback
+   condition: failed()
+   jobs:
           - deployment: rollback
             displayName: Rollback
             environment: 'Kubernetes_${{ parameters.Environment }}'
