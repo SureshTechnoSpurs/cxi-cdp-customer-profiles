@@ -108,10 +108,10 @@ stages:
 
  - template: AutoTests.yaml@templates
    parameters:
-   env: ${{ parameters.Environment }}
-   filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
-   condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
-    
+    env: ${{ parameters.Environment }}
+    filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
+    condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+      
 
  - stage: rollback
    pool:
