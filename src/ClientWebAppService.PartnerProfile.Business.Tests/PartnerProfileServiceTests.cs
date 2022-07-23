@@ -222,5 +222,18 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             await invocation.Should().NotThrowAsync();
         }
+
+        [Fact]
+        public async Task SetPartnerActivityStatusAsync_CorrectParams_Success()
+        {
+            _repositoryMock
+                .Setup(x => x.FindOne(It.IsAny<Expression<Func<Partner, bool>>>()))
+                .ReturnsAsync(new Partner());
+
+            await _service.SetPartnerActivityStatusAsync("test_partner", true);
+
+            _repositoryMock
+                .Verify(x => x.SetActivityStatus(It.IsAny<string>(), It.IsAny<bool>()), Times.Once);
+        }
     }
 }
