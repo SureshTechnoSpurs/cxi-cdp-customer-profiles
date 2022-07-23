@@ -88,10 +88,10 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         }
 
         /// <inheritdoc cref="SetStatus(string, bool)"/>
-        public Task SetStatus(string partnerId, bool isActive)
+        public Task SetActivityStatus(string partnerId, bool value)
         {
             var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
-            var updateStrategy = Builders<Partner>.Update.Set(x => x.IsActive, isActive);
+            var updateStrategy = Builders<Partner>.Update.Set(x => x.IsActive, value);
 
             var policy = GetDefaultPolicy();
 

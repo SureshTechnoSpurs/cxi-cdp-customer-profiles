@@ -39,6 +39,6 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         /// <param name="partnerId"></param>
         /// <param name="isActive"></param>
         /// <returns></returns>
-        Task SetStatus(string partnerId, bool isActive);
+        Task SetActivityStatus(string partnerId, bool value);
     }
 }

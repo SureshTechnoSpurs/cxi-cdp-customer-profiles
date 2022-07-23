@@ -19,6 +19,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using CXI.Contracts.PartnerProfile;
+using ClientWebAppService.PosProfile.Configuration;
+using CXI.Common.Helpers;
 
 namespace ClientWebAppService.PosProfile
 {
@@ -86,6 +89,17 @@ namespace ClientWebAppService.PosProfile
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationParBrinkCreationDto>, ParBrinkPosCredentialsService>();
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationOloCreationDto>, OloPosCredentialsService>();
             services.AddTransient<IPosCredentialsService<PosCredentialsConfigurationToastCreationDto>, ToastPosCredentialsService>();
+
+            var domainServicesConfiguration = configuration.GetSection("DomainServices").Get<DomainServicesConfiguration>();
+            VerifyHelper.NotNull(domainServicesConfiguration, nameof(domainServicesConfiguration));
+
+            VerifyHelper.NotNull(
+                domainServicesConfiguration.PartnerProfileServiceConfiguration,
+                nameof(domainServicesConfiguration.PartnerProfileServiceConfiguration));
+
+            services
+                .AddPartnerProfileServiceClient(domainServicesConfiguration.PartnerProfileServiceConfiguration.BaseUrl)
+                .WithHttpContextAuthorizationTokenResolver();
 
             return services;
         }
