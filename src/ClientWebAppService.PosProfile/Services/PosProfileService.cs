@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ClientWebAppService.PosProfile.Services.Credentials;
 using PosCredentialsConfigurationDto = CXI.Contracts.PosProfile.Models.PosCredentialsConfigurationDto;
+using CXI.Contracts.PartnerProfile;
 
 namespace ClientWebAppService.PosProfile.Services
 {
@@ -25,6 +26,7 @@ namespace ClientWebAppService.PosProfile.Services
         private readonly IConfiguration _configuration;
         private readonly ISecretClient _secretClient;
         private readonly IPosCredentialsServiceResolver _credentialsServiceResolver;
+        private readonly IPartnerProfileServiceClient _partnerProfileServiceClient;
 
         /// <summary>
         /// ctor
@@ -39,13 +41,15 @@ namespace ClientWebAppService.PosProfile.Services
             ILogger<PosProfileService> logger, 
             IConfiguration configuration,
             ISecretClient secretClient,
-            IPosCredentialsServiceResolver credentialsServiceResolver)
+            IPosCredentialsServiceResolver credentialsServiceResolver,
+            IPartnerProfileServiceClient partnerProfileServiceClient)
         {
             _posProfileRepository = posProfileRepository;
             _logger = logger;
             _configuration = configuration;
             _secretClient = secretClient;
             _credentialsServiceResolver = credentialsServiceResolver;
+            _partnerProfileServiceClient = partnerProfileServiceClient;
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
@@ -152,6 +156,7 @@ namespace ClientWebAppService.PosProfile.Services
                     posProfile.PosConfiguration.All(c => c.PosType.Equals(posType, StringComparison.OrdinalIgnoreCase)))
                 {
                     await _posProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
+                    await _partnerProfileServiceClient.SetPartnerActivityStatusAsync(partnerId, false);
                 }
                 else
                 {

@@ -78,6 +78,6 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="partnerId"></param>
         /// <param name="isActive"></param>
         /// <returns></returns>
-        Task SetPartnerStatusAsync(string partnerId, bool isActive);
+        Task SetPartnerActivityStatusAsync(string partnerId, bool isActive);
     }
 }

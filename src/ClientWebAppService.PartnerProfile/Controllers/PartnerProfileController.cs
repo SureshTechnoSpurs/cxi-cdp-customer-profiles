@@ -164,13 +164,13 @@ namespace ClientWebAppService.PartnerProfile.Controllers
         /// <param name="partnerId"></param>
         /// <param name="isActive"></param>
         /// <returns></returns>
-        [HttpPut("{partnerId}/status")]
+        [HttpPut("{partnerId}/active")]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> SetStatus([FromRoute] string partnerId, [FromBody] bool isActive)
+        public async Task<IActionResult> SetActivityStatus([FromRoute] string partnerId, [FromBody] bool value)
         {
             VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
 
-            await _partnerProfileService.SetPartnerStatusAsync(partnerId, isActive);
+            await _partnerProfileService.SetPartnerActivityStatusAsync(partnerId, value);
             return Ok();
         }
     }
