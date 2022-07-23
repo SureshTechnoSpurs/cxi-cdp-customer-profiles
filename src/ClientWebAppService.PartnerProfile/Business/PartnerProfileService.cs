@@ -38,11 +38,11 @@ namespace ClientWebAppService.PartnerProfile.Business
             {
                 _logger.LogInformation($"Creating partner profile with name : {creationModel.Name}.");
 
-                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.Address == creationModel.Address && x.PartnerName == creationModel.Name);
+                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.PartnerName == creationModel.Name && x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(creationModel.Name));
 
                 if (partnerWithSuchAddressOrName is not null)
                 {
-                    throw new ValidationException(nameof(creationModel.Address), $"Such address {creationModel.Address} and name {creationModel.Name} already presented.");
+                    throw new ValidationException(nameof(creationModel.Name), $"Partner profile with name {creationModel.Name} is already registered.");
                 }
 
                 var newPartnerProfile = new Partner
@@ -256,6 +256,21 @@ namespace ClientWebAppService.PartnerProfile.Business
             await _partnerRepository.SetActivityStatus(partnerId, value);
 
             _logger.LogInformation($"Partner {partnerId} actiity status was set to {value}.");
+        }
+
+        ///<inheritdoc/>
+        public async Task<PartnerProfileDto?> FindPartnerProfileAsync(string partnerId)
+        {
+            _logger.LogInformation($"Get partner profile with id : {partnerId}.");
+
+            if (string.IsNullOrWhiteSpace(partnerId))
+            {
+                throw new ValidationException(nameof(partnerId), $"{nameof(partnerId)} should not be null or empty.");
+            }
+
+            var result = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            return result != null ? Map(result) : null;
         }
     }
 }
