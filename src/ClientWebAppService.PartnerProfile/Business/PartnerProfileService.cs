@@ -245,7 +245,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="isActive"></param>
         /// <returns></returns>
         /// <exception cref="NotFoundException"></exception>
-        public async Task SetPartnerStatusAsync(string partnerId, bool isActive)
+        public async Task SetPartnerActivityStatusAsync(string partnerId, bool value)
         {
             var partner = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
             if (partner is null)
@@ -253,9 +253,9 @@ namespace ClientWebAppService.PartnerProfile.Business
                 throw new NotFoundException($"PartnerProfile with id: {partnerId} not found.");
             }
 
-            await _partnerRepository.SetStatus(partnerId, isActive);
+            await _partnerRepository.SetActivityStatus(partnerId, value);
 
-            _logger.LogInformation($"Partner with Id {partnerId} was activated.");
+            _logger.LogInformation($"Partner {partnerId} actiity status was set to {value}.");
         }
     }
 }
