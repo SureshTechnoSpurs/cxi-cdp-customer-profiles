@@ -183,5 +183,16 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/{partnerId}")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> M2MGetById([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.GetByIdAsync(partnerId);
+
+            return Ok(result);
+        }
     }
 }
