@@ -158,6 +158,22 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Sets partner IsActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        [HttpPut("{partnerId}/active")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SetActivityStatus([FromRoute] string partnerId, [FromBody] bool value)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            await _partnerProfileService.SetPartnerActivityStatusAsync(partnerId, value);
+            return Ok();
+        }
+
         [HttpGet("find/{partnerId}")]
         [ProducesResponseType(typeof(PartnerProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]

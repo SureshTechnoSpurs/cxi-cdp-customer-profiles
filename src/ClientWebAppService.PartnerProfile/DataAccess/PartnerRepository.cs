@@ -88,5 +88,16 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
             var policy = GetDefaultPolicy();
             return policy.ExecuteAsync(() => _collection.BulkWriteAsync(bulkUpdateModel));
         }
+
+        /// <inheritdoc cref="SetStatus(string, bool)"/>
+        public Task SetActivityStatus(string partnerId, bool value)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+            var updateStrategy = Builders<Partner>.Update.Set(x => x.IsActive, value);
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
     }
 }
