@@ -73,14 +73,16 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         }
 
         /// <inheritdoc cref="UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
-        public Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        public Task UpdateSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
             var bulkUpdateModel = new List<WriteModel<Partner>>();
 
-            foreach (var record in subscriptionPartnerIdDtos)
+            foreach (var dto in subscriptionBulkUpdateDtos)
             {
-                var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == record.PartnerId);
-                var updateStrategy = Builders<Partner>.Update.Set(x => x.Subscription, record.Subscription);
+                var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == dto.PartnerId);
+                var updateStrategy = Builders<Partner>.Update.Combine(
+                    Builders<Partner>.Update.Set(x => x.Subscription, dto.Subscription),
+                    Builders<Partner>.Update.Set(x => x.IsActive, dto.IsActive));
 
                 var updateOne = new UpdateOneModel<Partner>(filter, updateStrategy) { IsUpsert = true };
                 bulkUpdateModel.Add(updateOne);
