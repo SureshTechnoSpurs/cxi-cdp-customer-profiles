@@ -54,6 +54,13 @@ namespace ClientWebAppService.UserProfile.Business
         {
             try
             {
+                if (creationModel.Role == UserRole.SuperUser)
+                {
+                    _logger.LogInformation($"Attempted to create SuperUser for partnerId : {creationModel.PartnerId}");
+                    throw new ValidationException(nameof(creationModel.Role),
+                       $"Creating a SuperUser is forbidden.");
+                }
+
                 _logger.LogInformation($"Creating new user profile for partnerId : {creationModel.PartnerId}");
 
                 var result = await _userProfileRepository.FindOne(x => x.Email == creationModel.Email &&
