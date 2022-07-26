@@ -70,7 +70,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         /// <param name="subscriptionPartnerIdDtos"></param>
         /// <returns></returns>
-        Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
+        Task UpdatePartnerSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos);
 
         /// <summary>
         /// Sets Partners isActive flag

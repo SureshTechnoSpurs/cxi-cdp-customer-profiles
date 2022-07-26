@@ -31,7 +31,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         /// </summary>
         /// <param name="subscriptionPartnerIdDtos"></param>
         /// <returns></returns>
-        Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
+        Task UpdateSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos);
 
         /// <summary>
         /// Sets partners IsActive flag

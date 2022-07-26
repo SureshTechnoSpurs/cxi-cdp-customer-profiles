@@ -150,10 +150,10 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
         [Authorize(Policy = Constants.M2MPolicy)]
         [HttpPut("m2m/subscriptions")]
-        [ProducesResponseType(typeof(List<SubscriptionPartnerIdDto>), 200)]
-        public async Task<IActionResult> UpdatePartnerSubscriptionsAsync([FromBody] List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        [ProducesResponseType(typeof(List<SubscriptionBulkUpdateDto>), 200)]
+        public async Task<IActionResult> UpdatePartnerSubscriptionsAsync([FromBody] List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
-            await _partnerProfileService.UpdatePartnerSubscriptionsAsync(subscriptionPartnerIdDtos);
+            await _partnerProfileService.UpdatePartnerSubscriptionsAsync(subscriptionBulkUpdateDtos);
 
             return Ok();
         }
