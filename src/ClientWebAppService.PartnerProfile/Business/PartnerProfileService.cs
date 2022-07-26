@@ -121,6 +121,19 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
 
         ///<inheritdoc/>
+        public async Task<PaginatedResponse<PartnerProfileDto>> GetPartnerProfilesPaginatedAsync(PaginationRequest request)
+        {
+            VerifyHelper.GreaterThanZero(request.PageIndex, nameof(request.PageIndex));
+            VerifyHelper.GreaterThanZero(request.PageSize, nameof(request.PageSize));
+
+            var result = await _partnerRepository.GetPaginatedList(request);
+
+            VerifyHelper.NotNull(result, nameof(result));
+
+            return MapToPaginatedResponse(result);
+        }
+
+        ///<inheritdoc/>
         public async Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel)
         {
             try
@@ -222,7 +235,7 @@ namespace ClientWebAppService.PartnerProfile.Business
 
         private PartnerProfilePaginatedDto MapDto(PaginatedResponse<Partner> model)
         {
-            return new PartnerProfilePaginatedDto 
+            return new PartnerProfilePaginatedDto
             {
                 Items = model.Items.Select(Map),
                 PageIndex = model.PageIndex,
@@ -231,11 +244,23 @@ namespace ClientWebAppService.PartnerProfile.Business
                 TotalPages = model.TotalPages
             };
         }
-
+        
         /// <inheritdoc cref="UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
         public async Task UpdatePartnerSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
             await _partnerRepository.UpdateSubscriptionsAsync(subscriptionBulkUpdateDtos);
+        }
+
+        private PaginatedResponse<PartnerProfileDto> MapToPaginatedResponse(PaginatedResponse<Partner> model)
+        {
+            return new PaginatedResponse<PartnerProfileDto>
+            {
+                Items = model.Items.Select(Map).ToList(),
+                PageIndex = model.PageIndex,
+                PageSize = model.PageSize,
+                TotalCount = model.TotalCount,
+                TotalPages = model.TotalPages
+            };
         }
 
         /// <summary>
