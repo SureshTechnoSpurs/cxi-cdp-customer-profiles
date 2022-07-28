@@ -2,6 +2,7 @@
 using CXI.Contracts.PartnerProfile.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.PartnerProfile.Business
 {
@@ -49,6 +50,13 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="pageSize"></param>
         /// <returns></returns>
         Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize);
+
+        /// <summary>
+        /// Gets PartnerProfiles Paginated records
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PaginatedResponse<PartnerProfileDto>> GetPartnerProfilesPaginatedAsync(PaginationRequest request);
 
         /// <summary>
         /// Update PartnerSubscription Async

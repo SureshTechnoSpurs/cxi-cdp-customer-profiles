@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.PartnerProfile.Business;
+﻿using System;
+using ClientWebAppService.PartnerProfile.Business;
 using ClientWebAppService.PartnerProfile.Business.Models;
 using CXI.Common.ExceptionHandling;
 using CXI.Contracts.PartnerProfile.Models;
@@ -9,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ClientWebAppService.PartnerProfile.Core;
 using CXI.Common.Helpers;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.PartnerProfile.Controllers
 {
@@ -62,6 +64,7 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok(paginatedResult);
         }
 
+        [Obsolete("Use overload with PaginationRequest")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PartnerProfileDto>), 200)]
         [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
@@ -81,6 +84,17 @@ namespace ClientWebAppService.PartnerProfile.Controllers
                 await _partnerProfileService.GetPartnerProfilesPaginatedAsync(pageIndex.Value, pageSize.Value);
 
             return Ok(paginatedResult);
+        }
+
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(PaginatedResponse<PartnerProfileDto>), 200)]
+        [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPaginated([FromBody] PaginationRequest request)
+        {
+            var result = await _partnerProfileService.GetPartnerProfilesPaginatedAsync(request);
+
+            return Ok(result);
         }
 
         [HttpPost("{partnerId}/complete")]
