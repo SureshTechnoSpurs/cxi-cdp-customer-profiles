@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CXI.Common" Version="1.0.26" />
+    <PackageReference Include="CXI.Common" Version="1.0.27" />
     <PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.3" />
     <PackageReference Include="CXI.Common.MongoDb" Version="1.0.2" />
     <PackageReference Include="CXI.Common.Security" Version="1.0.4" />
