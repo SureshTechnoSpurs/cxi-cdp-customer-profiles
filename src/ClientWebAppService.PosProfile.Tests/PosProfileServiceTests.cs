@@ -34,7 +34,7 @@ namespace ClientWebAppService.PosProfile.Tests
         private readonly Mock<ISecretClient> _secretClientMock;
         private readonly Mock<IPosCredentialsServiceResolver> _posCredentialsServiceResolver;
         private readonly Mock<IPosCredentialsOffboardingService> _squareCredentialsOffboardingService;
-        private readonly Mock<IPartnerProfileServiceClient> _partnerProfileServiceClientMock;
+        private readonly Mock<IPartnerProfileM2MServiceClient> _partnerProfileServiceClientMock;
 
         public PosProfileServiceTests()
         {
@@ -45,7 +45,7 @@ namespace ClientWebAppService.PosProfile.Tests
             _secretClientMock = new Mock<ISecretClient>();
             _posCredentialsServiceResolver = new Mock<IPosCredentialsServiceResolver>();
             _squareCredentialsOffboardingService = new Mock<IPosCredentialsOffboardingService>();
-            _partnerProfileServiceClientMock = new Mock<IPartnerProfileServiceClient>();
+            _partnerProfileServiceClientMock = new Mock<IPartnerProfileM2MServiceClient>();
 
             _posProfileService = new PosProfileService(
                 _posProfileRepositoryMock.Object,
