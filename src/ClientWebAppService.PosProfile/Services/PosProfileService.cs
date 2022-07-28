@@ -26,7 +26,7 @@ namespace ClientWebAppService.PosProfile.Services
         private readonly IConfiguration _configuration;
         private readonly ISecretClient _secretClient;
         private readonly IPosCredentialsServiceResolver _credentialsServiceResolver;
-        private readonly IPartnerProfileServiceClient _partnerProfileServiceClient;
+        private readonly IPartnerProfileM2MServiceClient _partnerProfileM2MServiceClient;
 
         /// <summary>
         /// ctor
@@ -42,14 +42,14 @@ namespace ClientWebAppService.PosProfile.Services
             IConfiguration configuration,
             ISecretClient secretClient,
             IPosCredentialsServiceResolver credentialsServiceResolver,
-            IPartnerProfileServiceClient partnerProfileServiceClient)
+            IPartnerProfileM2MServiceClient partnerProfileM2mServiceClient)
         {
             _posProfileRepository = posProfileRepository;
             _logger = logger;
             _configuration = configuration;
             _secretClient = secretClient;
             _credentialsServiceResolver = credentialsServiceResolver;
-            _partnerProfileServiceClient = partnerProfileServiceClient;
+            _partnerProfileM2MServiceClient = partnerProfileM2mServiceClient;
         }
 
         /// <inheritdoc cref="IPosProfileService"/>
@@ -156,7 +156,7 @@ namespace ClientWebAppService.PosProfile.Services
                     posProfile.PosConfiguration.All(c => c.PosType.Equals(posType, StringComparison.OrdinalIgnoreCase)))
                 {
                     await _posProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
-                    await _partnerProfileServiceClient.SetPartnerActivityStatusAsync(partnerId, false);
+                    await _partnerProfileM2MServiceClient.SetPartnerActivityStatusAsync(partnerId, false);
                 }
                 else
                 {

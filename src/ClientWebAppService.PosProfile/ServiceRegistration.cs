@@ -98,8 +98,8 @@ namespace ClientWebAppService.PosProfile
                 nameof(domainServicesConfiguration.PartnerProfileServiceConfiguration));
 
             services
-                .AddPartnerProfileServiceClient(domainServicesConfiguration.PartnerProfileServiceConfiguration.BaseUrl)
-                .WithHttpContextAuthorizationTokenResolver();
+                .AddPartnerProfileM2MServiceClient(domainServicesConfiguration.PartnerProfileServiceConfiguration.BaseUrl)
+                .WithConfidentialClientTokenResolver(configuration);
 
             return services;
         }
