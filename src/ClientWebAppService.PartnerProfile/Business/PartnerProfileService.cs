@@ -59,7 +59,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                         LastBilledDate = null
                     },
                     ServiceAgreementVersion = string.Empty,
-                    ServiceAgreementAcceptedDate = null
+                    ServiceAgreementAcceptedDate = null,
+                    CreatedOn = DateTime.UtcNow,
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -217,7 +218,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded,
+                partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
                 partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />

@@ -51,5 +51,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("service_agreement_accepted_date")]
         public DateTime? ServiceAgreementAcceptedDate { get; set; }
+
+        [BsonElement("created_on")]
+        public DateTime CreatedOn { get; set; }
     }
 }
