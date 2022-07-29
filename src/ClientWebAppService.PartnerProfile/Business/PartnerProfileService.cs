@@ -123,7 +123,6 @@ namespace ClientWebAppService.PartnerProfile.Business
         ///<inheritdoc/>
         public async Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel)
         {
-            //todo
             try
             {
                 _logger.LogInformation($"Updating partner profile with id : {partnerId}.");
@@ -136,8 +135,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
                     IsActive = updateModel.IsActive,
-                    Subscription = updateModel.Subscription,
-                    //CreatedOn = updateModel.Cre
+                    Subscription = updateModel.Subscription
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
