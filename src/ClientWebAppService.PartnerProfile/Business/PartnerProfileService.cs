@@ -151,7 +151,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                     IsActive = updateModel.IsActive,
                     Subscription = updateModel.Subscription,
                     ServiceAgreementVersion = updateModel.ServiceAgreementVersion,
-                    ServiceAgreementAcceptedDate = updateModel.ServiceAgreementAcceptedDate,
+                    ServiceAgreementAcceptedDate = updateModel.ServiceAgreementAcceptedDate
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
