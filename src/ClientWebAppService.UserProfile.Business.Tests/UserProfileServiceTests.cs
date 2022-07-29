@@ -238,5 +238,31 @@ namespace ClientWebAppService.UserProfile.Business.Tests
                          .Should()
                          .ThrowAsync<OwnerDeletionForbiddenException>();
         }
+
+        [Fact]
+        public async Task GetUsersCountByPartners_UsersFound_GetUsersCountByPartners()
+        {
+            var partnerIds = new List<string> { "partnerID_1", "partnerID_2" , "partnerID_3" };
+            var users = new List<User>()
+            {
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_2"}
+            };
+
+            _repositoryMock.Setup(r => r.FilterBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(users);
+
+            var result = await _service.GetUsersCountByPartners(partnerIds);
+
+            Assert.NotNull(result);
+            Assert.Equal(partnerIds.Count, result.Count);
+            Assert.Contains("partnerID_1", (IDictionary<string,int>)result);
+            Assert.Equal(5, result.GetValueOrDefault("partnerID_1"));
+            Assert.Equal(1, result.GetValueOrDefault("partnerID_2"));
+            Assert.Equal(0, result.GetValueOrDefault("partnerID_3"));
+        }
     }
 }

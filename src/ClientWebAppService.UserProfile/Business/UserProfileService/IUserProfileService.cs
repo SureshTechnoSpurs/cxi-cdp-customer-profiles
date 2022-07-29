@@ -33,5 +33,12 @@ namespace ClientWebAppService.UserProfile.Business
         /// Delete user profile and its account in Azure ADB2C Directory.
         /// </summary>
         Task DeleteProfileByEmailAsync(string email);
+
+        /// <summary>
+        /// Get amount of users for each partner
+        /// </summary>
+        /// <param name="partnerIds"></param>
+        /// <returns></returns>
+        Task<Dictionary<string, int>> GetUsersCountByPartners(List<string> partnerIds);
     }
 }
