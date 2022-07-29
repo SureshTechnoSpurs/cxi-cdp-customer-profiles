@@ -44,5 +44,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("subscription")]
         public Subscription Subscription { get; set; } = new Subscription();
+
+        [BsonElement("created_on")]
+        public DateTime CreatedOn { get; set; }
     }
 }

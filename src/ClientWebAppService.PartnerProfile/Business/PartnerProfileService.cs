@@ -58,7 +58,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                         SubscriptionId = string.Empty,
                         State = null,
                         LastBilledDate = null
-                    }
+                    },
+                    CreatedOn = DateTime.UtcNow
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -122,6 +123,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         ///<inheritdoc/>
         public async Task UpdateProfileAsync(string partnerId, PartnerProfileUpdateModel updateModel)
         {
+            //todo
             try
             {
                 _logger.LogInformation($"Updating partner profile with id : {partnerId}.");
@@ -134,7 +136,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
                     IsActive = updateModel.IsActive,
-                    Subscription = updateModel.Subscription
+                    Subscription = updateModel.Subscription,
+                    //CreatedOn = updateModel.Cre
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -201,7 +204,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded);
+                partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
