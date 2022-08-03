@@ -247,7 +247,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         }
         
         /// <inheritdoc cref="UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
-        public async Task UpdatePartnerSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
+        public async Task UpdatePartnerSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
             await _partnerRepository.UpdateSubscriptionsAsync(subscriptionBulkUpdateDtos);
         }

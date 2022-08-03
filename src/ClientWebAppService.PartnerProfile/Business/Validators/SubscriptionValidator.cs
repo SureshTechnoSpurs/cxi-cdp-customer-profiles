@@ -16,10 +16,6 @@ namespace ClientWebAppService.PartnerProfile.Business.Validators
             {
                RuleFor(x => x.SubscriptionId).NotEmpty().NotNull();
             });
-            When(x => !string.IsNullOrEmpty(x.SubscriptionId) || x.State.HasValue, () =>
-            {
-                RuleFor(x => x.LastBilledDate).NotEmpty().NotNull();
-            });
             When(x => !string.IsNullOrEmpty(x.SubscriptionId) || x.LastBilledDate.HasValue, () =>
              {
                  RuleFor(x => x.State).NotEmpty().IsInEnum().NotNull();
