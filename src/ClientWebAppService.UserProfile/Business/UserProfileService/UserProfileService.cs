@@ -66,16 +66,15 @@ namespace ClientWebAppService.UserProfile.Business
                 _logger.LogInformation($"Creating new user profile for partnerId : {creationModel.PartnerId}");
 
                 var result = await _userProfileRepository.FindOne(
-                    x => x.Email == creationModel.Email &&
-                         x.PartnerId == creationModel.PartnerId);
+                    x => x.Email == creationModel.Email);
 
                 if (result != null)
                 {
                     _logger.LogError(
-                        $"CreateProfileAsync - Attempted to create user profile with email ({creationModel.Email}) and parner Id ${creationModel.PartnerId}");
+                        $"CreateProfileAsync - Attempted to create user profile with email ({creationModel.Email}) and partner Id ${creationModel.PartnerId}. User profile already exists.");
                     throw new ValidationException(
                         nameof(creationModel.PartnerId),
-                        $"User profile with email ({creationModel.Email}) and parnerId ${creationModel.PartnerId} already exists.");
+                        $"User profile with email ({creationModel.Email}) already exists.");
                 }
 
                 var newUser = new User
@@ -132,7 +131,7 @@ namespace ClientWebAppService.UserProfile.Business
 
             try
             {
-                var updatedUser = await _userProfileRepository.UpdateAsync(updateDto.PartnerId, updateDto.Email, updateDto.InvitationAccepted);
+                var updatedUser = await _userProfileRepository.UpdateAsync(updateDto.PartnerId, updateDto.Email, updateDto.InvitationAccepted.Value);
 
                 _logger.LogInformation($"Successfully updated user profile for partnerId = {updateDto.PartnerId} with email = {updateDto.Email}.");
 
