@@ -73,7 +73,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         }
 
         /// <inheritdoc cref="UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
-        public Task UpdateSubscriptionsAsync(List<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
+        public Task UpdateSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
             var bulkUpdateModel = new List<WriteModel<Partner>>();
 
