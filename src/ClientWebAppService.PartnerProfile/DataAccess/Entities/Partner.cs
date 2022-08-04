@@ -3,6 +3,7 @@ using CXI.Contracts.PartnerProfile.Models;
 using GL.MSA.Core.NoSql.Attributes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -44,5 +45,14 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("subscription")]
         public Subscription Subscription { get; set; } = new Subscription();
+
+        [BsonElement("service_agreement_version")]
+        public string? ServiceAgreementVersion { get; set; }
+
+        [BsonElement("service_agreement_accepted_date")]
+        public DateTime? ServiceAgreementAcceptedDate { get; set; }
+
+        [BsonElement("created_on")]
+        public DateTime CreatedOn { get; set; }
     }
 }

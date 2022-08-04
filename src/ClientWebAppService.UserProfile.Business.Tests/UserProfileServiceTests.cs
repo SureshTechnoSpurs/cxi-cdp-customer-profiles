@@ -1,6 +1,7 @@
 ﻿using ClientWebAppService.UserProfile.Core.Exceptions;
 using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
+using CXI.Common.Models.Pagination;
 using CXI.Contracts.UserProfile.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -237,6 +238,60 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             await _service.Invoking(x => x.DeleteProfileByEmailAsync(inputEmail))
                          .Should()
                          .ThrowAsync<OwnerDeletionForbiddenException>();
+        }
+
+        [Fact]
+        public async Task GetUsersCountByPartners_UsersFound_GetUsersCountByPartners()
+        {
+            var partnerIds = new List<string> { "partnerID_1", "partnerID_2" , "partnerID_3" };
+            var users = new List<User>()
+            {
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_1"},
+                new() { PartnerId = "partnerID_2"}
+            };
+
+            _repositoryMock.Setup(r => r.FilterBy(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(users);
+
+            var result = await _service.GetUsersCountByPartners(partnerIds);
+
+            Assert.NotNull(result);
+            Assert.Equal(partnerIds.Count, result.Count);
+            Assert.Contains("partnerID_1", (IDictionary<string,int>)result);
+            Assert.Equal(5, result.GetValueOrDefault("partnerID_1"));
+            Assert.Equal(1, result.GetValueOrDefault("partnerID_2"));
+            Assert.Equal(0, result.GetValueOrDefault("partnerID_3"));
+        }
+
+        [Fact]
+        public async Task GetUserProfilesPaginatedAsync_ProfilesExist_ShouldReturnUserProfilePaginatedDto()
+        {
+            // Arrange
+            _repositoryMock
+                .Setup(x => x.GetPaginatedList(It.IsAny<PaginationRequest>(), It.IsAny<Expression<Func<User, bool>>>()))
+                .ReturnsAsync(new PaginatedResponse<User>
+                {
+                    Items = new List<User>
+                    {
+                        new User { PartnerId = "test", Email = "test@outlook.com", Role = UserRole.Associate }
+                    },
+                    PageIndex = 1,
+                    PageSize = 1,
+                    TotalCount = 1,
+                    TotalPages = 1
+                });
+
+            var pageRequest = new PaginationRequest() { PageIndex = 1, PageSize = 1 };
+
+            // Act
+            var result = await _service.GetUserProfilesPaginatedAsync(pageRequest);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().NotBeEmpty();
         }
     }
 }

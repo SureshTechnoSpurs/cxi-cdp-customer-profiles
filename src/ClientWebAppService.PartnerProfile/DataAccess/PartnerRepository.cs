@@ -50,7 +50,9 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                     Builders<Partner>.Update.Set(x => x.ServiceAgreementAccepted, updatedPartner.ServiceAgreementAccepted),
                     Builders<Partner>.Update.Set(x => x.UserProfiles, updatedPartner.UserProfiles),
                     Builders<Partner>.Update.Set(x => x.IsActive, updatedPartner.IsActive),
-                    Builders<Partner>.Update.Set(x => x.Subscription, updatedPartner.Subscription));
+                    Builders<Partner>.Update.Set(x => x.Subscription, updatedPartner.Subscription),
+                    Builders<Partner>.Update.Set(x => x.ServiceAgreementVersion, updatedPartner.ServiceAgreementVersion),
+                    Builders<Partner>.Update.Set(x => x.ServiceAgreementAcceptedDate, updatedPartner.ServiceAgreementAcceptedDate));
 
             var policy = GetDefaultPolicy();
 
@@ -71,20 +73,33 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         }
 
         /// <inheritdoc cref="UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
-        public Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        public Task UpdateSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
             var bulkUpdateModel = new List<WriteModel<Partner>>();
 
-            foreach (var record in subscriptionPartnerIdDtos)
+            foreach (var dto in subscriptionBulkUpdateDtos)
             {
-                var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == record.PartnerId);
-                var updateStrategy = Builders<Partner>.Update.Set(x => x.Subscription, record.Subscription);
+                var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == dto.PartnerId);
+                var updateStrategy = Builders<Partner>.Update.Combine(
+                    Builders<Partner>.Update.Set(x => x.Subscription, dto.Subscription),
+                    Builders<Partner>.Update.Set(x => x.IsActive, dto.IsActive));
 
                 var updateOne = new UpdateOneModel<Partner>(filter, updateStrategy) { IsUpsert = true };
                 bulkUpdateModel.Add(updateOne);
             }
             var policy = GetDefaultPolicy();
             return policy.ExecuteAsync(() => _collection.BulkWriteAsync(bulkUpdateModel));
+        }
+
+        /// <inheritdoc cref="SetStatus(string, bool)"/>
+        public Task SetActivityStatus(string partnerId, bool value)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+            var updateStrategy = Builders<Partner>.Update.Set(x => x.IsActive, value);
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
         }
     }
 }

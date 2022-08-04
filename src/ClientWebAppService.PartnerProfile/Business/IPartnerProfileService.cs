@@ -2,6 +2,7 @@
 using CXI.Contracts.PartnerProfile.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.PartnerProfile.Business
 {
@@ -51,6 +52,13 @@ namespace ClientWebAppService.PartnerProfile.Business
         Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize);
 
         /// <summary>
+        /// Gets PartnerProfiles Paginated records
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PaginatedResponse<PartnerProfileDto>> GetPartnerProfilesPaginatedAsync(PaginationRequest request);
+
+        /// <summary>
         /// Update PartnerSubscription Async
         /// </summary>
         /// <param name="partnerId"></param>
@@ -70,6 +78,21 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         /// <param name="subscriptionPartnerIdDtos"></param>
         /// <returns></returns>
-        Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
+        Task UpdatePartnerSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos);
+
+        /// <summary>
+        /// Sets Partners isActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        Task SetPartnerActivityStatusAsync(string partnerId, bool isActive);
+
+        /// <summary>
+        /// Get the partner profile for the given partner id
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <returns></returns>
+        Task<PartnerProfileDto?> FindPartnerProfileAsync(string partnerId);
     }
 }

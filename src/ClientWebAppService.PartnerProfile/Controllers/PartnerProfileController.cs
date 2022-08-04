@@ -1,4 +1,5 @@
-﻿using ClientWebAppService.PartnerProfile.Business;
+﻿using System;
+using ClientWebAppService.PartnerProfile.Business;
 using ClientWebAppService.PartnerProfile.Business.Models;
 using CXI.Common.ExceptionHandling;
 using CXI.Contracts.PartnerProfile.Models;
@@ -9,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using ClientWebAppService.PartnerProfile.Core;
 using CXI.Common.Helpers;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.PartnerProfile.Controllers
 {
@@ -62,6 +64,7 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok(paginatedResult);
         }
 
+        [Obsolete("Use overload with PaginationRequest")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PartnerProfileDto>), 200)]
         [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
@@ -81,6 +84,17 @@ namespace ClientWebAppService.PartnerProfile.Controllers
                 await _partnerProfileService.GetPartnerProfilesPaginatedAsync(pageIndex.Value, pageSize.Value);
 
             return Ok(paginatedResult);
+        }
+
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(PaginatedResponse<PartnerProfileDto>), 200)]
+        [ProducesResponseType(typeof(PartnerProfilePaginatedDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPaginated([FromBody] PaginationRequest request)
+        {
+            var result = await _partnerProfileService.GetPartnerProfilesPaginatedAsync(request);
+
+            return Ok(result);
         }
 
         [HttpPost("{partnerId}/complete")]
@@ -150,12 +164,66 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
         [Authorize(Policy = Constants.M2MPolicy)]
         [HttpPut("m2m/subscriptions")]
-        [ProducesResponseType(typeof(List<SubscriptionPartnerIdDto>), 200)]
-        public async Task<IActionResult> UpdatePartnerSubscriptionsAsync([FromBody] List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        [ProducesResponseType(typeof(List<SubscriptionBulkUpdateDto>), 200)]
+        public async Task<IActionResult> UpdatePartnerSubscriptionsAsync([FromBody] IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
-            await _partnerProfileService.UpdatePartnerSubscriptionsAsync(subscriptionPartnerIdDtos);
+            await _partnerProfileService.UpdatePartnerSubscriptionsAsync(subscriptionBulkUpdateDtos);
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Sets partner IsActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        [HttpPut("{partnerId}/active")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SetActivityStatus([FromRoute] string partnerId, [FromBody] bool value)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            await _partnerProfileService.SetPartnerActivityStatusAsync(partnerId, value);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Sets partner IsActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpPut("m2m/{partnerId}/active")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> M2MSetActivityStatus([FromRoute] string partnerId, [FromBody] bool value)
+        {
+            VerifyHelper.NotEmpty(partnerId, nameof(partnerId));
+
+            await _partnerProfileService.SetPartnerActivityStatusAsync(partnerId, value);
+            return Ok();
+        }
+
+        [HttpGet("find/{partnerId}")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> FindPartnerProfile([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.FindPartnerProfileAsync(partnerId);
+
+            return Ok(result);
+        }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/{partnerId}")]
+        [ProducesResponseType(typeof(PartnerProfileDto), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> M2MGetById([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.GetByIdAsync(partnerId);
+
+            return Ok(result);
         }
     }
 }

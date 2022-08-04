@@ -11,6 +11,7 @@ using ClientWebAppService.PosProfile.Services;
 using ClientWebAppService.PosProfile.Services.Credentials;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Security.Secrets;
+using CXI.Contracts.PartnerProfile;
 using CXI.Contracts.PosProfile.Models;
 using CXI.Contracts.PosProfile.Models.Create;
 using FluentAssertions;
@@ -24,24 +25,6 @@ namespace ClientWebAppService.PosProfile.Tests
 {
     public class PosProfileServiceTests
     {
-        public PosProfileServiceTests()
-        {
-            _posProfileRepositoryMock = new Mock<IPosProfileRepository>();
-            _configurationMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
-            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
-            _loggerMock = new Mock<ILogger<PosProfileService>>();
-            _secretClientMock = new Mock<ISecretClient>();
-            _posCredentialsServiceResolver = new Mock<IPosCredentialsServiceResolver>();
-            _squareCredentialsOffboardingService = new Mock<IPosCredentialsOffboardingService>();
-
-            _posProfileService = new PosProfileService(
-                _posProfileRepositoryMock.Object,
-                _loggerMock.Object,
-                _configurationMock.Object,
-                _secretClientMock.Object,
-                _posCredentialsServiceResolver.Object);
-        }
-
         private const string SecretNotFoundErrorCode = "SecretNotFound";
 
         private readonly IPosProfileService _posProfileService;
@@ -51,6 +34,27 @@ namespace ClientWebAppService.PosProfile.Tests
         private readonly Mock<ISecretClient> _secretClientMock;
         private readonly Mock<IPosCredentialsServiceResolver> _posCredentialsServiceResolver;
         private readonly Mock<IPosCredentialsOffboardingService> _squareCredentialsOffboardingService;
+        private readonly Mock<IPartnerProfileM2MServiceClient> _partnerProfileServiceClientMock;
+
+        public PosProfileServiceTests()
+        {
+            _posProfileRepositoryMock = new Mock<IPosProfileRepository>();
+            _configurationMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+            _posProfileRepositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Models.PosProfile, bool>>>()));
+            _loggerMock = new Mock<ILogger<PosProfileService>>();
+            _secretClientMock = new Mock<ISecretClient>();
+            _posCredentialsServiceResolver = new Mock<IPosCredentialsServiceResolver>();
+            _squareCredentialsOffboardingService = new Mock<IPosCredentialsOffboardingService>();
+            _partnerProfileServiceClientMock = new Mock<IPartnerProfileM2MServiceClient>();
+
+            _posProfileService = new PosProfileService(
+                _posProfileRepositoryMock.Object,
+                _loggerMock.Object,
+                _configurationMock.Object,
+                _secretClientMock.Object,
+                _posCredentialsServiceResolver.Object, 
+                _partnerProfileServiceClientMock.Object);
+        }
 
         [Fact]
         public async Task CreatePosProfileAsync_CorrectParametersPassed_SuccessfulResultReturned()

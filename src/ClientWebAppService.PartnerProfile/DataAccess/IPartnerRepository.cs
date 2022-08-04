@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace ClientWebAppService.PartnerProfile.DataAccess
 {
     ///<inheritdoc/>
-    public interface IPartnerRepository :
-        IBaseMongoRepository<Partner, ObjectId>
+    public interface IPartnerRepository : IBaseMongoRepository<Partner, ObjectId>
     {
         /// <summary>
         /// Complete partner on-boarding 
@@ -32,6 +31,14 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         /// </summary>
         /// <param name="subscriptionPartnerIdDtos"></param>
         /// <returns></returns>
-        Task UpdateSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos);
+        Task UpdateSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos);
+
+        /// <summary>
+        /// Sets partners IsActive flag
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        Task SetActivityStatus(string partnerId, bool value);
     }
 }

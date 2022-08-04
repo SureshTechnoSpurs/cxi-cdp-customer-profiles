@@ -3,7 +3,7 @@ using ClientWebAppService.PartnerProfile.Business.Utils;
 using ClientWebAppService.PartnerProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
-using CXI.Common.Models;
+using CXI.Common.Models.Pagination;
 using CXI.Contracts.PartnerProfile.Models;
 using CXI.Contracts.PosProfile;
 using Microsoft.Extensions.Logging;
@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MongoDB.Bson;
 using ValidationException = CXI.Common.ExceptionHandling.Primitives.ValidationException;
 
 namespace ClientWebAppService.PartnerProfile.Business
@@ -58,7 +57,10 @@ namespace ClientWebAppService.PartnerProfile.Business
                         SubscriptionId = string.Empty,
                         State = null,
                         LastBilledDate = null
-                    }
+                    },
+                    ServiceAgreementVersion = string.Empty,
+                    ServiceAgreementAcceptedDate = null,
+                    CreatedOn = DateTime.UtcNow,
                 };
 
                 await _partnerRepository.InsertOne(newPartnerProfile);
@@ -112,11 +114,24 @@ namespace ClientWebAppService.PartnerProfile.Business
             VerifyHelper.GreaterThanZero(pageIndex, nameof(pageIndex));
             VerifyHelper.GreaterThanZero(pageSize, nameof(pageSize));
 
-            var partnerProfiles = await _partnerRepository.GetPaginatedList(pageIndex, pageSize);
+            var partnerProfiles = await _partnerRepository.GetPaginatedList(new PaginationRequest() { PageIndex = pageIndex, PageSize = pageSize });
 
             VerifyHelper.NotNull(partnerProfiles, nameof(partnerProfiles));
 
             return MapDto(partnerProfiles);
+        }
+
+        ///<inheritdoc/>
+        public async Task<PaginatedResponse<PartnerProfileDto>> GetPartnerProfilesPaginatedAsync(PaginationRequest request)
+        {
+            VerifyHelper.GreaterThanZero(request.PageIndex, nameof(request.PageIndex));
+            VerifyHelper.GreaterThanZero(request.PageSize, nameof(request.PageSize));
+
+            var result = await _partnerRepository.GetPaginatedList(request);
+
+            VerifyHelper.NotNull(result, nameof(result));
+
+            return MapToPaginatedResponse(result);
         }
 
         ///<inheritdoc/>
@@ -134,7 +149,9 @@ namespace ClientWebAppService.PartnerProfile.Business
                     UserProfiles = updateModel.UserProfileEmails,
                     ServiceAgreementAccepted = updateModel.ServiceAgreementAccepted,
                     IsActive = updateModel.IsActive,
-                    Subscription = updateModel.Subscription
+                    Subscription = updateModel.Subscription,
+                    ServiceAgreementVersion = updateModel.ServiceAgreementVersion,
+                    ServiceAgreementAcceptedDate = updateModel.ServiceAgreementAcceptedDate
                 };
 
                 await _partnerRepository.UpdateAsync(partnerId, newPart);
@@ -201,7 +218,8 @@ namespace ClientWebAppService.PartnerProfile.Business
         private PartnerProfileDto Map(Partner partner) =>
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
-                partner.IsActive, partner.Subscription, partner.Id.CreationTime, partner.IsOnBoarded);
+                partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -218,7 +236,7 @@ namespace ClientWebAppService.PartnerProfile.Business
 
         private PartnerProfilePaginatedDto MapDto(PaginatedResponse<Partner> model)
         {
-            return new PartnerProfilePaginatedDto 
+            return new PartnerProfilePaginatedDto
             {
                 Items = model.Items.Select(Map),
                 PageIndex = model.PageIndex,
@@ -227,11 +245,58 @@ namespace ClientWebAppService.PartnerProfile.Business
                 TotalPages = model.TotalPages
             };
         }
-
+        
         /// <inheritdoc cref="UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
-        public async Task UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto> subscriptionPartnerIdDtos)
+        public async Task UpdatePartnerSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
-            await _partnerRepository.UpdateSubscriptionsAsync(subscriptionPartnerIdDtos);
+            await _partnerRepository.UpdateSubscriptionsAsync(subscriptionBulkUpdateDtos);
+        }
+
+        private PaginatedResponse<PartnerProfileDto> MapToPaginatedResponse(PaginatedResponse<Partner> model)
+        {
+            return new PaginatedResponse<PartnerProfileDto>
+            {
+                Items = model.Items.Select(Map).ToList(),
+                PageIndex = model.PageIndex,
+                PageSize = model.PageSize,
+                TotalCount = model.TotalCount,
+                TotalPages = model.TotalPages
+            };
+        }
+
+        /// <summary>
+        /// SetPartnerStatusAsync
+        /// </summary>
+        /// <param name="partnerId"></param>
+        /// <param name="isActive"></param>
+        /// <returns></returns>
+        /// <exception cref="NotFoundException"></exception>
+        public async Task SetPartnerActivityStatusAsync(string partnerId, bool value)
+        {
+            var partner = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+            if (partner is null)
+            {
+                throw new NotFoundException($"PartnerProfile with id: {partnerId} not found.");
+            }
+
+            await _partnerRepository.SetActivityStatus(partnerId, value);
+
+            _logger.LogInformation($"Partner {partnerId} actiity status was set to {value}.");
+        }
+
+        ///<inheritdoc/>
+        public async Task<PartnerProfileDto?> FindPartnerProfileAsync(string partnerId)
+        {
+            _logger.LogInformation($"Get partner profile with id : {partnerId}.");
+
+            if (string.IsNullOrWhiteSpace(partnerId))
+            {
+                throw new ValidationException(nameof(partnerId), $"{nameof(partnerId)} should not be null or empty.");
+            }
+
+            var result = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            return result != null ? Map(result) : null;
         }
     }
 }

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using CXI.Common.Helpers;
+using CXI.Common.Models.Pagination;
 
 namespace ClientWebAppService.UserProfile.Controllers
 {
@@ -86,6 +88,27 @@ namespace ClientWebAppService.UserProfile.Controllers
             await _userProfileService.DeleteProfileByEmailAsync(email);
 
             return Ok();
+        }
+
+        [HttpPost("count")]
+        [ProducesResponseType(typeof(Dictionary<string, int>), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetUsersCountByPartners(List<string> partnerIds)
+        {
+            VerifyHelper.CollectionNotEmpty(partnerIds, nameof(partnerIds));
+
+            var result = await _userProfileService.GetUsersCountByPartners(partnerIds);
+            return Ok(result);
+        }
+
+        [HttpPost("search")]
+        [ProducesResponseType(typeof(PaginatedResponse<UserProfileDto>), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPaginatedUser([FromBody] PaginationRequest request)
+        {
+            var result = await _userProfileService.GetUserProfilesPaginatedAsync(request);
+
+            return Ok(result);
         }
     }
 }
