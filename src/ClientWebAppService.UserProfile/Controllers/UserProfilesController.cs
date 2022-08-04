@@ -101,7 +101,7 @@ namespace ClientWebAppService.UserProfile.Controllers
             return Ok(result);
         }
 
-        [HttpPost("page/search")]
+        [HttpPost("search")]
         [ProducesResponseType(typeof(PaginatedResponse<UserProfileDto>), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
         public async Task<IActionResult> GetPaginatedUser([FromBody] PaginationRequest request)
