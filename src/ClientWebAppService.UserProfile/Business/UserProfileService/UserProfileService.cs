@@ -3,6 +3,7 @@ using ClientWebAppService.UserProfile.Core.Exceptions;
 using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
+using CXI.Common.Models.Pagination;
 using CXI.Contracts.UserProfile.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -186,5 +187,30 @@ namespace ClientWebAppService.UserProfile.Business
 
         private UserProfileDto Map(User profile) =>
             new UserProfileDto(profile.PartnerId, profile.Email, profile.Role, profile.InvitationAccepted);
+
+        ///<inheritdoc cref="GetUserProfilesPaginatedAsync(PaginationRequest)"/>
+        public async Task<PaginatedResponse<UserProfileDto>> GetUserProfilesPaginatedAsync(PaginationRequest request)
+        {
+            VerifyHelper.GreaterThanZero(request.PageIndex, nameof(request.PageIndex));
+            VerifyHelper.GreaterThanZero(request.PageSize, nameof(request.PageSize));
+
+            var result = await _userProfileRepository.GetPaginatedList(request);
+
+            VerifyHelper.NotNull(result, nameof(result));
+
+            return MapToPaginatedResponse(result);
+        }
+
+        private PaginatedResponse<UserProfileDto> MapToPaginatedResponse(PaginatedResponse<User> model)
+        {
+            return new PaginatedResponse<UserProfileDto>
+            {
+                Items = model.Items.Select(Map).ToList(),
+                PageIndex = model.PageIndex,
+                PageSize = model.PageSize,
+                TotalCount = model.TotalCount,
+                TotalPages = model.TotalPages
+            };
+        }
     }
 }
