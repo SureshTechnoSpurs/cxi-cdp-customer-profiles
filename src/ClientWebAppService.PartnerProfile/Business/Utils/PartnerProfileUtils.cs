@@ -23,7 +23,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
             var formatedPartnerName = partnerName.RemoveWhitespace();
             var hash = ComputeHash(DateTime.UtcNow.ToString("yyyyMMddHHmmssfff"));
 
-            return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}-{hash}";
+            return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}#{hash}";
         }
 
         private static string ComputeHash(string value)
