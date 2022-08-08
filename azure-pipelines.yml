@@ -242,7 +242,7 @@ stages:
                 namespace: 'dev-customer-profiles'
                 acrname: 'acrnpreastus2mgmt'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20220329.1'
+                acrrepo: 'cxi-default:20220804.5'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
                 - componentname: 'customer-profiles-partner-profile'
@@ -257,8 +257,16 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
                     deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=50m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=1,\
+                    autoscaling.maxReplicasCount=3,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
                 - componentname: 'customer-profiles-pos-profile'
                   releasename: 'customer-profiles-pos-profile'
                   overridevalues: "
@@ -271,8 +279,16 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
                     deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=50m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=1,\
+                    autoscaling.maxReplicasCount=3,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
                 - componentname: 'customer-profiles-user-profile'
                   releasename: 'customer-profiles-user-profile'
                   overridevalues: "
@@ -285,8 +301,16 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
                     deployment.replicaCount=1,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=50m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=1,\
+                    autoscaling.maxReplicasCount=3,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
 
  - stage: Sonar_Qube
    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
@@ -304,7 +328,7 @@ stages:
         - task: SonarQubeAnalyze@4
         - task: SonarQubePublish@4
           inputs:
-           pollingTimeoutSec: '300'        
+           pollingTimeoutSec: '300'
            
 
 
