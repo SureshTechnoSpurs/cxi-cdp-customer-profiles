@@ -11,7 +11,7 @@ namespace ClientWebAppService.UserProfile.Business.Validators
     {
         public EmailValidator()
         {
-            RuleFor(x => x).NotEmpty().EmailAddress();
+            RuleFor(x => x).NotEmpty().EmailAddress().WithMessage(prop => $"{prop} is not a valid email address.");
         }
     }
 }

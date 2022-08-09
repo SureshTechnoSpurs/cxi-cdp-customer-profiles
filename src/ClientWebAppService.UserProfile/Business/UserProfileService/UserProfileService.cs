@@ -38,12 +38,14 @@ namespace ClientWebAppService.UserProfile.Business
         {
             _logger.LogInformation($"Get user profile by email: {email}");
 
+            VerifyHelper.NotEmpty(email, nameof(email));
+
             var validator = new EmailValidator();
             var validationResult = validator.Validate(email);
 
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(nameof(email), validationResult.Errors.ToString());
+                throw new ValidationException(nameof(email), validationResult.Errors.FirstOrDefault().ToString());
             }
 
             var result = await _userProfileRepository.FindOne(x => x.Email == email);
@@ -211,6 +213,29 @@ namespace ClientWebAppService.UserProfile.Business
                 TotalCount = model.TotalCount,
                 TotalPages = model.TotalPages
             };
+        }
+
+        public async Task<bool> UpdateUserRoleByEmailAsync(UserProfileUpdateRoleDto userProfileUpdateRole)
+        {
+            _logger.LogInformation($"Update user role for email = {userProfileUpdateRole.Email}.");
+
+            var email = userProfileUpdateRole.Email;
+            var role = userProfileUpdateRole.Role;
+
+            VerifyHelper.NotEmpty(email, nameof(email));
+            VerifyHelper.NotNull(role, nameof(role));
+            
+            var userByEmail = await GetByEmailAsync(email);
+            var userExists = userByEmail != null;
+            
+            if (userExists)
+            {
+                await _userProfileRepository.UpdateUserRoleAsync(userProfileUpdateRole);
+            }
+
+            _logger.LogInformation($"Successfully updated user role for email = {email}.");
+
+            return true;
         }
     }
 }

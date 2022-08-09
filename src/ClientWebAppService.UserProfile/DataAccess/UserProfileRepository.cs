@@ -1,4 +1,5 @@
 ﻿using CXI.Common.MongoDb;
+using CXI.Contracts.UserProfile.Models;
 using GL.MSA.Core.NoSql;
 using GL.MSA.Core.ResiliencyPolicy;
 using MongoDB.Bson;
@@ -26,6 +27,25 @@ namespace ClientWebAppService.UserProfile.DataAccess
             var updateStrategy =
                     Builders<User>.Update.Set(x => x.InvitationAccepted,
                         invitationAccepted);
+
+            var options = new FindOneAndUpdateOptions<User>
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+
+            var policy = GetDefaultPolicy();
+
+            return await policy.ExecuteAsync(async () => await _collection.FindOneAndUpdateAsync(filter, updateStrategy, options));
+        }
+
+        ///<inheritdoc cref="UpdateUserRoleAsync(UserProfileUpdateRoleDto)"/>
+        public async Task<User> UpdateUserRoleAsync(UserProfileUpdateRoleDto userProfileUpdateRole)
+        {
+            var filter = Builders<User>.Filter.Where(x => x.Email == userProfileUpdateRole.Email);
+
+            var updateStrategy =
+                    Builders<User>.Update.Set(x => x.Role,
+                        userProfileUpdateRole.Role);
 
             var options = new FindOneAndUpdateOptions<User>
             {
