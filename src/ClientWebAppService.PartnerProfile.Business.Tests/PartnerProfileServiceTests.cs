@@ -74,7 +74,6 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
                   x.PartnerName == testInput.Name &&
                   x.Address == testInput.Address &&
                   x.PartnerType == PartnerProfileUtils.DefaultPartnerType &&
-                  x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(testInput.Name) &&
                   x.ServiceAgreementAccepted == false);
         }
 
