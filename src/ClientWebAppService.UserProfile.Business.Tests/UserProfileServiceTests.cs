@@ -293,5 +293,28 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
         }
+
+        [Fact]
+        public async Task UpdateUserRoleByEmailAsync_CorrectParametersPassed_UserRoleUpdated()
+        {
+            // Arrange
+            var email = "testemail@mail.com";
+            var partnerId = "partnerId";
+            var userProfileUpdateRoleDto = new UserProfileUpdateRoleDto(UserRole.Associate, email);
+            var initialUserProfileState = new User { Email = email, PartnerId = partnerId, Role = UserRole.Associate, InvitationAccepted = false };
+
+            _repositoryMock.Setup(
+                x => x.UpdateUserRoleAsync(It.IsAny<UserProfileUpdateRoleDto>()))
+                .ReturnsAsync(initialUserProfileState);
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
+                          .ReturnsAsync(initialUserProfileState);
+            // Act
+            var result = await _service.UpdateUserRoleByEmailAsync(userProfileUpdateRoleDto);
+
+            // Assert
+            result.Should().BeTrue();
+
+            _repositoryMock.Verify(x => x.UpdateUserRoleAsync(It.IsAny<UserProfileUpdateRoleDto>()));
+        }
     }
 }
