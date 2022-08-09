@@ -226,9 +226,8 @@ namespace ClientWebAppService.UserProfile.Business
             VerifyHelper.NotNull(role, nameof(role));
             
             var userByEmail = await GetByEmailAsync(email);
-            var userExists = userByEmail != null;
             
-            if (userExists)
+            if (userByEmail != null)
             {
                 await _userProfileRepository.UpdateUserRoleAsync(userProfileUpdateRole);
             }
