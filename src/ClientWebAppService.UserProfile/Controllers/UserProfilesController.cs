@@ -110,6 +110,16 @@ namespace ClientWebAppService.UserProfile.Controllers
 
             return Ok(result);
         }
+
+        [HttpPut("role")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> UpdateUserRoleByEmail([FromBody] UserProfileUpdateRoleDto userProfileUpdateRole)
+        {
+            var result = await _userProfileService.UpdateUserRoleByEmailAsync(userProfileUpdateRole);
+
+            return Ok(result);
+        }
     }
 }
 
