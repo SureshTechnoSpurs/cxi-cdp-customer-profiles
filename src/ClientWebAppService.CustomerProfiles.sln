@@ -17,6 +17,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientWebAppService.PosProf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B509A0C7-0210-479A-BB4F-FB5B41C83765}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CXI.Common", "D:\Working\cxi\source\cxi-cdp-common\src\CXI.Common\CXI.Common\CXI.Common.csproj", "{A6379C39-84B0-4242-879D-490E411BF81C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CXI.Common.ExceptionHandling", "D:\Working\cxi\source\cxi-cdp-common\src\CXI.Common\CXI.Common.ExceptionHandling\CXI.Common.ExceptionHandling.csproj", "{4CEC38E4-AA9B-463F-BAC4-9438859083B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CXI.Contracts.UserProfile", "D:\Working\cxi\source\cxi-cdp-common\src\CXI.Common\CXI.Contracts.UserProfile\CXI.Contracts.UserProfile.csproj", "{AAB0736A-CF71-40C0-91F3-C4046D837252}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +53,18 @@ Global
 		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CF766EC-3064-48F6-A967-67B40A235B9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6379C39-84B0-4242-879D-490E411BF81C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6379C39-84B0-4242-879D-490E411BF81C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6379C39-84B0-4242-879D-490E411BF81C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6379C39-84B0-4242-879D-490E411BF81C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEC38E4-AA9B-463F-BAC4-9438859083B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEC38E4-AA9B-463F-BAC4-9438859083B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEC38E4-AA9B-463F-BAC4-9438859083B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEC38E4-AA9B-463F-BAC4-9438859083B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB0736A-CF71-40C0-91F3-C4046D837252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB0736A-CF71-40C0-91F3-C4046D837252}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB0736A-CF71-40C0-91F3-C4046D837252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB0736A-CF71-40C0-91F3-C4046D837252}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

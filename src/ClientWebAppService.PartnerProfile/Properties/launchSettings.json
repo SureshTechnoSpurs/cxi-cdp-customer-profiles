@@ -14,7 +14,11 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AZURE_APP_CONFIG": "Endpoint=https://aac-npr-eastus2-mgmt.azconfig.io;Id=whzq-l6-s0:En5dKH2knG/tbBdkrxHQ;Secret=EmHCtahsIz/eOpgt1kl/EmvlkYR683feVaX7zTlxImU=",
+        "AZURE_KEY_VAULT_URL": "https://kv-dev-eastus2-cdp.vault.azure.net",
+        "AZURE_KEY_VAULT_SECRET": "4eC_.~Z2Qs_Nvn4W0.Igj3N8e0zsdPvC.M",
+        "AZURE_KEY_VAULT_ID": "94940146-44d0-4ef4-b980-510ada0b4814"
       }
     },
     "ClientWebAppService.PartnerProfile": {
@@ -22,7 +26,11 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AZURE_APP_CONFIG": "Endpoint=https://aac-npr-eastus2-mgmt.azconfig.io;Id=whzq-l6-s0:En5dKH2knG/tbBdkrxHQ;Secret=EmHCtahsIz/eOpgt1kl/EmvlkYR683feVaX7zTlxImU=",
+        "AZURE_KEY_VAULT_URL": "https://kv-dev-eastus2-cdp.vault.azure.net",
+        "AZURE_KEY_VAULT_SECRET": "4eC_.~Z2Qs_Nvn4W0.Igj3N8e0zsdPvC.M",
+        "AZURE_KEY_VAULT_ID": "94940146-44d0-4ef4-b980-510ada0b4814"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
