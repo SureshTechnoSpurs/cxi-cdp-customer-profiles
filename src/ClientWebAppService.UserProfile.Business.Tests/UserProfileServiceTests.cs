@@ -300,14 +300,17 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             // Arrange
             var email = "testemail@mail.com";
             var partnerId = "partnerId";
-            var userProfileUpdateRoleDto = new UserProfileUpdateRoleDto(UserRole.Associate, email);
-            var initialUserProfileState = new User { Email = email, PartnerId = partnerId, Role = UserRole.Associate, InvitationAccepted = false };
+            var userProfileUpdateRoleDto = new UserProfileUpdateRoleDto(UserRole.Owner, email);
+            var initialUserProfileState = new User { Email = email, PartnerId = partnerId, Role = UserRole.Owner, InvitationAccepted = false };
 
             _repositoryMock.Setup(
                 x => x.UpdateUserRoleAsync(It.IsAny<UserProfileUpdateRoleDto>()))
                 .ReturnsAsync(initialUserProfileState);
             _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
-                          .ReturnsAsync(initialUserProfileState);
+                .ReturnsAsync(initialUserProfileState);
+            _repositoryMock.Setup(r => r.FilterBy(It.IsAny<Expression<Func<User, bool>>>()))
+                .ReturnsAsync(new List<User> { initialUserProfileState });
+
             // Act
             var result = await _service.UpdateUserRoleByEmailAsync(userProfileUpdateRoleDto);
 

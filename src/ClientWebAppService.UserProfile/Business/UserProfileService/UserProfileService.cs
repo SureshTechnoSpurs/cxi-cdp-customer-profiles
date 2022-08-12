@@ -224,17 +224,57 @@ namespace ClientWebAppService.UserProfile.Business
 
             VerifyHelper.NotEmpty(email, nameof(email));
             VerifyHelper.NotNull(role, nameof(role));
-            
+
             var userByEmail = await GetByEmailAsync(email);
-            
+
             if (userByEmail != null)
             {
+                if (role == UserRole.Associate)
+                {
+                    await ValidateOwner(email, userByEmail.PartnerId);
+                }
                 await _userProfileRepository.UpdateUserRoleAsync(userProfileUpdateRole);
             }
 
             _logger.LogInformation($"Successfully updated user role for email = {email}.");
 
             return true;
+        }
+        
+        private async Task ValidateOwner(string email, string partnerId)
+        {
+            var ownerCount = await GetOwnerCount(partnerId, email);
+
+            if (ownerCount <= 0)
+            {
+                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner");
+            }
+        }
+
+        private async Task<int> GetOwnerCount(string partnerId, string email)
+        {
+            var users = await GetUserProfilesByPartnerIdAsync(partnerId);
+
+            var ownerUser = users.Where(x => x.Role == UserRole.Owner && x.Email != email).ToList();
+
+            return ownerUser.Count();
+        }
+
+        public async Task<IEnumerable<UserProfileDto>> GetUserProfilesByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Retrieving user profiles by search criteria.");
+
+            var result = await _userProfileRepository.FilterBy(x => x.PartnerId == partnerId);
+
+            var userProfiles = result.ToList();
+
+            if (result == null || !userProfiles.Any())
+            {
+                _logger.LogInformation($"User profiles were not found for partnerId {partnerId}.");
+                throw new NotFoundException($"User profiles were not found.");
+            }
+
+            return userProfiles.Select(x => Map(x));
         }
     }
 }
