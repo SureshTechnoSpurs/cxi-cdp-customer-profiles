@@ -23,7 +23,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
             var formatedPartnerName = partnerName.RemoveWhitespace();
             var hash = ComputeHash(DateTime.UtcNow.ToString("yyyyMMddHHmmssfff"));
 
-            return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}-{hash}";
+            return $"{PartnerIdPrefix}{formatedPartnerName?.ToLower()}-{hash.ToLower()}";
         }
 
         private static string ComputeHash(string value)
@@ -31,7 +31,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Utils
             var hashUtil = new HashUtils(HashAlgorithmType.SHA1, Encoding.UTF8);
             var hash = hashUtil.GetHashData(value);
 
-            Regex regEx = new Regex("[^a-zA-Z0-9 -]");
+            Regex regEx = new Regex("[^a-zA-Z0-9]");
             var replacement = regEx.Replace(hash, "");
 
             if (replacement.Length > HashLength)
