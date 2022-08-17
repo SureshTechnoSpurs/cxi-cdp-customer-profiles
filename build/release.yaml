@@ -80,7 +80,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=2,\
                     autoscaling.maxReplicasCount=5,\
@@ -102,7 +102,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=2,\
                     autoscaling.maxReplicasCount=5,\
@@ -124,7 +124,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=2,\
                     autoscaling.maxReplicasCount=5,\

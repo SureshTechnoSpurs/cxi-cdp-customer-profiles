@@ -12,7 +12,7 @@ resources:
 
 variables:
 - group: default
-- group: common    
+- group: common-dev
 - name: version.MajorMinor
   value: '0.1' # Manually adjust the version number as needed for semantic versioning. Revision is auto-incremented.
 - name: version.Revision
@@ -262,7 +262,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=1,\
                     autoscaling.maxReplicasCount=3,\
@@ -284,7 +284,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=1,\
                     autoscaling.maxReplicasCount=3,\
@@ -306,7 +306,7 @@ stages:
                     deployment.resources.requests.memory=350Mi,\
                     deployment.resources.requests.cpu=20m,\
                     deployment.resources.limits.memory=700Mi,\
-                    deployment.resources.limits.cpu=50m,\
+                    deployment.resources.limits.cpu=100m,\
                     autoscaling.enabled=true,\
                     autoscaling.minReplicasCount=1,\
                     autoscaling.maxReplicasCount=3,\

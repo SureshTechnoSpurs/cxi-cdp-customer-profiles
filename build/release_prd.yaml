@@ -66,7 +66,7 @@ stages:
                 namespace: 'customer-profiles'
                 acrname: '$(registry)'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20220329.1'
+                acrrepo: 'cxi-default:20220804.5'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
                 - componentname: 'customer-profiles-partner-profile'
@@ -82,7 +82,15 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=100m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=2,\
+                    autoscaling.maxReplicasCount=5,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
                 - componentname: 'customer-profiles-pos-profile'
                   releasename: 'customer-profiles-pos-profile'
                   overridevalues: "
@@ -96,7 +104,15 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"    
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=100m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=2,\
+                    autoscaling.maxReplicasCount=5,\
+                    autoscaling.targetCPUUtilizationPercentage=70"   
                 - componentname: 'customer-profiles-user-profile'
                   releasename: 'customer-profiles-user-profile'
                   overridevalues: "
@@ -110,4 +126,12 @@ stages:
                     deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
                     deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
                     deployment.replicaCount=2,\
-                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT)"                       
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=100m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=2,\
+                    autoscaling.maxReplicasCount=5,\
+                    autoscaling.targetCPUUtilizationPercentage=70"                     
