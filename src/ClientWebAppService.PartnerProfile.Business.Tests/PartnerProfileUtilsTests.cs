@@ -11,11 +11,11 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
         public void GetPartnerIdByName_IncorrectPartnerNameProvided_FormatedPartnerIdReturned()
         {
             string partnerName = "  Partner     Name    1";
-            string espectedPartnerName = $"{PartnerIdPrefix}partnername1";
+            string expectedPartnerName = $"{PartnerIdPrefix}partnername1";
 
             string resultingPartnerName = PartnerProfileUtils.GetPartnerIdByName(partnerName);
 
-            Assert.Equal(espectedPartnerName, resultingPartnerName);
+            Assert.StartsWith(expectedPartnerName, resultingPartnerName);
         }
     }
 }

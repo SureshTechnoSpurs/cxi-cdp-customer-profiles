@@ -12,6 +12,7 @@
 		<PackageReference Include="CXI.Common" Version="1.0.28" />
 		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.8" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
+		<PackageReference Include="CXI.Common.Utilities" Version="1.0.1" />
 		<PackageReference Include="CXI.Contracts.PartnerProfile" Version="1.0.21" />
 		<PackageReference Include="CXI.Contracts.PosProfile" Version="1.0.10" />
 		<PackageReference Include="FluentValidation" Version="10.3.4" />
