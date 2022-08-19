@@ -108,6 +108,12 @@ namespace ClientWebAppService.PartnerProfile.Business
             return partnerProfiles.Select(Map);
         }
 
+        public async Task<IEnumerable<string>> GetPartnerProfileIds()
+        {
+            var result = (await _partnerRepository.FilterBy()).Select(x => x.PartnerId);
+            return result;
+        }
+
         /// <inheritdoc cref="GetPartnerProfilesPaginatedAsync(int, int)"/>
         public async Task<PartnerProfilePaginatedDto> GetPartnerProfilesPaginatedAsync(int pageIndex, int pageSize)
         {
