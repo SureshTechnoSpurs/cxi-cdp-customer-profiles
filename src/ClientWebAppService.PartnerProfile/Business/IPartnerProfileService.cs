@@ -94,5 +94,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// <param name="partnerId"></param>
         /// <returns></returns>
         Task<PartnerProfileDto?> FindPartnerProfileAsync(string partnerId);
+
+        /// <summary>
+        /// GetPartnerProfileIds
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<string>> GetPartnerProfileIds();
     }
 }
