@@ -38,11 +38,11 @@ namespace ClientWebAppService.PartnerProfile.Business
             {
                 _logger.LogInformation($"Creating partner profile with name : {creationModel.Name}.");
 
-                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.PartnerName == creationModel.Name && x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(creationModel.Name));
+                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.PartnerName == creationModel.Name && x.Address == creationModel.Address);
 
                 if (partnerWithSuchAddressOrName is not null)
                 {
-                    throw new ValidationException(nameof(creationModel.Name), $"Partner profile with name {creationModel.Name} is already registered.");
+                    throw new ValidationException(nameof(creationModel.Address), $"Such address {creationModel.Address} and name {creationModel.Name} already exists.");
                 }
 
                 var newPartnerProfile = new Partner

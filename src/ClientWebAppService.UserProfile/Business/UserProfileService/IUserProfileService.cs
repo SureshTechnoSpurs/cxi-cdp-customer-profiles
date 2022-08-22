@@ -48,5 +48,12 @@ namespace ClientWebAppService.UserProfile.Business
         /// <param name="request"></param>
         /// <returns></returns>
         Task<PaginatedResponse<UserProfileDto>> GetUserProfilesPaginatedAsync(PaginationRequest request);
+
+        /// <summary>
+        /// Update user role using roleId
+        /// </summary>
+        /// <param name="userProfileUpdateRole"></param>
+        /// <returns></returns>
+        Task<bool> UpdateUserRoleByEmailAsync(UserProfileUpdateRoleDto userProfileUpdateRole);
     }
 }
