@@ -11,9 +11,11 @@ using ClientWebAppService.UserProfile.DataAccess;
 using ClientWebAppService.UserProfile.Business;
 using FluentValidation.AspNetCore;
 using CXI.Common.MessageBrokers.Extentions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClientWebAppService.UserProfile.Core.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)

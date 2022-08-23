@@ -305,6 +305,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             return result != null ? Map(result) : null;
         }
 
+        ///<inheritdoc/>
         public async Task DeleteProfileByPartnerIdAsync(string partnerId)
         {
             _logger.LogInformation($"Deleting partner profile with id : {partnerId}.");
