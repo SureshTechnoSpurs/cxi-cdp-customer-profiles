@@ -100,5 +100,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<string>> GetPartnerProfileIds();
+
+
+        /// <summary>
+        /// Deletes Partner profile by its id.
+        /// </summary>
+        Task DeleteProfileByPartnerIdAsync(string partnerId);
     }
 }

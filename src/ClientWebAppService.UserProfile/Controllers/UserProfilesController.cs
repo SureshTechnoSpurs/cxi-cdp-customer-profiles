@@ -120,6 +120,16 @@ namespace ClientWebAppService.UserProfile.Controllers
 
             return Ok(result);
         }
+
+        [HttpDelete("partner/{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        {
+            await _userProfileService.DeleteUserProfilesByPartnerIdAsync(partnerId);
+
+            return Ok();
+        }
     }
 }
 
