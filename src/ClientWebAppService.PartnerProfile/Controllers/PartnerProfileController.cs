@@ -225,5 +225,14 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/ids")]
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        public async Task<IActionResult> M2mGetPartnerProfileIds()
+        {
+            var result = await _partnerProfileService.GetPartnerProfileIds();
+            return Ok(result);
+        }
     }
 }
