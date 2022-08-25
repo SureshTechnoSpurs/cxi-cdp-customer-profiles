@@ -235,5 +235,42 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock
                 .Verify(x => x.SetActivityStatus(It.IsAny<string>(), It.IsAny<bool>()), Times.Once);
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task DeleteProfileByPartnerIdAsync_IncorrectPartnerIdPassed_ValidationExceptionThrown(string partnerId)
+        {
+            var invocation = _service.Invoking(x => x.DeleteProfileByPartnerIdAsync(partnerId));
+            var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Fact]
+        public async Task DeleteProfileByPartnerIdAsync_PartnerProfileNotFound_NotFoundExceptionThrown()
+        {
+            var testInput = "testpartnerId";
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Partner, bool>>>()))
+                           .ReturnsAsync(default(Partner));
+
+            var invocation = _service.Invoking(x => x.DeleteProfileByPartnerIdAsync(testInput));
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+        }
+
+        [Fact]
+        public async Task DeleteProfileByPartnerIdAsync_PartnerProfileFound_ProperMethodsInoked()
+        {
+            var testInput = "testpartnerId";
+            var existingPartner = new Partner { PartnerName = "name", PartnerId = testInput, Address = "some adress" };
+
+            _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<Partner, bool>>>()))
+                           .ReturnsAsync(existingPartner);
+
+            await _service.Invoking(x => x.DeleteProfileByPartnerIdAsync(testInput))
+                         .Should()
+                         .NotThrowAsync();
+
+            _repositoryMock.Verify(x => x.DeleteOne(It.IsAny<Expression<Func<Partner, bool>>>()), Times.Once);
+        }
     }
 }

@@ -234,5 +234,16 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             var result = await _partnerProfileService.GetPartnerProfileIds();
             return Ok(result);
         }
+
+
+        [HttpDelete("{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        {
+            await _partnerProfileService.DeleteProfileByPartnerIdAsync(partnerId);
+
+            return Ok();
+        }
     }
 }
