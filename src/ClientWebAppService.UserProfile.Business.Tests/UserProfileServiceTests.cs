@@ -319,5 +319,31 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
             _repositoryMock.Verify(x => x.UpdateUserRoleAsync(It.IsAny<UserProfileUpdateRoleDto>()));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task DeleteUserProfilesByPartnerIdAsync_IncorrectPartnerIdPassed_ValidationExceptionThrown(string partnerId)
+        {
+            var invocation = _service.Invoking(x => x.DeleteUserProfilesByPartnerIdAsync(partnerId));
+            var result = await invocation.Should().ThrowAsync<ValidationException>();
+        }
+
+        [Fact]
+        public async Task DeleteUserProfilesByPartnerIdAsync_UserProfileFound_ProperMethodsInoked()
+        {
+            var testPartnerId = "testPartnerId";
+            var existingUserEmails = new List<string>() {"testPartnerEmail", "testPartnerEmail2" };
+
+            _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<User, string>>>(), It.IsAny<Expression<Func<User, bool>>>()))
+                           .ReturnsAsync(existingUserEmails);
+
+            await _service.Invoking(x => x.DeleteUserProfilesByPartnerIdAsync(testPartnerId))
+                         .Should()
+                         .NotThrowAsync();
+
+            _repositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
+            _azureADB2CDirectoryManagerMock.Verify(x => x.DeleteADB2CAccountByEmailAsync(It.IsAny<string>()), Times.Exactly(existingUserEmails.Count));
+        }
     }
 }

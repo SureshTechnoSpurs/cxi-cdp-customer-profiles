@@ -276,5 +276,29 @@ namespace ClientWebAppService.UserProfile.Business
 
             return userProfiles.Select(x => Map(x));
         }
+
+        ///<inheritdoc/>
+        public async Task DeleteUserProfilesByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Deleteing all user profiles for partnerId: {partnerId}");
+
+            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));
+
+            var userEmailsToDelete = await _userProfileRepository.FilterBy(profile => profile.Email, x => x.PartnerId == partnerId);
+
+            foreach (var email in userEmailsToDelete)
+            {
+                try
+                {
+                    await _azureADB2CDirectoryManager.DeleteADB2CAccountByEmailAsync(email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"DeleteUserProfilesByPartnerIdAsync. Failed to delete ADB2C account for user email: {email}. Exception: {ex.Message}.");
+                }
+            }
+
+            await _userProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
+        }
     }
 }

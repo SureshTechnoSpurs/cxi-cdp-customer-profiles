@@ -304,5 +304,21 @@ namespace ClientWebAppService.PartnerProfile.Business
 
             return result != null ? Map(result) : null;
         }
+
+        ///<inheritdoc/>
+        public async Task DeleteProfileByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Deleting partner profile with id : {partnerId}.");
+            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));           
+
+            var partnerToDelete = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            if (partnerToDelete == null)
+            {
+                throw new NotFoundException($"DeleteProfileByPartnerIdAsync. PartnerProfile with partnerId: {partnerId} not found.");
+            }
+
+            await _partnerRepository.DeleteOne(x => x.PartnerId == partnerId);
+        }
     }
 }

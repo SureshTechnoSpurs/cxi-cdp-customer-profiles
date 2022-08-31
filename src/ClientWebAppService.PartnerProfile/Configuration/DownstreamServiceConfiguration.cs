@@ -3,7 +3,7 @@
 namespace ClientWebAppService.PartnerProfile.Configuration
 {
     [ExcludeFromCodeCoverage]
-    public class PosProfileServiceConfiguration
+    public class DownstreamServiceConfiguration
     {
         public string? BaseUrl { get; set; }
     }

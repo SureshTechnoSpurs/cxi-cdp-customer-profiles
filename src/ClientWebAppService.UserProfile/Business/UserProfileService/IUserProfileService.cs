@@ -55,5 +55,10 @@ namespace ClientWebAppService.UserProfile.Business
         /// <param name="userProfileUpdateRole"></param>
         /// <returns></returns>
         Task<bool> UpdateUserRoleByEmailAsync(UserProfileUpdateRoleDto userProfileUpdateRole);
+
+        /// <summary>
+        /// Delete all user profiles and their accounts in Azure ADB2C Directory for specified partnerId. 
+        /// </summary>
+        Task DeleteUserProfilesByPartnerIdAsync(string partnerId);
     }
 }

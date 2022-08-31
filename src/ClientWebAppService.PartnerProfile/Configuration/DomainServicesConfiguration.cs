@@ -5,6 +5,6 @@ namespace ClientWebAppService.PartnerProfile.Configuration
     [ExcludeFromCodeCoverage]
     public class DomainServicesConfiguration : IDomainServicesConfiguration
     {
-        public PosProfileServiceConfiguration? PosProfileServiceConfiguration { get; set; }
+        public DownstreamServiceConfiguration? PosProfileServiceConfiguration { get; set; }
     }
 }
