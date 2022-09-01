@@ -38,11 +38,11 @@ namespace ClientWebAppService.PartnerProfile.Business
             {
                 _logger.LogInformation($"Creating partner profile with name : {creationModel.Name}.");
 
-                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.PartnerName == creationModel.Name && x.PartnerId == PartnerProfileUtils.GetPartnerIdByName(creationModel.Name));
+                var partnerWithSuchAddressOrName = await _partnerRepository.FindOne(x => x.PartnerName == creationModel.Name && x.Address == creationModel.Address);
 
                 if (partnerWithSuchAddressOrName is not null)
                 {
-                    throw new ValidationException(nameof(creationModel.Name), $"Partner profile with name {creationModel.Name} is already registered.");
+                    throw new ValidationException(nameof(creationModel.Address), $"Such address {creationModel.Address} and name {creationModel.Name} already exists.");
                 }
 
                 var newPartnerProfile = new Partner
@@ -106,6 +106,12 @@ namespace ClientWebAppService.PartnerProfile.Business
             }
 
             return partnerProfiles.Select(Map);
+        }
+
+        public async Task<IEnumerable<string>> GetPartnerProfileIds()
+        {
+            var result = (await _partnerRepository.FilterBy()).Select(x => x.PartnerId);
+            return result;
         }
 
         /// <inheritdoc cref="GetPartnerProfilesPaginatedAsync(int, int)"/>
@@ -297,6 +303,22 @@ namespace ClientWebAppService.PartnerProfile.Business
             var result = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
 
             return result != null ? Map(result) : null;
+        }
+
+        ///<inheritdoc/>
+        public async Task DeleteProfileByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Deleting partner profile with id : {partnerId}.");
+            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));           
+
+            var partnerToDelete = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
+
+            if (partnerToDelete == null)
+            {
+                throw new NotFoundException($"DeleteProfileByPartnerIdAsync. PartnerProfile with partnerId: {partnerId} not found.");
+            }
+
+            await _partnerRepository.DeleteOne(x => x.PartnerId == partnerId);
         }
     }
 }

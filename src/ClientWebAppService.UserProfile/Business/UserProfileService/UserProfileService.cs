@@ -38,12 +38,14 @@ namespace ClientWebAppService.UserProfile.Business
         {
             _logger.LogInformation($"Get user profile by email: {email}");
 
+            VerifyHelper.NotEmpty(email, nameof(email));
+
             var validator = new EmailValidator();
             var validationResult = validator.Validate(email);
 
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(nameof(email), validationResult.Errors.ToString());
+                throw new ValidationException(nameof(email), validationResult.Errors.FirstOrDefault().ToString());
             }
 
             var result = await _userProfileRepository.FindOne(x => x.Email == email);
@@ -211,6 +213,92 @@ namespace ClientWebAppService.UserProfile.Business
                 TotalCount = model.TotalCount,
                 TotalPages = model.TotalPages
             };
+        }
+
+        public async Task<bool> UpdateUserRoleByEmailAsync(UserProfileUpdateRoleDto userProfileUpdateRole)
+        {
+            _logger.LogInformation($"Update user role for email = {userProfileUpdateRole.Email}.");
+
+            var email = userProfileUpdateRole.Email;
+            var role = userProfileUpdateRole.Role;
+
+            VerifyHelper.NotEmpty(email, nameof(email));
+            VerifyHelper.NotNull(role, nameof(role));
+
+            var userByEmail = await GetByEmailAsync(email);
+
+            if (userByEmail != null)
+            {
+                if (role == UserRole.Associate)
+                {
+                    await ValidateOwner(email, userByEmail.PartnerId);
+                }
+                await _userProfileRepository.UpdateUserRoleAsync(userProfileUpdateRole);
+            }
+
+            _logger.LogInformation($"Successfully updated user role for email = {email}.");
+
+            return true;
+        }
+        
+        private async Task ValidateOwner(string email, string partnerId)
+        {
+            var ownerCount = await GetOwnerCount(partnerId, email);
+
+            if (ownerCount <= 0)
+            {
+                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner");
+            }
+        }
+
+        private async Task<int> GetOwnerCount(string partnerId, string email)
+        {
+            var users = await GetUserProfilesByPartnerIdAsync(partnerId);
+
+            var ownerUser = users.Where(x => x.Role == UserRole.Owner && x.Email != email).ToList();
+
+            return ownerUser.Count();
+        }
+
+        public async Task<IEnumerable<UserProfileDto>> GetUserProfilesByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Retrieving user profiles by search criteria.");
+
+            var result = await _userProfileRepository.FilterBy(x => x.PartnerId == partnerId);
+
+            var userProfiles = result.ToList();
+
+            if (result == null || !userProfiles.Any())
+            {
+                _logger.LogInformation($"User profiles were not found for partnerId {partnerId}.");
+                throw new NotFoundException($"User profiles were not found.");
+            }
+
+            return userProfiles.Select(x => Map(x));
+        }
+
+        ///<inheritdoc/>
+        public async Task DeleteUserProfilesByPartnerIdAsync(string partnerId)
+        {
+            _logger.LogInformation($"Deleteing all user profiles for partnerId: {partnerId}");
+
+            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));
+
+            var userEmailsToDelete = await _userProfileRepository.FilterBy(profile => profile.Email, x => x.PartnerId == partnerId);
+
+            foreach (var email in userEmailsToDelete)
+            {
+                try
+                {
+                    await _azureADB2CDirectoryManager.DeleteADB2CAccountByEmailAsync(email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"DeleteUserProfilesByPartnerIdAsync. Failed to delete ADB2C account for user email: {email}. Exception: {ex.Message}.");
+                }
+            }
+
+            await _userProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
         }
     }
 }

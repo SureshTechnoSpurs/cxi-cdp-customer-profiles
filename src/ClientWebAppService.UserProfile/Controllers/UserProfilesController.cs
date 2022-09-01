@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using CXI.Common.Helpers;
 using CXI.Common.Models.Pagination;
+using FluentValidation.AspNetCore;
 
 namespace ClientWebAppService.UserProfile.Controllers
 {
@@ -109,6 +110,26 @@ namespace ClientWebAppService.UserProfile.Controllers
             var result = await _userProfileService.GetUserProfilesPaginatedAsync(request);
 
             return Ok(result);
+        }
+
+        [HttpPut("role")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> UpdateUserRoleByEmail([FromBody] UserProfileUpdateRoleDto userProfileUpdateRole)
+        {
+            var result = await _userProfileService.UpdateUserRoleByEmailAsync(userProfileUpdateRole);
+
+            return Ok(result);
+        }
+
+        [HttpDelete("partner/{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> DeleteByPartnerId([CustomizeValidator(Skip =true)][FromRoute] string partnerId)
+        {
+            await _userProfileService.DeleteUserProfilesByPartnerIdAsync(partnerId);
+
+            return Ok();
         }
     }
 }

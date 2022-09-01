@@ -225,5 +225,25 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok(result);
         }
+
+        [Authorize(Policy = Constants.M2MPolicy)]
+        [HttpGet("m2m/ids")]
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        public async Task<IActionResult> M2mGetPartnerProfileIds()
+        {
+            var result = await _partnerProfileService.GetPartnerProfileIds();
+            return Ok(result);
+        }
+
+
+        [HttpDelete("{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> DeleteByPartnerId([FromRoute] string partnerId)
+        {
+            await _partnerProfileService.DeleteProfileByPartnerIdAsync(partnerId);
+
+            return Ok();
+        }
     }
 }
