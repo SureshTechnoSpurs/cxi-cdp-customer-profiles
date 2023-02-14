@@ -29,7 +29,7 @@ resources:
 
     - repository: test-auto
       type : git
-      name : cxi-cdp-test-api  
+      name : cxi-cdp-test-auto  
     
     - repository: test-apiauto
       type : git
