@@ -224,6 +224,47 @@ stages:
         testRunTitle: 'Dependency Check'
         buildConfiguration: '$(BuildConfiguration)'
 
+ - stage: TestFilesCreation
+   displayName: TestFiles
+   jobs:
+   - job: Test_files
+     steps: 
+     - task: Kubernetes@1
+       displayName: Login Dev AKS
+       inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'Kub_CXI_Cluster'
+        command: 'login'
+     - task: Bash@3
+       displayName: Expose Allure Locally
+       inputs:
+        targetType: 'inline'
+        script: |
+          echo "#!/usr/bin/bash" > expose_svc_local.sh
+          echo "set +x" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/dev-onboarding -n dev-onboarding --address 0.0.0.0 10000:80 &" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/dev-customer-profiles-partner-profile -n dev-customer-profiles --address 0.0.0.0 10001:80 &" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/dev-audiences-app -n dev-audiences --address 0.0.0.0 10002:80 &" >> expose_svc_local.sh
+          # Allure-API
+          echo "kubectl port-forward svc/allure-service-load-balancer -n allure-docker-service --address 0.0.0.0 10003:6060 &" >> expose_svc_local.sh
+          # Allure-UI
+          echo "kubectl port-forward svc/allure-service-load-balancer -n allure-docker-service --address 0.0.0.0 10004:7070 &" >> expose_svc_local.sh
+      
+          chmod +x expose_svc_local.sh
+          ./expose_svc_local.sh
+          chmod +x expose_svc_local.sh
+          ./expose_svc_local.sh
+          sleep 10
+          netstat -tunlp
+          echo "=== COMPLETED ==="
+
+     - task: Bash@3
+       displayName: Validate Port
+       inputs:
+        targetType: 'inline'
+        script: 'netstat -tunlp'
+
+
  - stage: deploy_dev
    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
    displayName: Deploy to Kubernetes Dev
