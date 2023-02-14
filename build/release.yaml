@@ -175,7 +175,7 @@ stages:
         script: 'netstat -tunlp'
      - task: Maven@4
        inputs:
-         mavenPomFile: 'pom.xml'
+         mavenPomFile: 'cxi-cdp-api-test-auto/pom.xml'
          publishJUnitResults: true
          testResultsFiles: '**/TEST-*.xml'
          javaHomeOption: 'JDKVersion'
