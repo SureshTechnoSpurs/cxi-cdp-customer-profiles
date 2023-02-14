@@ -173,6 +173,18 @@ stages:
        inputs:
         targetType: 'inline'
         script: 'netstat -tunlp'
+     - task: Maven@4
+       inputs:
+         mavenPomFile: 'pom.xml'
+         publishJUnitResults: true
+         testResultsFiles: '**/TEST-*.xml'
+         javaHomeOption: 'JDKVersion'
+         mavenVersionOption: 'Default'
+         mavenAuthenticateFeed: false 
+         effectivePomSkip: false
+         sonarQubeRunAnalysis: false
+       condition: succeededOrFailed()
+       continueOnError: true 
 
 
  - template: AutoTests.yaml@templates
