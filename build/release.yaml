@@ -38,7 +38,9 @@ resources:
     pipelines:
       - pipeline: cxi-cdp-customer-profiles
         source: cxi-cdp-customer-profiles
-        trigger: none  
+        trigger: none
+      - pipeline: Pipeline1 # Name of the pipeline resource
+        source: cxi-cdp-api-test-auto (2)  
 
 pool:
  vmImage: ubuntu-latest
