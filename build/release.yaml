@@ -189,6 +189,11 @@ stages:
        condition: succeededOrFailed()
        continueOnError: true 
 
+ - template: APIAutoTests.yaml@templates
+   parameters:
+    env: ${{ parameters.Environment }}
+    filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
+    condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
 
  - template: AutoTests.yaml@templates
    parameters:
