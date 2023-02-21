@@ -141,7 +141,8 @@ stages:
    displayName: TestFiles
    jobs:
    - job: Test_files
-     steps: 
+     steps:
+     - checkout: api-test-auto
      - task: Kubernetes@1
        displayName: Login Dev AKS
        inputs:
@@ -176,9 +177,10 @@ stages:
        inputs:
         targetType: 'inline'
         script: 'netstat -tunlp'
-     - task: Maven@4
+     
+     - task: Maven@
        inputs:
-         mavenPomFile: '/cxi-cdp-api-test-auto/pom.xml'
+         mavenPomFile: 'pom.xml'
          publishJUnitResults: true
          testResultsFiles: '**/TEST-*.xml'
          javaHomeOption: 'JDKVersion'
@@ -189,11 +191,11 @@ stages:
        condition: succeededOrFailed()
        continueOnError: true 
 
- - template: APIAutoTest.yaml@templates
-   parameters:
-    env: ${{ parameters.Environment }}
-    filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
-    condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+ #- template: APIAutoTest.yaml@templates
+ #  parameters:
+ #   env: ${{ parameters.Environment }}
+ #   filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
+ #   condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
 
  - template: AutoTests.yaml@templates
    parameters:
