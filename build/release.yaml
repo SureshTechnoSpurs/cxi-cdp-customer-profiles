@@ -178,7 +178,7 @@ stages:
         targetType: 'inline'
         script: 'netstat -tunlp'
      
-     - task: Maven@
+     - task: Maven@4
        inputs:
          mavenPomFile: 'pom.xml'
          publishJUnitResults: true
