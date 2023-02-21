@@ -189,7 +189,7 @@ stages:
        condition: succeededOrFailed()
        continueOnError: true 
 
- - template: APIAutoTests.yaml@templates
+ - template: APIAutoTest.yaml@templates
    parameters:
     env: ${{ parameters.Environment }}
     filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
