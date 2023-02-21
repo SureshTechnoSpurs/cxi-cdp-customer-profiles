@@ -178,12 +178,12 @@ stages:
         script: 'netstat -tunlp'
      - task: Maven@4
        inputs:
-         mavenPomFile: '$(system.defaultWorkingDirectory)/cxi-cdp-api-test-auto/pom.xml'
+         mavenPomFile: '$(system.defaultWorkingDirectory)/cxi-cdp-api-test-auto (2)/pom.xml'
          publishJUnitResults: true
          testResultsFiles: '**/TEST-*.xml'
          javaHomeOption: 'JDKVersion'
          mavenVersionOption: 'Default'
-         mavenAuthenticateFeed: false 
+         mavenAuthenticateFeed: false
          effectivePomSkip: false
          sonarQubeRunAnalysis: false
        condition: succeededOrFailed()
