@@ -142,7 +142,7 @@ stages:
    jobs:
    - job: Test_files
      steps:
-     - checkout: api-test-auto
+     - checkout: test-apiauto
      - task: Kubernetes@1
        displayName: Login Dev AKS
        inputs:
