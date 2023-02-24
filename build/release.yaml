@@ -156,9 +156,9 @@ stages:
         script: |
           echo "#!/usr/bin/bash" > expose_svc_local.sh
           echo "set +x" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/dev-onboarding -n dev-onboarding --address 0.0.0.0 10000:80 &" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/dev-customer-profiles-partner-profile -n dev-customer-profiles --address 0.0.0.0 10001:80 &" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/dev-audiences-app -n dev-audiences --address 0.0.0.0 10002:80 &" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/${{parameters.Environment}}-onboarding -n ${{parameters.Environment}}-onboarding --address 0.0.0.0 10000:80 &" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/${{parameters.Environment}}-customer-profiles-partner-profile -n ${{parameters.Environment}}-customer-profiles --address 0.0.0.0 10001:80 &" >> expose_svc_local.sh
+          echo "kubectl port-forward svc/${{parameters.Environment}}-audiences-app -n ${{parameters.Environment}}-audiences --address 0.0.0.0 10002:80 &" >> expose_svc_local.sh
           # Allure-API
           echo "kubectl port-forward svc/allure-service-load-balancer -n allure-docker-service --address 0.0.0.0 10003:6060 &" >> expose_svc_local.sh
           # Allure-UI
@@ -181,6 +181,7 @@ stages:
      - task: Maven@4
        inputs:
          mavenPomFile: 'pom.xml'
+         goals: 'clean test -DargLine="-Dkarate.env=${{ parameters.Environment }}"'
          publishJUnitResults: true
          testResultsFiles: '**/TEST-*.xml'
          javaHomeOption: 'JDKVersion'
