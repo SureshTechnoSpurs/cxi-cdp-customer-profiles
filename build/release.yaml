@@ -137,66 +137,12 @@ stages:
                     autoscaling.minReplicasCount=2,\
                     autoscaling.maxReplicasCount=5,\
                     autoscaling.targetCPUUtilizationPercentage=70"
- - stage: TestFilesCreation
-   displayName: TestFiles
-   jobs:
-   - job: Test_files
-     steps:
-     - checkout: test-apiauto
-     - task: Kubernetes@1
-       displayName: Login Dev AKS
-       inputs:
-        connectionType: 'Kubernetes Service Connection'
-        kubernetesServiceEndpoint: 'Kub_CXI_Cluster'
-        command: 'login'
-     - task: Bash@3
-       displayName: Expose Allure Locally
-       inputs:
-        targetType: 'inline'
-        script: |
-          echo "#!/usr/bin/bash" > expose_svc_local.sh
-          echo "set +x" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/${{parameters.Environment}}-onboarding -n ${{parameters.Environment}}-onboarding --address 0.0.0.0 10000:80 &" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/${{parameters.Environment}}-customer-profiles-partner-profile -n ${{parameters.Environment}}-customer-profiles --address 0.0.0.0 10001:80 &" >> expose_svc_local.sh
-          echo "kubectl port-forward svc/${{parameters.Environment}}-audiences-app -n ${{parameters.Environment}}-audiences --address 0.0.0.0 10002:80 &" >> expose_svc_local.sh
-          # Allure-API
-          echo "kubectl port-forward svc/allure-service-load-balancer -n allure-docker-service --address 0.0.0.0 10003:6060 &" >> expose_svc_local.sh
-          # Allure-UI
-          echo "kubectl port-forward svc/allure-service-load-balancer -n allure-docker-service --address 0.0.0.0 10004:7070 &" >> expose_svc_local.sh
-      
-          chmod +x expose_svc_local.sh
-          ./expose_svc_local.sh
-          chmod +x expose_svc_local.sh
-          ./expose_svc_local.sh
-          sleep 10
-          netstat -tunlp
-          echo "=== COMPLETED ==="
 
-     - task: Bash@3
-       displayName: Validate Port
-       inputs:
-        targetType: 'inline'
-        script: 'netstat -tunlp'
-     
-     - task: Maven@4
-       inputs:
-         mavenPomFile: 'pom.xml'
-         goals: 'clean test -DargLine="-Dkarate.env=${{ parameters.Environment }}"'
-         publishJUnitResults: true
-         testResultsFiles: '**/TEST-*.xml'
-         javaHomeOption: 'JDKVersion'
-         mavenVersionOption: 'Default'
-         mavenAuthenticateFeed: false
-         effectivePomSkip: false
-         sonarQubeRunAnalysis: false
-       condition: succeededOrFailed()
-       continueOnError: true 
-
- #- template: APIAutoTest.yaml@templates
- #  parameters:
- #   env: ${{ parameters.Environment }}
- #   filter: '--filter "TestCategory=Authorization|TestCategory=Onboarding|TestCategory=Associates"'
- #   condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
+ - template: APIAutoTest.yaml@templates
+   parameters:
+    env: ${{ parameters.Environment }}
+    category: 'userprofile'
+    condition: "or(in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),in(dependencies.deploy.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'))"
 
  - template: AutoTests.yaml@templates
    parameters:
