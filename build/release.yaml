@@ -31,9 +31,9 @@ resources:
       type : git
       name : cxi-cdp-test-auto  
     
-    - repository: test-apiauto
+    - repository: api-test-auto
       type : git
-      name : cxi-cdp-api-test-auto
+      name : cxi-cdp-api-test-auto  
     
     pipelines:
       - pipeline: cxi-cdp-customer-profiles
