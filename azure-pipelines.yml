@@ -208,7 +208,7 @@ stages:
        continueOnError: true
        inputs:
         projectName: 'customer-profiles-app'
-        scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0/*.dll'
+        scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0/*.dll'
         additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0-windows/*.dll'
         format: 'HTML, JSON, JUNIT'
         enableVerbose: true
