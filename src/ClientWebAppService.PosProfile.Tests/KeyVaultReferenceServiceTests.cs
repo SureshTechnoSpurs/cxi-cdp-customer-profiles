@@ -77,6 +77,47 @@ namespace ClientWebAppService.PosProfile.Tests
         }
 
         [Fact]
+        public async Task GetParBrinkLocationsAsync_MultipleKeyvaultPassed_ReturnsResult()
+        {
+            // Arrange
+            var partnerId = "partnerId";
+            var expectedPosType = "parbrink";
+            var keyvaultReference = "key,key2,key3";
+            var token = "token";
+            var url = "http://test.url";
+
+            var posProfile = new PosProfileDto(partnerId, new List<PosCredentialsConfigurationDto>() {
+                new PosCredentialsConfigurationDto(expectedPosType,keyvaultReference,String.Empty)
+            });
+
+            var location = new List<ParBrinkLocationConfiguration>()
+                { new ParBrinkLocationConfiguration
+                    {
+                         Token = token,
+                         Url = url
+                    }
+                };
+            var parBrinkKeyReferenceModel = new ParBrinkKeyReferenceModel() { Locations = location };
+
+            _posProfileServiceMock.Setup(x => x.GetPosProfileByPartnerId(partnerId))
+                .ReturnsAsync(posProfile);
+
+            var secretValue = JsonConvert.SerializeObject(parBrinkKeyReferenceModel);
+            var keyvault = new Mock<KeyVaultSecret>(_testKey, secretValue);
+            var configuration = new Mock<Response<KeyVaultSecret>>();
+            configuration.Setup(x => x.Value).Returns(keyvault.Object);
+            _secretClientMock.Setup(c => c.GetSecret(It.IsAny<string>()))
+                .Returns(configuration.Object);
+
+            // Act
+            var result = await _keyVaultReferenceService.GetKeyVaultValueByReferenceAsync<ParBrinkKeyReferenceModel>(partnerId, expectedPosType);
+
+            // Assert
+            result.Should().NotBeNull();
+
+        }
+
+        [Fact]
         public async Task SetParBrinkLocationsAsync_CorrectParams_ReturnsResult()
         {
             // Arrange

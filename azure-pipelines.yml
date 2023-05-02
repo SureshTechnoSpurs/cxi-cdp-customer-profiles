@@ -208,7 +208,7 @@ stages:
        continueOnError: true
        inputs:
         projectName: 'customer-profiles-app'
-        scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0/*.dll'
+        scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0/*.dll'
         additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0-windows/*.dll'
         format: 'HTML, JSON, JUNIT'
         enableVerbose: true
@@ -242,7 +242,8 @@ stages:
                 namespace: 'dev-customer-profiles'
                 acrname: 'acrnpreastus2mgmt'
                 azureservice: 'cxi-devops'
-                acrrepo: 'cxi-default:20220804.5'
+                acrrepo: 'cxi-default'
+                acrchartversion: '20220804.5'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
                 components:
                 - componentname: 'customer-profiles-partner-profile'

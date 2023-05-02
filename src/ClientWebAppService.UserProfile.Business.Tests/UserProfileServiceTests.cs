@@ -294,6 +294,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             result.Items.Should().NotBeEmpty();
         }
 
+
         [Fact]
         public async Task UpdateUserRoleByEmailAsync_CorrectParametersPassed_UserRoleUpdated()
         {
