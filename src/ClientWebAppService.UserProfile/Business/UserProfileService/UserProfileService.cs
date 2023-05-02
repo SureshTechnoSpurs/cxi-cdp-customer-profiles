@@ -247,7 +247,7 @@ namespace ClientWebAppService.UserProfile.Business
 
             if (ownerCount <= 0)
             {
-                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner");
+                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner.");
             }
         }
 
