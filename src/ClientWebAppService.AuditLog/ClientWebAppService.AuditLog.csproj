@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<UserSecretsId>882a57ed-a829-4bbd-8cfc-b7de3ee72f7d</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CXI.Common" Version="1.0.36" />
+		<PackageReference Include="CXI.Common.AuditLog" Version="1.0.1" />
+		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.9" />
+		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
+		<PackageReference Include="CXI.Contracts.AuditLog" Version="1.0.1" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
+		<PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
+		<PackageReference Include="GL.MSA.Core.ResiliencyPolicy" Version="1.0.0" />
+		<PackageReference Include="CXI.Common.ApplicationInsights" Version="1.0.1" />
+		<PackageReference Include="CXI.Common.ExceptionHandling" Version="1.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.13" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="4.5.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+	</ItemGroup>
+	
+</Project>
