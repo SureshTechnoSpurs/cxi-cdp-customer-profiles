@@ -21,7 +21,7 @@ namespace ClientWebAppService.UserProfile.Controllers
     [Route("api/v{version:apiVersion}/profile")]
     [ApiVersion("1.0")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class UserProfilesController : ControllerBase
     {
         private readonly IUserProfileService _userProfileService;
@@ -41,7 +41,7 @@ namespace ClientWebAppService.UserProfile.Controllers
             return Ok(result);
         }
 
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{email}")]
         [ProducesResponseType(typeof(UserProfileDto), 200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
