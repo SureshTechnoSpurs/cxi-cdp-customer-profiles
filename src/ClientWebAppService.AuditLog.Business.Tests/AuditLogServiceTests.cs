@@ -26,7 +26,7 @@ namespace ClientWebAppService.AuditLog.Business.Tests
         {
             _auditLogServiceClientMock.Setup(x => x.InsertAuditLogs(It.IsAny<PartnerAuditLogEntity>()))
                 .Returns(Task.CompletedTask);
-            var testInput = new CreateAuditLogDto("testpartnerid", "testuseremail@customerxi.com", "testname", "testlogin", "https://devtest.cxicodes.com", "login click", DateTime.UtcNow, "US", "Web", "Chrome", "Username: admin login", "", "", "");
+            var testInput = new CreateAuditLogDto("testpartnerid", "testuseremail@customerxi.com", "testname", "testlogin", "https://devtest.cxicodes.com", "login click", DateTime.UtcNow.ToString(), "US", "Web", "Chrome", "Username: admin login", "", "", "");
             var invocation = _service.Invoking(x => x.CreateAuditLogsAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();
 
@@ -39,7 +39,7 @@ namespace ClientWebAppService.AuditLog.Business.Tests
             _auditLogServiceClientMock.Setup(x => x.InsertAuditLogs(It.IsAny<PartnerAuditLogEntity>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new CreateAuditLogDto("testpartnerid", "testuseremail@customerxi.com", "testname", "testlogin", "https://devtest.cxicodes.com", "login click", DateTime.UtcNow, "US", "Web", "Chrome", "Username: admin login", "", "", "");
+            var testInput = new CreateAuditLogDto("testpartnerid", "testuseremail@customerxi.com", "testname", "testlogin", "https://devtest.cxicodes.com", "login click", DateTime.UtcNow.ToString(), "US", "Web", "Chrome", "Username: admin login", "", "", "");
             var invocation = _service.Invoking(x => x.CreateAuditLogsAsync(testInput));
             var result = await invocation.Should().NotThrowAsync();
 

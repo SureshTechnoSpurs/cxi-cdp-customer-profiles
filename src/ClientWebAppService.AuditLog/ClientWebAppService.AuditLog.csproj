@@ -12,7 +12,7 @@
 		<PackageReference Include="CXI.Common.AuditLog" Version="1.0.1" />
 		<PackageReference Include="CXI.Common.MongoDb" Version="1.0.9" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
-		<PackageReference Include="CXI.Contracts.AuditLog" Version="1.0.1" />
+		<PackageReference Include="CXI.Contracts.AuditLog" Version="1.0.2" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
 		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />
 		<PackageReference Include="GL.MSA.Core.NoSql" Version="1.0.0" />
