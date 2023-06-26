@@ -83,7 +83,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             var testInput = new UserCreationDto { Email = "testemail@mail.com", PartnerId = "testPartnerId", Role = UserRole.Associate };
 
             var invocation = _service.Invoking(x => x.CreateProfileAsync(testInput));
-            var result = await invocation.Should().ThrowAsync<ValidationException>();
+            var result = await invocation.Should().ThrowAsync<NotFoundException>();
         }
 
         [Fact]
