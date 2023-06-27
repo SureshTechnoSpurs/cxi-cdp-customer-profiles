@@ -23,7 +23,7 @@ namespace ClientWebAppService.UserProfile.Business
         /// <summary>
         /// Get profiles by seach criteria.
         /// </summary>
-        Task<IEnumerable<UserProfileDto>> GetUserProfilesAsync(UserProfileSearchDto criteria);
+        Task<IEnumerable<UserProfileAssociateDto>> GetUserProfilesAsync(UserProfileSearchDto criteria);
 
         /// <summary>
         /// Update user profile.

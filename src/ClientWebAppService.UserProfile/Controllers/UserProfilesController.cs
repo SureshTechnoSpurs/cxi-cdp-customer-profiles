@@ -63,7 +63,7 @@ namespace ClientWebAppService.UserProfile.Controllers
         }
 
         [HttpGet("search")]
-        [ProducesResponseType(typeof(IEnumerable<UserProfileDto>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<UserProfileAssociateDto>), 200)]
         public async Task<IActionResult> Search([FromQuery] UserProfileSearchDto searchCriteria)
         {
             var userProfileSearchResult = await _userProfileService.GetUserProfilesAsync(searchCriteria);

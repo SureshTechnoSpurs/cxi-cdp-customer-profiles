@@ -4,6 +4,8 @@ using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Helpers;
 using CXI.Common.Models.Pagination;
+using CXI.Common.AuditLog;
+using CXI.Common.AuditLog.Models;
 using CXI.Contracts.UserProfile.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,17 +22,19 @@ namespace ClientWebAppService.UserProfile.Business
         private readonly ILogger<UserProfileService> _logger;
         private readonly IEmailService _emailService;
         private readonly IAzureADB2CDirectoryManager _azureADB2CDirectoryManager;
-
+        private readonly IAuditLog _auditLog;
         public UserProfileService(
             IUserProfileRepository userProfileRepository,
             ILogger<UserProfileService> logger,
             IEmailService emailService,
-            IAzureADB2CDirectoryManager azureADB2CDirectoryManager)
+            IAzureADB2CDirectoryManager azureADB2CDirectoryManager,
+            IAuditLog auditLog)
         {
             _userProfileRepository = userProfileRepository;
             _logger = logger;
             _emailService = emailService;
             _azureADB2CDirectoryManager = azureADB2CDirectoryManager;
+            _auditLog = auditLog;
         }
 
         ///<inheritdoc/>
@@ -106,24 +110,55 @@ namespace ClientWebAppService.UserProfile.Business
         }
 
         ///<inheritdoc/>
-        public async Task<IEnumerable<UserProfileDto>> GetUserProfilesAsync(UserProfileSearchDto criteria)
+        public async Task<IEnumerable<UserProfileAssociateDto>> GetUserProfilesAsync(UserProfileSearchDto criteria)
         {
             _logger.LogInformation($"Retrieving user profiles by search criteria.");
 
-            var result = await _userProfileRepository.FilterBy(
-                profile => Map(profile),
-                userProfile => userProfile.PartnerId == criteria.PartnerId &&
-                               userProfile.Role == criteria.Role);
+            var userProfileAssociates = new List<UserProfileAssociateDto>();
 
-            var userProfiles = result.ToList();
+            var result = await _userProfileRepository.FilterBy(x => x.PartnerId == criteria.PartnerId && x.Role == criteria.Role);
 
-            if (result == null || !userProfiles.Any())
+            var useremail = result.Select(x => x.Email).ToList();
+            
+            if (!useremail.Any())
+            {
+                foreach (var user in result)
+                {
+                    var userProfile = new UserProfileAssociateDto(user.PartnerId, user.Email, user.Role, user.InvitationAccepted,  null);
+
+                    userProfileAssociates.Add(userProfile);
+                }
+
+                return userProfileAssociates;
+            }
+            //get audit logs API call by useremail
+            var partnerAuditlogs = _auditLog.GetAuditLogByEmails(useremail);
+
+            var auditlogUsers = from i in partnerAuditlogs.Result
+                                group i by i.UserEmail into g
+                                select g.OrderByDescending(t => t.EventDate).FirstOrDefault();
+
+            var dictAuditlogUsers = new Dictionary<string, DisplayAuditLogsDto>();
+            foreach (var item in auditlogUsers)
+            {
+                dictAuditlogUsers.Add(item.UserEmail, item);
+            }
+
+            foreach (var user in result)
+            {
+                var auditlog = dictAuditlogUsers.ContainsKey(user.Email) ? dictAuditlogUsers[user.Email] : null;
+                var userProfile = new UserProfileAssociateDto(user.PartnerId, user.Email, user.Role, user.InvitationAccepted, auditlog == null ? null : auditlog.EventDate);
+
+                userProfileAssociates.Add(userProfile);
+            }
+
+            if (!userProfileAssociates.Any())
             {
                 _logger.LogInformation($"User profiles were not found for partnerId {criteria.PartnerId}.");
                 throw new NotFoundException($"User profiles were not found.");
             }
 
-            return userProfiles;
+            return userProfileAssociates;
         }
 
         ///<inheritdoc/>
@@ -239,7 +274,7 @@ namespace ClientWebAppService.UserProfile.Business
 
             return true;
         }
-        
+
         private async Task ValidateOwner(string email, string partnerId)
         {
             var ownerCount = await GetOwnerCount(partnerId, email);

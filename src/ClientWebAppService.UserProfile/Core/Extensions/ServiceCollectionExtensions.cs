@@ -7,6 +7,7 @@ using GL.MSA.Core.HealthCheck.HealthCheckExtensions;
 using CXI.Common.ApplicationInsights;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using CXI.Common.MongoDb.Extensions;
+using CXI.Common.AuditLog;
 using ClientWebAppService.UserProfile.DataAccess;
 using ClientWebAppService.UserProfile.Business;
 using FluentValidation.AspNetCore;
@@ -40,6 +41,8 @@ namespace ClientWebAppService.UserProfile.Core.Extensions
                               name: "MongoDB",
                               failureStatus: HealthStatus.Unhealthy,
                               tags: new string[] { "mongoDB", "ready" });
+
+            services.AddAuditLogClient(configuration);
 
             services.AddCxiMongoDb()
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
