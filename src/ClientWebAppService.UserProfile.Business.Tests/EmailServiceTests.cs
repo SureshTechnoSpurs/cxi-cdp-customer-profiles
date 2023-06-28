@@ -1,6 +1,7 @@
 ﻿using ClientWebAppService.UserProfile.Core;
 using CXI.Common.MessageBrokers.Producers;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
             _optionsMock.Setup(opt => opt.Value).Returns(opts);
 
-            _service = new EmailService(_producerMock.Object, _optionsMock.Object);
+            _service = new EmailService(_producerMock.Object, _optionsMock.Object, new Mock<ILogger<EmailService>>().Object);
         }
 
         [Fact]
