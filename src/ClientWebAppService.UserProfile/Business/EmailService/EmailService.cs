@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CXI.Common.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -22,20 +23,27 @@ namespace ClientWebAppService.UserProfile.Business
         private const string EmailSubject = "You have been invited as an associate";
         private const string B2CSignUpUrl = "{0}/{1}/{2}/oauth2/v2.0/authorize?client_id={3}&nonce={4}&redirect_uri={5}&scope=openid&response_type=id_token";
         private const string EmailTemplatePath = "EmailTemplates/InvitationTemplate.html";
+        private readonly ILogger<EmailService> _logger;
 
         public EmailService(IProducer producer,
-                            IOptions<AdB2CInvitationOptions> b2cIDentityOptions)
+                            IOptions<AdB2CInvitationOptions> b2cIDentityOptions,
+                            ILogger<EmailService> logger)
         {
             _producer = producer;
             _b2cIdentityOptions = b2cIDentityOptions.Value;
+            _logger = logger;
         }
 
         ///<inheritdoc/>
         public async Task SendInvitationMessageToAssociateAsync(string email)
         {
-            var inviteUrl = BuildInvitationUrl(email);
+            _logger.LogInformation($"Sending Inviatation for Email: {email}");
 
-            string htmlTemplate = File.ReadAllText(EmailTemplatePath);            
+            var inviteUrl = BuildInvitationUrl(email);
+            _logger.LogInformation($"Inviatation Url: {inviteUrl}");
+
+            string htmlTemplate = File.ReadAllText(EmailTemplatePath);
+            _logger.LogInformation($"Html Email Template : {htmlTemplate}");
 
             var emailMessage = new EmailDataMessage
             {

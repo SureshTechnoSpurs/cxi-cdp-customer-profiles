@@ -75,8 +75,7 @@ namespace ClientWebAppService.UserProfile.Business
                 {
                     _logger.LogError(
                         $"CreateProfileAsync - Attempted to create user profile with email ({creationModel.Email}) and partner Id ${creationModel.PartnerId}. User profile already exists.");
-                    throw new ValidationException(
-                        nameof(creationModel.PartnerId),
+                    throw new NotFoundException(
                         $"User profile with email ({creationModel.Email}) already exists.");
                 }
 
