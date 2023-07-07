@@ -24,6 +24,8 @@ namespace ClientWebAppService.AuditLog.Business
         public async Task CreateAuditLogsAsync(CreateAuditLogDto createAuditLogDto)
         {
             //create audit logs
+            var eventDate = createAuditLogDto.EventDate == "" || createAuditLogDto.EventDate == string.Empty ? DateTime.UtcNow : DateTimeOffset.Parse(createAuditLogDto.EventDate).UtcDateTime;
+
             var createAuditLog = new PartnerAuditLogEntity()
             {
                 Id = ObjectId.GenerateNewId(),
@@ -33,7 +35,7 @@ namespace ClientWebAppService.AuditLog.Business
                 EntityName = createAuditLogDto.EntityName,
                 PageVisited = createAuditLogDto.PageVisited,
                 EventName = createAuditLogDto.EventName,
-                EventDate = DateTime.UtcNow,
+                EventDate = eventDate,
                 TimeZone = createAuditLogDto.TimeZone,
                 Device = createAuditLogDto.Device,
                 Browser = createAuditLogDto.Browser,
