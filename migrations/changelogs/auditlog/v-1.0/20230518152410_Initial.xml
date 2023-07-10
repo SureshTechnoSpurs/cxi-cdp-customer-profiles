@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd">
-   <changeSet id="initial_partnerauditlog_collections_creation" author="Mayavan Renganathan">
+   <changeSet id="initial_partnerauditlog_collections_creation" author="Suresh Baskaran">
       <!--Create initial collection schema-->
       <ext:createCollection collectionName="partner_audit_log">
          <ext:options>{
@@ -66,10 +66,7 @@
          <ext:keys>{ _id: 1}</ext:keys>
          <ext:options>{name: "_id_"}</ext:options>
       </ext:createIndex>
-	   <ext:createIndex collectionName="partner_audit_log">
-         <ext:keys>{ cxi_partner_id: 1}</ext:keys>
-         <ext:options>{name: "cxi_partner_id_1"}</ext:options>
-      </ext:createIndex>
+	  
       <rollback>
          <ext:dropCollection collectionName="partner_audit_log" />
       </rollback>
