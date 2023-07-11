@@ -18,6 +18,8 @@ variables:
   value: cxi-cdp-customer-profiles-pos-profile
 - name: repo3
   value: cxi-cdp-customer-profiles-user-profile
+- name: repo4
+  value: cxi-cdp-customer-profiles-audit-log
 - name : tag
   value:  $(resources.pipeline.cxi-cdp-customer-profiles.runName)  
 
@@ -130,6 +132,28 @@ stages:
                     autoscaling.minReplicasCount=2,\
                     autoscaling.maxReplicasCount=5,\
                     autoscaling.targetCPUUtilizationPercentage=70"
+                - componentname: 'customer-profiles-audit-log'
+                  releasename: 'customer-profiles-audit-log'
+                  overridevalues: "
+                    application.name=customer-profiles-audit-log,\
+                    application.env=${{ parameters.Environment }},\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo4),\
+                    deployment.container.image.tag=$(tag),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
+                    deployment.replicaCount=2,\
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=100m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=2,\
+                    autoscaling.maxReplicasCount=5,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
 
  - template: AutoTests.yaml@templates
    parameters:
@@ -163,3 +187,5 @@ stages:
                         releasename: 'customer-profiles-pos-profile'
                       - componentname: 'customer-profiles-user-profile'
                         releasename: 'customer-profiles-user-profile'
+                      - componentname: 'customer-profiles-audit-log'
+                        releasename: 'customer-profiles-audit-log'  

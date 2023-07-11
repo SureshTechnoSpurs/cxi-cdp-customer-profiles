@@ -25,6 +25,8 @@ variables:
   value: cxi-cdp-customer-profiles-pos-profile
 - name: repo3
   value: cxi-cdp-customer-profiles-user-profile
+- name: repo4
+  value: cxi-cdp-customer-profiles-audit-log
  
 
 name: $(versionNumber)  
@@ -71,9 +73,20 @@ stages:
           tags: |
             $(Build.BuildNumber)
             $(Build.SourceBranchName)-$(Build.BuildNumber)
-          arguments: '--build-arg PAT=$(PAT)'  
-
-
+          arguments: '--build-arg PAT=$(PAT)'
+      - task: Docker@2
+        displayName: Build an image audit-log
+        inputs:
+          containerRegistry: 'ado-2-acr-npr'
+          repository: '$(repo4)'
+          command: 'build'
+          dockerfile: '$(Build.SourcesDirectory)/src/ClientWebAppService.AuditLog/Dockerfile'
+          buildContext: '$(Build.SourcesDirectory)/src/'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)
+          arguments: '--build-arg PAT=$(PAT)'
+            
       - script: |
           sudo apt-get install wget apt-transport-https gnupg lsb-release
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
@@ -90,6 +103,7 @@ stages:
               trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo1)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo1):$(Build.BuildNumber) 
               trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo2)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo2):$(Build.BuildNumber) 
               trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo3)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo3):$(Build.BuildNumber)
+              trivy i -f table -o $(Build.ArtifactStagingDirectory)/$(repo4)-$(Build.BuildNumber).txt  acrnpreastus2mgmt.azurecr.io/$(repo4):$(Build.BuildNumber)
 
       - task: PublishBuildArtifacts@1
         inputs:
@@ -130,6 +144,15 @@ stages:
           testRunTitle: 'UserProfile.Business.Tests.csproj' 
           arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
           publishTestResults: true   
+     
+      - task: DotNetCoreCLI@2
+        displayName: "AuditLog.Business.Tests"
+        inputs:
+          command: 'test'
+          projects: 'src/ClientWebAppService.AuditLog.Business.Tests/ClientWebAppService.AuditLog.Business.Tests.csproj'
+          testRunTitle: 'AuditLog.Business.Tests.csproj' 
+          arguments: '--configuration $(BuildConfiguration) --no-restore --collect:"XPlat Code Coverage"'
+          publishTestResults: true     
 
       - script: 'dotnet tool install --global dotnet-reportgenerator-globaltool'  
         displayName: 'Install ReportGenerator tool'  
@@ -182,8 +205,17 @@ stages:
           tags: |
             $(Build.BuildNumber)
             $(Build.SourceBranchName)-$(Build.BuildNumber)  
-
-       
+      - task: Docker@2
+        displayName: Push an image audit-log
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))  
+        inputs:
+          containerRegistry: 'ado-2-acr-npr'
+          repository: '$(repo4)'
+          command: 'push'
+          tags: |
+            $(Build.BuildNumber)
+            $(Build.SourceBranchName)-$(Build.BuildNumber)     
+    
           
  - stage: OWASPDependencyCheck
    displayName: OWASPDependencyCheck
@@ -209,7 +241,7 @@ stages:
        inputs:
         projectName: 'customer-profiles-app'
         scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0/*.dll'
-        additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net5.0-windows/*.dll'
+        additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0-windows/*.dll'
         format: 'HTML, JSON, JUNIT'
         enableVerbose: true
         enableExperimental: true
@@ -297,6 +329,28 @@ stages:
                     application.env=dev,\
                     deployment.container.registry=$(registry),\
                     deployment.container.image.name=$(repo3),\
+                    deployment.container.image.tag=$(Build.BuildNumber),\
+                    deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
+                    deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\
+                    deployment.env.AZURE_KEY_VAULT_SECRET=$(AZURE_KEY_VAULT_SECRET),\
+                    deployment.env.AZURE_KEY_VAULT_URL=$(AZURE_KEY_VAULT_URL),\
+                    deployment.env.ASPNETCORE_ENVIRONMENT=$(ASPNETCORE_ENVIRONMENT),\
+                    deployment.replicaCount=1,\
+                    deployment.resources.requests.memory=350Mi,\
+                    deployment.resources.requests.cpu=20m,\
+                    deployment.resources.limits.memory=700Mi,\
+                    deployment.resources.limits.cpu=100m,\
+                    autoscaling.enabled=true,\
+                    autoscaling.minReplicasCount=1,\
+                    autoscaling.maxReplicasCount=3,\
+                    autoscaling.targetCPUUtilizationPercentage=70"
+                - componentname: 'customer-profiles-audit-log'
+                  releasename: 'customer-profiles-audit-log'
+                  overridevalues: "
+                    application.name=customer-profiles-audit-log,\
+                    application.env=dev,\
+                    deployment.container.registry=$(registry),\
+                    deployment.container.image.name=$(repo4),\
                     deployment.container.image.tag=$(Build.BuildNumber),\
                     deployment.env.AZURE_APP_CONFIG=$(AZURE_APP_CONFIG),\
                     deployment.env.AZURE_KEY_VAULT_ID=$(AZURE_KEY_VAULT_ID),\

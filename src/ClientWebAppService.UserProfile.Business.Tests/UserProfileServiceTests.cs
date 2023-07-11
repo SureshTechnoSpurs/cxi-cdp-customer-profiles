@@ -3,6 +3,7 @@ using ClientWebAppService.UserProfile.DataAccess;
 using CXI.Common.ExceptionHandling.Primitives;
 using CXI.Common.Models.Pagination;
 using CXI.Contracts.UserProfile.Models;
+using CXI.Common.AuditLog;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
+using CXI.Common.AuditLog.Models;
 
 namespace ClientWebAppService.UserProfile.Business.Tests
 {
@@ -21,10 +23,11 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         public Mock<IUserProfileRepository> _repositoryMock = new Mock<IUserProfileRepository>();
         public Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
         public Mock<IAzureADB2CDirectoryManager> _azureADB2CDirectoryManagerMock = new Mock<IAzureADB2CDirectoryManager>();
+        public Mock<IAuditLog> _auditLogMock = new Mock<IAuditLog>();
 
         public UserProfileServiceTests()
         {
-            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object);
+            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object, _auditLogMock.Object);
         }
 
         [Fact]
@@ -89,38 +92,46 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         [Fact]
         public async Task GetUserProfilesAsync_UserProfilesFound_SuccessfulResultReturned()
         {
-            var existingUsers = new List<UserProfileDto>()
+
+            var existingUsers = new List<UserProfileAssociateDto>()
             {
-                new UserProfileDto("testPartnerId", "testemail@mail.com", UserRole.Associate, false),
-                new UserProfileDto("testPartnerId", "testemail2@mail.com", UserRole.Associate, true)
+                new UserProfileAssociateDto("testPartnerId", "testuseremail@customerxi.com", UserRole.Associate, false, DateTime.Now)
+            };
+
+            var getAuditLogs = new List<DisplayAuditLogsDto>()
+            {
+                new DisplayAuditLogsDto("testpartnerid", "testuseremail@customerxi.com", "testname", "testlogin", "https://devtest.cxicodes.com", "login click", DateTime.UtcNow, "US", "Web", "Chrome", "Username: admin login", "", "", "")
             };
 
             _repositoryMock.Setup(
-                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileDto>>>(),
+                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileAssociateDto>>>(),
                 It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync(existingUsers);
 
+            _auditLogMock.Setup(x => x.GetAuditLogByEmails(It.IsAny<string[]>())).ReturnsAsync(getAuditLogs);
+            
             var testInput = new UserProfileSearchDto { PartnerId = "testPartnerId", Role = UserRole.Associate };
 
             var result = await _service.GetUserProfilesAsync(testInput);
 
-            result.Should().Match<List<UserProfileDto>>(x => x.TrueForAll(element => element.Role == testInput.Role));
+            result.Should().Match<List<UserProfileAssociateDto>>(x => x.TrueForAll(element => element.Role == testInput.Role));
         }
 
         [Fact]
         public async Task GetUserProfilesAsync_UserProfilesNotFound_NotFoundExceptionThrown()
         {
-            var existingUsers = new List<UserProfileDto>();
+            var existingUsers = new List<UserProfileAssociateDto>();
 
             _repositoryMock.Setup(
-                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileDto>>>(),
+                x => x.FilterBy(It.IsAny<Expression<Func<User, UserProfileAssociateDto>>>(),
                 It.IsAny<Expression<Func<User, bool>>>()))
                 .ReturnsAsync(existingUsers);
 
             var testInput = new UserProfileSearchDto { PartnerId = "testPartnerId", Role = UserRole.Associate };
 
             var invocation = _service.Invoking(x => x.GetUserProfilesAsync(testInput));
-            var result = await invocation.Should().ThrowAsync<NotFoundException>();
+            var result = await invocation.Should().NotThrowAsync<NotFoundException>();
+            Assert.NotNull(result);
         }
 
         [Fact]

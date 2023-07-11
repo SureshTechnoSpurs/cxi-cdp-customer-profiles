@@ -1,18 +1,15 @@
-using ClientWebAppService.UserProfile.Core;
+using ClientWebAppService.AuditLog.Core;
 using CXI.Common.Extensions;
 using CXI.Common.Security.Extensions;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ClientWebAppService.UserProfile
+namespace ClientWebAppService.AuditLog
 {
     [ExcludeFromCodeCoverage]
     public class Program
     {
-        [ExcludeFromCodeCoverage]
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
