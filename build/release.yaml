@@ -61,7 +61,7 @@ stages:
                 kubernetesServiceConnectionName: 'Kub_CXI_Cluster'
                 namespace: '${{ parameters.Environment }}-customer-profiles'
                 acrname: '$(registry)'
-                azureservice: 'cxi-devops'
+                azureservice: 'cxi-devops-platform'
                 acrrepo: 'cxi-default'
                 acrchartversion: '20220804.5'
                 chartPath: '$(build.stagingdirectory)/cxi-default/'
