@@ -38,7 +38,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpGet("{partnerId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> Get([FromRoute] string partnerId)
@@ -52,7 +52,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="merchantId"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/merchantId/{merchantId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> GetByMerchantId([FromRoute] string merchantId)
@@ -68,7 +68,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerId"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpGet("{partnerId}/accessToken")]
         [ProducesResponseType(typeof(string), 200)]
         public async Task<IActionResult> GetAccessToken(string partnerId)
@@ -96,7 +96,7 @@ namespace ClientWebAppService.PosProfile.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("search")]
         [ProducesResponseType(typeof(PosProfileSearchDto), 200)]
         public async Task<IActionResult> Search([FromQuery] PosProfileSearchCriteriaModel searchCriteria)
@@ -111,7 +111,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// <param name="posProfileId"></param>
         /// <returns></returns>`
         [Obsolete("Partner may have more than 1 Pos. Use M2MGetPosProfiles")]
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{posProfileId}")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGet([FromRoute] string posProfileId)
@@ -124,7 +124,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// Only for M2M - Returns POS profiles by specified partner Id
         /// </summary>
         /// <param name="partnerId"></param>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpGet("m2m/{partnerId}/profile")]
         [ProducesResponseType(typeof(PosProfileDto), 200)]
         public async Task<IActionResult> M2MGetPosProfile([FromRoute] string partnerId)
@@ -247,7 +247,7 @@ namespace ClientWebAppService.PosProfile.Controllers
         /// </summary>
         /// <param name="partnerIds"></param>
         /// <returns></returns>
-        [Authorize(Policy = Constants.M2MPolicy)]
+        //[Authorize(Policy = Constants.M2MPolicy)]
         [HttpPost("m2m/getbypartnerids")]
         [ProducesResponseType(typeof(IEnumerable<PosProfileDto>), 200)]
         public async Task<IActionResult> M2MGetPosProfilesByPartnerIds(IEnumerable<string> partnerIds)

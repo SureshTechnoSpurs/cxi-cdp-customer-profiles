@@ -29,9 +29,11 @@ namespace ClientWebAppService.PartnerProfile.Core.Extensions
 
             services.AddTransient<IDomainServicesConfiguration>(_ => serviceConfigs);
 
-            services.AddPosProfileServiceClient(serviceConfigs.PosProfileServiceConfiguration.BaseUrl)
+            //services.AddPosProfileServiceClient(serviceConfigs.PosProfileServiceConfiguration.BaseUrl)
+              //  .WithHttpContextAuthorizationTokenResolver();
+            services.AddPosProfileServiceClient("https://localhost:44361")
                 .WithHttpContextAuthorizationTokenResolver();
-
+        
             services.AddTraceExtentionDispatcher(configuration)
                 .AddHealthChecks()
                 .AddCheck<LivenessHealthCheck>(name: "live",
