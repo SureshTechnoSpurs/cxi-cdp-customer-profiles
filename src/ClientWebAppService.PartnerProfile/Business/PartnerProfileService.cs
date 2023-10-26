@@ -225,7 +225,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.AllowSyntheticId,partner.AllowUiView,partner.AllowMlPrediction);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)

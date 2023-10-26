@@ -54,5 +54,14 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("created_on")]
         public DateTime CreatedOn { get; set; }
+
+        [BsonElement("allow_synthetic_id")]
+        public bool AllowSyntheticId { get; set; }
+
+        [BsonElement("allow_ui_view")]
+        public bool AllowUiView { get; set; }
+
+        [BsonElement("allow_ml_prediction")]
+        public bool AllowMlPrediction { get; set; }
     }
 }
