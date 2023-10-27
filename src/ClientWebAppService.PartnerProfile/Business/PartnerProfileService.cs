@@ -320,5 +320,28 @@ namespace ClientWebAppService.PartnerProfile.Business
 
             await _partnerRepository.DeleteOne(x => x.PartnerId == partnerId);
         }
+
+        ///<inheritdoc/>
+        public async Task UpdateProcessConfigurationAsync(string partnerId, ProcessConfigurationUpdateModel processConfiguration)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating partner profile with id : {partnerId}.");
+                Partner newPart = new Partner
+                {
+                    AllowSyntheticId = processConfiguration.AllowSyntheticId,
+                    AllowUiView = processConfiguration.AllowUiView,
+                    AllowMlPrediction = processConfiguration.AllowMlPrediction
+                };
+
+                await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
+                _logger.LogInformation($"Successfully updated partner profile with id : {partnerId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
+                throw;
+            }
+        }
     }
 }

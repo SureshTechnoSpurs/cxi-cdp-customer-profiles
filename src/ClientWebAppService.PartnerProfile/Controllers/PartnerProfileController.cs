@@ -245,5 +245,16 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok();
         }
+
+        [HttpPut("{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> UpdateProcessConfiguration([FromRoute] string partnerId,
+                                                [FromBody] ProcessConfigurationUpdateModel processConfiguration)
+        {
+            await _partnerProfileService.UpdateProcessConfigurationAsync(partnerId, processConfiguration);
+
+            return Ok();
+        }
     }
 }
