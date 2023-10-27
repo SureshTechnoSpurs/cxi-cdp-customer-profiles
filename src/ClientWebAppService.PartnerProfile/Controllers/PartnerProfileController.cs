@@ -246,7 +246,7 @@ namespace ClientWebAppService.PartnerProfile.Controllers
             return Ok();
         }
 
-        [HttpPut("{partnerId}")]
+        [HttpPut("process-config/{partnerId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
         public async Task<IActionResult> UpdateProcessConfiguration([FromRoute] string partnerId,
