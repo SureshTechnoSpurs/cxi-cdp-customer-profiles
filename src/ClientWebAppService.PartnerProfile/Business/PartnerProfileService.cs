@@ -335,7 +335,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                 };
 
                 await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
-                _logger.LogInformation($"Successfully updated partner profile with id : {partnerId}");
+                _logger.LogInformation($"Successfully updated partner profile configuration with id : {partnerId}");
             }
             catch (Exception ex)
             {
