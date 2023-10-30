@@ -21,7 +21,6 @@ namespace ClientWebAppService.UserProfile.Core.Extensions
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            configuration["Mongo:ConnectionString"] = "mongodb://localhost:27017/?compressors=disabled&gssapiServiceName=mongodb?connect=replicaSet";
             services.AddADAndADB2CAuthorization(configuration);
             services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
 
