@@ -29,5 +29,11 @@
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\cxi-cdp-common\src\CXI.Common\CXI.Common.ExceptionHandling\CXI.Common.ExceptionHandling.csproj" />
+	  <ProjectReference Include="..\..\..\cxi-cdp-common\src\CXI.Common\CXI.Common\CXI.Common.csproj" />
+	  <ProjectReference Include="..\..\..\cxi-cdp-common\src\CXI.Common\CXI.Contracts.PartnerProfile\CXI.Contracts.PartnerProfile.csproj" />
+	</ItemGroup>
 	
 </Project>
