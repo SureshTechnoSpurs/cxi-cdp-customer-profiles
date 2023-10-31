@@ -272,5 +272,18 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             _repositoryMock.Verify(x => x.DeleteOne(It.IsAny<Expression<Func<Partner, bool>>>()), Times.Once);
         }
+
+        [Fact]
+        public async Task UpdateProcessConfigurationAsync_CorrectParametersPassed_SuccessfulResult()
+        {
+            _repositoryMock.Setup(x => x.UpdateProcessConfigAsync(It.IsAny<string>(), It.IsAny<Partner>()))
+                .Returns(Task.CompletedTask);
+
+            var testInput = new ProcessConfigurationUpdateModel( true, true, true);
+
+            var invocation = _service.Invoking(x => x.UpdateProcessConfigurationAsync("testId", testInput));
+
+            await invocation.Should().NotThrowAsync();
+        }
     }
 }

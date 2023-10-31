@@ -54,5 +54,14 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("created_on")]
         public DateTime CreatedOn { get; set; }
+
+        [BsonElement("synthetic_generate_flag")]
+        public bool SyntheticGenerateFlag { get; set; }
+
+        [BsonElement("ui_enable_flag")]
+        public bool UiEnableFlag { get; set; }
+
+        [BsonElement("demog_predict_flag")]
+        public bool DemogPredictFlag { get; set; }
     }
 }
