@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CXI.Common.Utilities;
 using Microsoft.Extensions.Logging;
+using CXI.Contracts.UserProfile.Models;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -21,8 +22,10 @@ namespace ClientWebAppService.UserProfile.Business
         private readonly IProducer _producer;
         private readonly AdB2CInvitationOptions _b2cIdentityOptions;
         private const string EmailSubject = "You have been invited as an associate";
+        private const string ToEmail = "tech-support@customerxi.com";
         private const string B2CSignUpUrl = "{0}/{1}/{2}/oauth2/v2.0/authorize?client_id={3}&nonce={4}&redirect_uri={5}&scope=openid&response_type=id_token";
         private const string EmailTemplatePath = "EmailTemplates/InvitationTemplate.html";
+        private const string FeedbackEmailTemplatePath = "EmailTemplates/FeedbackTemplate.html";
         private readonly ILogger<EmailService> _logger;
 
         public EmailService(IProducer producer,
@@ -98,6 +101,32 @@ namespace ClientWebAppService.UserProfile.Business
         {
             var correaltionid = TelemetryHelper.GetCorrelationIdForCurrentActivity();
             return Guid.TryParse(correaltionid, out var messageCorrelationId) ? messageCorrelationId : Guid.NewGuid();      
+        }
+
+        ///<inheritdoc/>
+        public async Task SendFeedbackMessageToTechSupportAsync(UserFeedbackCreationDto request)
+        {
+            _logger.LogInformation($"Sending Feedback  Email to Tech Support");
+
+            string htmlTemplate = File.ReadAllText(FeedbackEmailTemplatePath);
+            _logger.LogInformation($"Html Email Template : {htmlTemplate}");
+
+            htmlTemplate = htmlTemplate.Replace("###Message###", request.Message);
+            htmlTemplate = htmlTemplate.Replace("###PartnerName###", request.PartnerName);
+            htmlTemplate = htmlTemplate.Replace("###PartnerId###", request.PartnerId);
+            htmlTemplate = htmlTemplate.Replace("###Timestamp###", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff"));
+
+            var emailMessage = new EmailDataMessage
+            {
+                From = request.Email,
+                Name= request.PartnerName,
+                To = ToEmail,
+                Subject = "Feedback - "+ request.Subject,
+                HtmlContent = string.Format(htmlTemplate),
+                CorrelationId = GetCorrelationIdForMessage()
+            };
+
+            await _producer.SendMessages(new string[] { emailMessage.Serialize() });
         }
     }
 }

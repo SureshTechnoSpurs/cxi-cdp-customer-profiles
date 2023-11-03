@@ -7,10 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="EmailTemplates\FeedbackTemplate.html" />
 	  <None Remove="EmailTemplates\InvitationTemplate.html" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="EmailTemplates\FeedbackTemplate.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="EmailTemplates\InvitationTemplate.html">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
@@ -24,8 +28,8 @@
 		<PackageReference Include="CXI.Common.MessageBrokers" Version="1.0.1" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
 		<PackageReference Include="CXI.Common.Utilities" Version="1.0.1" />
-		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.15" />
-		<PackageReference Include="CXI.MessageBroker.Messages" Version="1.0.9" />
+		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.16" />
+		<PackageReference Include="CXI.MessageBroker.Messages" Version="1.0.14" />
 		<PackageReference Include="FluentValidation" Version="10.3.4" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
 		<PackageReference Include="GL.MSA.Core.HealthCheck" Version="1.0.0" />

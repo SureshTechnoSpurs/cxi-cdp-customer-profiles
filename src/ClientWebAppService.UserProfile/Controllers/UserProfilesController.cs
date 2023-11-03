@@ -131,6 +131,16 @@ namespace ClientWebAppService.UserProfile.Controllers
 
             return Ok();
         }
+        
+        [HttpPost("partner-feedback-email")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> CreateFeedbackEmail([FromBody] UserFeedbackCreationDto request)
+        {
+             await _userProfileService.CreateFeedbackEmailAsync(request);
+
+            return Ok();
+        }
     }
 }
 

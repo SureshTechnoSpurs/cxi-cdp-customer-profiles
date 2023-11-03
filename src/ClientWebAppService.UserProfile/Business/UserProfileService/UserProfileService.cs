@@ -334,5 +334,23 @@ namespace ClientWebAppService.UserProfile.Business
 
             await _userProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
         }
+
+        ///<inheritdoc/>
+        public async Task CreateFeedbackEmailAsync(UserFeedbackCreationDto request)
+        {
+            _logger.LogInformation($"Trigger partner feedback email: {request.Email}");
+
+            VerifyHelper.NotEmpty(request.Email, nameof(request.Email));
+
+            var validator = new EmailValidator();
+            var validationResult = validator.Validate(request.Email);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(nameof(request.Email), validationResult.Errors.FirstOrDefault().ToString());
+            }
+
+            await _emailService.SendFeedbackMessageToTechSupportAsync(request);
+        }
     }
 }

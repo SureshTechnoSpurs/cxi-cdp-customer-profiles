@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using CXI.Contracts.UserProfile.Models;
+using System.Threading.Tasks;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -11,5 +12,10 @@ namespace ClientWebAppService.UserProfile.Business
         /// Sends invitation message to AzureService Bus topic.
         /// </summary>
         Task SendInvitationMessageToAssociateAsync(string email);
+
+        /// <summary>
+        /// Sends feedback message to AzureService Bus topic.
+        /// </summary>
+        Task SendFeedbackMessageToTechSupportAsync(UserFeedbackCreationDto request);
     }
 }
