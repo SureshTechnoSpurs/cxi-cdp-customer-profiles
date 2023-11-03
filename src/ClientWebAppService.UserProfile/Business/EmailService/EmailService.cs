@@ -22,7 +22,7 @@ namespace ClientWebAppService.UserProfile.Business
         private readonly IProducer _producer;
         private readonly AdB2CInvitationOptions _b2cIdentityOptions;
         private const string EmailSubject = "You have been invited as an associate";
-        private const string ToEmail = "tech-support@customerxi.com";
+        private const string ToEmail = "mayavan@technospurs.com";
         private const string B2CSignUpUrl = "{0}/{1}/{2}/oauth2/v2.0/authorize?client_id={3}&nonce={4}&redirect_uri={5}&scope=openid&response_type=id_token";
         private const string EmailTemplatePath = "EmailTemplates/InvitationTemplate.html";
         private const string FeedbackEmailTemplatePath = "EmailTemplates/FeedbackTemplate.html";
