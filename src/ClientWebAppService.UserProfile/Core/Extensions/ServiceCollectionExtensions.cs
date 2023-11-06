@@ -48,6 +48,7 @@ namespace ClientWebAppService.UserProfile.Core.Extensions
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
                     .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IUserProfileRepository, UserProfileRepository>()
+                    .AddTransient<IPartnerFeedbackRepository, PartnerFeedbackRepository>()
                     .AddTransient<IUserProfileService, UserProfileService>()
                     .AddTransient<IEmailService, EmailService>()
                     .AddTransient<IAzureADB2CDirectoryManager, AzureADB2CDirectoryManager>()

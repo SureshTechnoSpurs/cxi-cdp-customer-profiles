@@ -21,13 +21,14 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         public readonly IUserProfileService _service;
 
         public Mock<IUserProfileRepository> _repositoryMock = new Mock<IUserProfileRepository>();
+        public Mock<IPartnerFeedbackRepository> _feedbackRepositryMock = new Mock<IPartnerFeedbackRepository>();
         public Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
         public Mock<IAzureADB2CDirectoryManager> _azureADB2CDirectoryManagerMock = new Mock<IAzureADB2CDirectoryManager>();
         public Mock<IAuditLog> _auditLogMock = new Mock<IAuditLog>();
 
         public UserProfileServiceTests()
         {
-            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object, _auditLogMock.Object);
+            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object, _auditLogMock.Object, _feedbackRepositryMock.Object);
         }
 
         [Fact]

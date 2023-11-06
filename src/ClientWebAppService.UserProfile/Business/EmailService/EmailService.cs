@@ -118,8 +118,8 @@ namespace ClientWebAppService.UserProfile.Business
 
             var emailMessage = new EmailDataMessage
             {
-                From = request.Email,
-                Name= request.PartnerName,
+                //From = request.Email,
+                //Name= request.PartnerName,
                 To = ToEmail,
                 Subject = "Feedback - "+ request.Subject,
                 HtmlContent = string.Format(htmlTemplate),
