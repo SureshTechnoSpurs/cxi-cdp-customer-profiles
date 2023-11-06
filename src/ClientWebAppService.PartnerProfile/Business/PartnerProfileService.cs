@@ -225,7 +225,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -319,6 +319,29 @@ namespace ClientWebAppService.PartnerProfile.Business
             }
 
             await _partnerRepository.DeleteOne(x => x.PartnerId == partnerId);
+        }
+
+        ///<inheritdoc/>
+        public async Task UpdateProcessConfigurationAsync(string partnerId, ProcessConfigurationUpdateModel processConfiguration)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating partner profile with id : {partnerId}.");
+                Partner newPart = new Partner
+                {
+                    SyntheticGenerateFlag = processConfiguration.SyntheticGenerateFlag,
+                    UiEnableFlag = processConfiguration.UiEnableFlag,
+                    DemogPredictFlag = processConfiguration.DemogPredictFlag
+                };
+
+                await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
+                _logger.LogInformation($"Successfully updated partner profile configuration with id : {partnerId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
+                throw;
+            }
         }
     }
 }

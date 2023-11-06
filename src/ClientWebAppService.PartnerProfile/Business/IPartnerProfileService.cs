@@ -106,5 +106,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// Deletes Partner profile by its id.
         /// </summary>
         Task DeleteProfileByPartnerIdAsync(string partnerId);
+
+        /// <summary>
+        /// Update specified partner processconfiguration.
+        /// </summary>
+        Task UpdateProcessConfigurationAsync(string partnerId, ProcessConfigurationUpdateModel processConfiguration);
+        
     }
 }
