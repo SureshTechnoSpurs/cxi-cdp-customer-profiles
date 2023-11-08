@@ -15,6 +15,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
         public Mock<IProducer> _producerMock = new Mock<IProducer>();
         public Mock<IOptions<AdB2CInvitationOptions>> _optionsMock = new Mock<IOptions<AdB2CInvitationOptions>>();
+        public Mock<IEmailOptions> _emailOptionsMock = new Mock<IEmailOptions>();
 
         public EmailServiceTests()
         {
@@ -32,7 +33,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
             _optionsMock.Setup(opt => opt.Value).Returns(opts);
 
-            _service = new EmailService(_producerMock.Object, _optionsMock.Object, new Mock<ILogger<EmailService>>().Object);
+            _service = new EmailService(_producerMock.Object, _optionsMock.Object, new Mock<ILogger<EmailService>>().Object, _emailOptionsMock.Object);
         }
 
         [Fact]

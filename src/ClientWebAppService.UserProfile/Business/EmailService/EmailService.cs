@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using CXI.Common.Utilities;
 using Microsoft.Extensions.Logging;
 using CXI.Contracts.UserProfile.Models;
+using System.Globalization;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -21,8 +22,8 @@ namespace ClientWebAppService.UserProfile.Business
     {
         private readonly IProducer _producer;
         private readonly AdB2CInvitationOptions _b2cIdentityOptions;
+        private readonly IEmailOptions _emailOptions;
         private const string EmailSubject = "You have been invited as an associate";
-        private const string ToEmail = "mayavan@technospurs.com";
         private const string B2CSignUpUrl = "{0}/{1}/{2}/oauth2/v2.0/authorize?client_id={3}&nonce={4}&redirect_uri={5}&scope=openid&response_type=id_token";
         private const string EmailTemplatePath = "EmailTemplates/InvitationTemplate.html";
         private const string FeedbackEmailTemplatePath = "EmailTemplates/FeedbackTemplate.html";
@@ -30,11 +31,12 @@ namespace ClientWebAppService.UserProfile.Business
 
         public EmailService(IProducer producer,
                             IOptions<AdB2CInvitationOptions> b2cIDentityOptions,
-                            ILogger<EmailService> logger)
+                            ILogger<EmailService> logger, IEmailOptions emailOptions)
         {
             _producer = producer;
             _b2cIdentityOptions = b2cIDentityOptions.Value;
             _logger = logger;
+            _emailOptions = emailOptions;
         }
 
         ///<inheritdoc/>
@@ -108,19 +110,18 @@ namespace ClientWebAppService.UserProfile.Business
         {
             _logger.LogInformation($"Sending Feedback  Email to Tech Support");
 
+            DateTimeOffset dateOffset = new DateTimeOffset(DateTime.Now, TimeZoneInfo.Local.GetUtcOffset(DateTime.Now));
             string htmlTemplate = File.ReadAllText(FeedbackEmailTemplatePath);
             _logger.LogInformation($"Html Email Template : {htmlTemplate}");
 
             htmlTemplate = htmlTemplate.Replace("###Message###", request.Message);
             htmlTemplate = htmlTemplate.Replace("###PartnerName###", request.PartnerName);
             htmlTemplate = htmlTemplate.Replace("###PartnerId###", request.PartnerId);
-            htmlTemplate = htmlTemplate.Replace("###Timestamp###", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff"));
+            htmlTemplate = htmlTemplate.Replace("###Timestamp###", dateOffset.ToUniversalTime().ToString("r") + "" + DateTimeOffset.UtcNow.ToString("%K"));
 
             var emailMessage = new EmailDataMessage
             {
-                //From = request.Email,
-                //Name= request.PartnerName,
-                To = ToEmail,
+                To = _emailOptions.ReceiverEmail,
                 Subject = "Feedback - "+ request.Subject,
                 HtmlContent = string.Format(htmlTemplate),
                 CorrelationId = GetCorrelationIdForMessage()

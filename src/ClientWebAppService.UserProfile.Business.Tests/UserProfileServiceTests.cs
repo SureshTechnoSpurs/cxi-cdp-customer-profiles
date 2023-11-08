@@ -358,5 +358,19 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             _repositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
             _azureADB2CDirectoryManagerMock.Verify(x => x.DeleteADB2CAccountByEmailAsync(It.IsAny<string>()), Times.Exactly(existingUserEmails.Count));
         }
+
+        [Fact]
+        public async Task CreateFeedbackEmailAsync_TechSetTeam_MailSent()
+        {
+            _feedbackRepositryMock.Setup(x => x.InsertOne(It.IsAny<Feedback>()))
+                .Returns(Task.CompletedTask);
+
+            var testInput = new UserFeedbackCreationDto {  Email="testemail@email.com", PartnerId = "testPartnerId", PartnerName="testPartnerName", Message = "testMessage", Subject= "testSubject"};
+
+             await _service.CreateFeedbackEmailAsync(testInput);
+
+            _emailServiceMock.Verify(mock => mock.SendFeedbackMessageToTechSupportAsync(testInput), Times.Once);
+        }
+
     }
 }
