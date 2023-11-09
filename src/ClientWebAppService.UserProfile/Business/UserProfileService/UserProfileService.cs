@@ -19,6 +19,7 @@ namespace ClientWebAppService.UserProfile.Business
     public class UserProfileService : IUserProfileService
     {
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IPartnerFeedbackRepository _partnerFeedbackRepository;
         private readonly ILogger<UserProfileService> _logger;
         private readonly IEmailService _emailService;
         private readonly IAzureADB2CDirectoryManager _azureADB2CDirectoryManager;
@@ -28,13 +29,15 @@ namespace ClientWebAppService.UserProfile.Business
             ILogger<UserProfileService> logger,
             IEmailService emailService,
             IAzureADB2CDirectoryManager azureADB2CDirectoryManager,
-            IAuditLog auditLog)
+            IAuditLog auditLog,
+            IPartnerFeedbackRepository partnerFeedbackRepository)
         {
             _userProfileRepository = userProfileRepository;
             _logger = logger;
             _emailService = emailService;
             _azureADB2CDirectoryManager = azureADB2CDirectoryManager;
             _auditLog = auditLog;
+            _partnerFeedbackRepository = partnerFeedbackRepository;
         }
 
         ///<inheritdoc/>
@@ -333,6 +336,36 @@ namespace ClientWebAppService.UserProfile.Business
             }
 
             await _userProfileRepository.DeleteMany(x => x.PartnerId == partnerId);
+        }
+
+        ///<inheritdoc/>
+        public async Task CreateFeedbackEmailAsync(UserFeedbackCreationDto request)
+        {
+            _logger.LogInformation($"Trigger partner feedback email: {request.Email}");
+
+            VerifyHelper.NotEmpty(request.Email, nameof(request.Email));
+
+            var validator = new EmailValidator();
+            var validationResult = validator.Validate(request.Email);
+
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(nameof(request.Email), validationResult.Errors.FirstOrDefault().ToString());
+            }
+
+            var feedback = new Feedback
+            {
+                PartnerId = request.PartnerId,
+                PartnerName = request.PartnerName,
+                Email = request.Email,
+                Subject= request.Subject,
+                Message = request.Message,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await _partnerFeedbackRepository.InsertOne(feedback);
+
+            await _emailService.SendFeedbackMessageToTechSupportAsync(request);
         }
     }
 }

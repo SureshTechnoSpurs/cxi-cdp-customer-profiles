@@ -44,10 +44,14 @@ namespace ClientWebAppService.UserProfile.Core.Extensions
 
             services.AddAuditLogClient(configuration);
 
+            var emailOptions = configuration.GetSection(nameof(EmailOptions)).Get<EmailOptions>();
+            services.AddTransient<IEmailOptions>(_ => emailOptions);
+
             services.AddCxiMongoDb()
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.UserProfile")
                     .AddMongoResiliencyFor<User>(LoggerFactory.Create(builder => builder.AddApplicationInsights()).CreateLogger("mongobb-resilency"))
                     .AddTransient<IUserProfileRepository, UserProfileRepository>()
+                    .AddTransient<IPartnerFeedbackRepository, PartnerFeedbackRepository>()
                     .AddTransient<IUserProfileService, UserProfileService>()
                     .AddTransient<IEmailService, EmailService>()
                     .AddTransient<IAzureADB2CDirectoryManager, AzureADB2CDirectoryManager>()

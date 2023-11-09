@@ -60,5 +60,10 @@ namespace ClientWebAppService.UserProfile.Business
         /// Delete all user profiles and their accounts in Azure ADB2C Directory for specified partnerId. 
         /// </summary>
         Task DeleteUserProfilesByPartnerIdAsync(string partnerId);
+
+        /// <summary>
+        /// Create Feedback Email.
+        /// </summary>
+        Task CreateFeedbackEmailAsync(UserFeedbackCreationDto request);
     }
 }

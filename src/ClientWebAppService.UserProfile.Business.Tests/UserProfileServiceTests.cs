@@ -21,13 +21,14 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         public readonly IUserProfileService _service;
 
         public Mock<IUserProfileRepository> _repositoryMock = new Mock<IUserProfileRepository>();
+        public Mock<IPartnerFeedbackRepository> _feedbackRepositryMock = new Mock<IPartnerFeedbackRepository>();
         public Mock<IEmailService> _emailServiceMock = new Mock<IEmailService>();
         public Mock<IAzureADB2CDirectoryManager> _azureADB2CDirectoryManagerMock = new Mock<IAzureADB2CDirectoryManager>();
         public Mock<IAuditLog> _auditLogMock = new Mock<IAuditLog>();
 
         public UserProfileServiceTests()
         {
-            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object, _auditLogMock.Object);
+            _service = new UserProfileService(_repositoryMock.Object, new Mock<ILogger<UserProfileService>>().Object, _emailServiceMock.Object, _azureADB2CDirectoryManagerMock.Object, _auditLogMock.Object, _feedbackRepositryMock.Object);
         }
 
         [Fact]
@@ -356,5 +357,19 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             _repositoryMock.Verify(x => x.DeleteMany(It.IsAny<Expression<Func<User, bool>>>()), Times.Once);
             _azureADB2CDirectoryManagerMock.Verify(x => x.DeleteADB2CAccountByEmailAsync(It.IsAny<string>()), Times.Exactly(existingUserEmails.Count));
         }
+
+        [Fact]
+        public async Task CreateFeedbackEmailAsync_TechSetTeam_MailSent()
+        {
+            _feedbackRepositryMock.Setup(x => x.InsertOne(It.IsAny<Feedback>()))
+                .Returns(Task.CompletedTask);
+
+            var testInput = new UserFeedbackCreationDto {  Email="testemail@email.com", PartnerId = "testPartnerId", PartnerName="testPartnerName", Message = "testMessage", Subject= "testSubject"};
+
+             await _service.CreateFeedbackEmailAsync(testInput);
+
+            _emailServiceMock.Verify(mock => mock.SendFeedbackMessageToTechSupportAsync(testInput), Times.Once);
+        }
+
     }
 }
