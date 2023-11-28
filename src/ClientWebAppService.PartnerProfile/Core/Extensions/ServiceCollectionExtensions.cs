@@ -20,11 +20,12 @@ namespace ClientWebAppService.PartnerProfile.Core.Extensions
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            services.AddADAndADB2CAuthorization(configuration);
-            services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
+            configuration["Mongo:ConnectionString"] = "mongodb+srv://cxi_di_services:SPpm5vRsIe3fhny5@cluster0-pl-0.iuoic.mongodb.net/cxi_customer_profiles?retryWrites=true&w=majority";
+            //services.AddADAndADB2CAuthorization(configuration);
+            //services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
 
-            services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
-            
+            //services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
+
             var serviceConfigs = configuration.GetSection("DomainServices").Get<DomainServicesConfiguration>();
 
             services.AddTransient<IDomainServicesConfiguration>(_ => serviceConfigs);
