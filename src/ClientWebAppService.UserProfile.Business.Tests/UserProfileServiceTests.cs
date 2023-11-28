@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 using CXI.Common.AuditLog.Models;
+using MongoDB.Bson;
 
 namespace ClientWebAppService.UserProfile.Business.Tests
 {
@@ -370,6 +371,36 @@ namespace ClientWebAppService.UserProfile.Business.Tests
              await _service.CreateFeedbackEmailAsync(testInput);
 
             _emailServiceMock.Verify(mock => mock.SendFeedbackMessageToTechSupportAsync(testInput), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetFeedbackMessageAsync_MessageExist_ShouldReturnFeedbackMessagePaginatedDto()
+        {
+            var testPartnerId = "testPartnerId";
+            // Arrange
+            _feedbackRepositryMock
+                .Setup(x => x.GetPaginatedList(It.IsAny<PaginationRequest>(), It.IsAny<Expression<Func<Feedback, bool>>>()))
+                .ReturnsAsync(new PaginatedResponse<Feedback>
+                {
+                    Items = new List<Feedback>
+                    {
+                        new Feedback { PartnerId = "test", Email = "test@outlook.com", PartnerName = "partnerName", Subject = "testSubject", Message = "testMessage", CreatedOn= DateTime.Now}
+                    },
+                    PageIndex = 1,
+                    PageSize = 1,
+                    TotalCount = 1,
+                    TotalPages = 1
+                });
+
+            var pageRequest = new PaginationRequest() { PageIndex = 1, PageSize = 1 };
+
+            // Act
+            var result = await _service.GetFeedbackMessageAsync(testPartnerId, pageRequest);
+
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().NotBeEmpty();
         }
 
     }

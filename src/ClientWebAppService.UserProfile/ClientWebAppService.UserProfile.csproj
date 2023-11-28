@@ -28,7 +28,7 @@
 		<PackageReference Include="CXI.Common.MessageBrokers" Version="1.0.1" />
 		<PackageReference Include="CXI.Common.Security" Version="1.0.4" />
 		<PackageReference Include="CXI.Common.Utilities" Version="1.0.1" />
-		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.17" />
+		<PackageReference Include="CXI.Contracts.UserProfile" Version="1.0.18" />
 		<PackageReference Include="CXI.MessageBroker.Messages" Version="1.0.14" />
 		<PackageReference Include="FluentValidation" Version="10.3.4" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
