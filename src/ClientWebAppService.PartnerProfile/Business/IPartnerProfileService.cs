@@ -111,6 +111,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// Update specified partner processconfiguration.
         /// </summary>
         Task UpdateProcessConfigurationAsync(string partnerId, ProcessConfigurationUpdateModel processConfiguration);
-        
+
+        /// <summary>
+        /// Update specified partner tutorialEnableFlag.
+        /// </summary>
+        Task UpdatePartnerTutorialConfigurationAsync(string partnerId, bool tutorialEnableFlag);
+
     }
 }

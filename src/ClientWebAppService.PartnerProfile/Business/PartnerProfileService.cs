@@ -225,7 +225,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag,partner.TutorialEnableFlag);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -335,6 +335,27 @@ namespace ClientWebAppService.PartnerProfile.Business
                 };
 
                 await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
+                _logger.LogInformation($"Successfully updated partner profile configuration with id : {partnerId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
+                throw;
+            }
+        }
+
+        ///<inheritdoc/>
+        public async Task UpdatePartnerTutorialConfigurationAsync(string partnerId, bool tutorialEnableFlag)
+        {
+            try
+            {
+                _logger.LogInformation($"Updating partner tutorialEnableFlag with id : {partnerId}.");
+                Partner newPart = new Partner
+                {
+                    TutorialEnableFlag = tutorialEnableFlag
+                };
+
+                await _partnerRepository.UpdateTutorialConfigAsync(partnerId, newPart);
                 _logger.LogInformation($"Successfully updated partner profile configuration with id : {partnerId}");
             }
             catch (Exception ex)

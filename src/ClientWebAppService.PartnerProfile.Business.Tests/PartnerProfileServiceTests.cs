@@ -285,5 +285,18 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             await invocation.Should().NotThrowAsync();
         }
+
+        [Fact]
+        public async Task UpdatePartnerTutorialConfigurationAsync_CorrectParametersPassed_SuccessfulResult()
+        {
+            _repositoryMock.Setup(x => x.UpdateTutorialConfigAsync(It.IsAny<string>(), It.IsAny<Partner>()))
+                .Returns(Task.CompletedTask);
+
+            bool tutorialFlag = true;
+
+            var invocation = _service.Invoking(x => x.UpdatePartnerTutorialConfigurationAsync("testId", tutorialFlag));
+
+            await invocation.Should().NotThrowAsync();
+        }
     }
 }

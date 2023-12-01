@@ -63,5 +63,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("demog_predict_flag")]
         public bool DemogPredictFlag { get; set; }
+
+        [BsonElement("tutorial_enable_flag")]
+        public bool TutorialEnableFlag { get; set; }
     }
 }

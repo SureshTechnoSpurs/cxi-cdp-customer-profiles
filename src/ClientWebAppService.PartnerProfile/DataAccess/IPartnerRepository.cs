@@ -42,5 +42,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         Task SetActivityStatus(string partnerId, bool value);
 
         Task UpdateProcessConfigAsync(string partnerId, Partner updatedPartner);
+
+        Task UpdateTutorialConfigAsync(string partnerId, Partner updatedPartner);
     }
 }

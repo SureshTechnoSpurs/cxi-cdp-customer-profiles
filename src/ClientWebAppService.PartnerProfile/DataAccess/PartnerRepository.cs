@@ -119,5 +119,21 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
         }
+
+        /// <summary>
+        /// Update partner with <paramref name="partnerId"/> by new values from <paramref name="updatedPartner"/>
+        /// </summary>
+        public Task UpdateTutorialConfigAsync(string partnerId, Partner updatedPartner)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+
+            var updateStrategy =
+                Builders<Partner>.Update.Combine(
+                    Builders<Partner>.Update.Set(x => x.TutorialEnableFlag, updatedPartner.TutorialEnableFlag));
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
     }
 }
