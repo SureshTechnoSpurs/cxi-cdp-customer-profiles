@@ -398,6 +398,6 @@ namespace ClientWebAppService.UserProfile.Business
         }
 
         private UserFeedbackMessageDto MapFeedback(Feedback feedback) =>
-            new UserFeedbackMessageDto(feedback.PartnerId, feedback.Email, feedback.PartnerName, feedback.Subject, feedback.Message, feedback.CreatedOn);
+            new UserFeedbackMessageDto(feedback.Id.ToString(), feedback.PartnerId, feedback.Email, feedback.PartnerName, feedback.Subject, feedback.Message, feedback.CreatedOn);
     }
 }
