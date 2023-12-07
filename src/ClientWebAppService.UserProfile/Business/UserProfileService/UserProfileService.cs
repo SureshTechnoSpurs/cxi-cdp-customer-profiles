@@ -379,7 +379,7 @@ namespace ClientWebAppService.UserProfile.Business
             VerifyHelper.GreaterThanZero(paginationRequest.PageIndex, nameof(paginationRequest.PageIndex));
             VerifyHelper.GreaterThanZero(paginationRequest.PageSize, nameof(paginationRequest.PageSize));
 
-            var result = await _partnerFeedbackRepository.GetPaginatedList(paginationRequest);
+            var result = await _partnerFeedbackRepository.GetPaginatedList(paginationRequest, x => x.PartnerId == partnerId);
 
             VerifyHelper.NotNull(result, nameof(result));
 
