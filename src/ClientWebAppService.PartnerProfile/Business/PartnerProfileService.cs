@@ -60,6 +60,10 @@ namespace ClientWebAppService.PartnerProfile.Business
                     },
                     ServiceAgreementVersion = string.Empty,
                     ServiceAgreementAcceptedDate = null,
+                    SyntheticGenerateFlag = true,
+                    UiEnableFlag = true,
+                    DemogPredictFlag = true,
+                    TutorialEnableFlag = true,
                     CreatedOn = DateTime.UtcNow,
                 };
 
