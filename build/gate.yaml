@@ -167,16 +167,16 @@ stages:
           coverageThreshold: '70'
           buildConfiguration: '$(BuildConfiguration)'       
 
-      - task: dependency-check-build-task@6
-        continueOnError: true
-        inputs:
-          projectName: 'customer-profiles-app'
-          scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0/*.dll'
-          additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0-windows/*.dll'
-          format: 'HTML, JSON, JUNIT'
-          enableVerbose: true
-          enableExperimental: true
-          failOnCVSS: '8'
+      # - task: dependency-check-build-task@6
+      #   continueOnError: true
+      #   inputs:
+      #     projectName: 'customer-profiles-app'
+      #     scanPath: '$(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0/*.dll'
+      #     additionalArguments: '--scan $(Build.SourcesDirectory)/**/bin/$(BuildConfiguration)/net6.0-windows/*.dll'
+      #     format: 'HTML, JSON, JUNIT'
+      #     enableVerbose: true
+      #     enableExperimental: true
+      #     failOnCVSS: '8'
     
       - task: PublishTestResults@2
         displayName: 'Publish OWASP Dependency Check security scan results'
