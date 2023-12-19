@@ -34,13 +34,12 @@ namespace ClientWebAppService.PosProfile
             services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
             services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
 
-            configuration["appidentity:clientsecret"] =configuration["AZURE_KEY_VAULT_SECRET"];
+            configuration["appidentity:clientsecret"] = configuration["AZURE_KEY_VAULT_SECRET"];
 
             services.AddTraceExtentionDispatcher(configuration);
 
             services.AddControllers();
             services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
-
 
             services.AddSingleton<TokenCredential>(_ => new ClientSecretCredential(
                 tenantId: configuration["appidentity:tenantid"],
@@ -55,7 +54,6 @@ namespace ClientWebAppService.PosProfile
                     name: "MongoDB",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new string[] { "mongoDB", "ready" });
-
 
             services.AddCxiMongoDb()
                     .AddMongoDbApplicationInsightTelemetry("MongoDB.PosProfile")
