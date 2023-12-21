@@ -34,8 +34,6 @@ namespace ClientWebAppService.PosProfile
             services.AddAzureAdB2CMachineToMachineAuthentication(configuration, logger);
             services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
 
-            configuration["appidentity:clientsecret"] = configuration["AZURE_KEY_VAULT_SECRET"];
-
             services.AddTraceExtentionDispatcher(configuration);
 
             services.AddControllers();
@@ -44,7 +42,7 @@ namespace ClientWebAppService.PosProfile
             services.AddSingleton<TokenCredential>(_ => new ClientSecretCredential(
                 tenantId: configuration["appidentity:tenantid"],
                 clientId: configuration["appidentity:clientid"],
-                clientSecret: configuration["appidentity:clientsecret"]));
+                clientSecret: configuration["appidentity:clientsecretnew"]));
 
             services.AddHealthChecks()
                 .AddCheck<LivenessHealthCheck>(name: "live",
