@@ -229,7 +229,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag,partner.TutorialEnableFlag);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag,partner.TutorialEnableFlag, partner.OverviewDashboardFlag);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -335,7 +335,8 @@ namespace ClientWebAppService.PartnerProfile.Business
                 {
                     SyntheticGenerateFlag = processConfiguration.SyntheticGenerateFlag,
                     UiEnableFlag = processConfiguration.UiEnableFlag,
-                    DemogPredictFlag = processConfiguration.DemogPredictFlag
+                    DemogPredictFlag = processConfiguration.DemogPredictFlag,
+                    OverviewDashboardFlag = processConfiguration.OverviewDashboardFlag
                 };
 
                 await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
@@ -367,6 +368,6 @@ namespace ClientWebAppService.PartnerProfile.Business
                 _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
                 throw;
             }
-        }
+        } 
     }
 }

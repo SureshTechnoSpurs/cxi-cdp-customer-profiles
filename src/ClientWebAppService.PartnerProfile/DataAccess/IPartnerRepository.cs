@@ -44,5 +44,6 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         Task UpdateProcessConfigAsync(string partnerId, Partner updatedPartner);
 
         Task UpdateTutorialConfigAsync(string partnerId, Partner updatedPartner);
+
     }
 }

@@ -66,5 +66,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("tutorial_enable_flag")]
         public bool TutorialEnableFlag { get; set; }
+
+        [BsonElement("overview_dashboard_flag")]
+        public bool OverviewDashboardFlag { get; set; }
     }
 }

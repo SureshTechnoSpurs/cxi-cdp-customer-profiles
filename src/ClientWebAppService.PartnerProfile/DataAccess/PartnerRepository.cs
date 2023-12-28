@@ -113,7 +113,8 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                 Builders<Partner>.Update.Combine(
                     Builders<Partner>.Update.Set(x => x.SyntheticGenerateFlag, updatedPartner.SyntheticGenerateFlag),
                     Builders<Partner>.Update.Set(x => x.UiEnableFlag, updatedPartner.UiEnableFlag),
-                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag));
+                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag),
+                    Builders<Partner>.Update.Set(x => x.OverviewDashboardFlag, updatedPartner.OverviewDashboardFlag));
 
             var policy = GetDefaultPolicy();
 
@@ -135,5 +136,6 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
         }
+ 
     }
 }
