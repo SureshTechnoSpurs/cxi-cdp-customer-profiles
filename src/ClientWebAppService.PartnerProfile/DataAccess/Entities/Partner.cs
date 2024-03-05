@@ -69,5 +69,17 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
         [BsonElement("overview_dashboard_flag")]
         public bool OverviewDashboardFlag { get; set; }
+
+        [BsonElement("identity_phone_flag")]
+        public bool IdentityPhoneFlag { get; set; }
+
+        [BsonElement("identity_email_flag")]
+        public bool IdentityEmailFlag { get; set; }
+
+        [BsonElement("identity_idfa_flag")]
+        public bool IdentityIOSFlag { get; set; }
+
+        [BsonElement("identity_aaid_flag")]
+        public bool IdentityAndroidFlag { get; set; }
     }
 }
