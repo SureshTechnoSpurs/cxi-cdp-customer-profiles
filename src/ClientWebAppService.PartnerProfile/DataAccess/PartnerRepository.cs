@@ -20,7 +20,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         public PartnerRepository(IMongoDbContext dataContext, IResiliencyPolicyProvider policyProvider)
             : base(dataContext, policyProvider)
         {
-           
+
         }
 
         ///<inheritdoc/>
@@ -113,7 +113,24 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                 Builders<Partner>.Update.Combine(
                     Builders<Partner>.Update.Set(x => x.SyntheticGenerateFlag, updatedPartner.SyntheticGenerateFlag),
                     Builders<Partner>.Update.Set(x => x.UiEnableFlag, updatedPartner.UiEnableFlag),
-                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag));
+                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag),
+                    Builders<Partner>.Update.Set(x => x.OverviewDashboardFlag, updatedPartner.OverviewDashboardFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityPhoneFlag, updatedPartner.IdentityPhoneFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityEmailFlag, updatedPartner.IdentityEmailFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityIOSFlag, updatedPartner.IdentityIOSFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityAndroidFlag, updatedPartner.IdentityAndroidFlag));
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <summary>
+        /// Update partner with <paramref name="partnerId"/> by new values from <paramref name="updatedPartner"/>
+        /// </summary>
+        public Task UpdateTutorialConfigAsync(string partnerId, Partner updatedPartner)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
 
             var policy = GetDefaultPolicy();
 

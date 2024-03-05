@@ -225,7 +225,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag,partner.TutorialEnableFlag, partner.OverviewDashboardFlag, partner.IdentityPhoneFlag, partner.IdentityEmailFlag, partner.IdentityIOSFlag, partner.IdentityAndroidFlag);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -331,7 +331,12 @@ namespace ClientWebAppService.PartnerProfile.Business
                 {
                     SyntheticGenerateFlag = processConfiguration.SyntheticGenerateFlag,
                     UiEnableFlag = processConfiguration.UiEnableFlag,
-                    DemogPredictFlag = processConfiguration.DemogPredictFlag
+                    DemogPredictFlag = processConfiguration.DemogPredictFlag,
+                    OverviewDashboardFlag = processConfiguration.OverviewDashboardFlag,
+                    IdentityPhoneFlag = processConfiguration.IdentityPhoneFlag,
+                    IdentityEmailFlag = processConfiguration.IdentityEmailFlag,
+                    IdentityIOSFlag = processConfiguration.IdentityIOSFlag,
+                    IdentityAndroidFlag = processConfiguration.IdentityAndroidFlag,
                 };
 
                 await _partnerRepository.UpdateProcessConfigAsync(partnerId, newPart);
