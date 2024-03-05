@@ -279,7 +279,7 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateProcessConfigAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new ProcessConfigurationUpdateModel( true, true, true, false);
+            var testInput = new ProcessConfigurationUpdateModel( true, true, true, false, false, false, false, false);
 
             var invocation = _service.Invoking(x => x.UpdateProcessConfigurationAsync("testId", testInput));
 

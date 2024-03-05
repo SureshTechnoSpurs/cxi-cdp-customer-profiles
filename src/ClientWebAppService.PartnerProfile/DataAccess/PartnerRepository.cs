@@ -20,7 +20,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         public PartnerRepository(IMongoDbContext dataContext, IResiliencyPolicyProvider policyProvider)
             : base(dataContext, policyProvider)
         {
-           
+
         }
 
         ///<inheritdoc/>
@@ -114,7 +114,11 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                     Builders<Partner>.Update.Set(x => x.SyntheticGenerateFlag, updatedPartner.SyntheticGenerateFlag),
                     Builders<Partner>.Update.Set(x => x.UiEnableFlag, updatedPartner.UiEnableFlag),
                     Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag),
-                    Builders<Partner>.Update.Set(x => x.OverviewDashboardFlag, updatedPartner.OverviewDashboardFlag));
+                    Builders<Partner>.Update.Set(x => x.OverviewDashboardFlag, updatedPartner.OverviewDashboardFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityPhoneFlag, updatedPartner.IdentityPhoneFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityEmailFlag, updatedPartner.IdentityEmailFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityIOSFlag, updatedPartner.IdentityIOSFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityAndroidFlag, updatedPartner.IdentityAndroidFlag));
 
             var policy = GetDefaultPolicy();
 
@@ -136,6 +140,6 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
         }
- 
+
     }
 }
