@@ -298,5 +298,31 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             await invocation.Should().NotThrowAsync();
         }
+
+        [Fact]
+        public async Task GetPartnerConfigAsync_ConfigExist_ShouldReturnPartnerProfiles()
+        {
+            var partnerId = "partnerId";
+
+            // Arrange
+            _repositoryMock.Setup(x => x.GetPartnerConfigAsync(It.IsAny<string>()))
+               .ReturnsAsync(new List<Partner>
+                {
+                    new()
+                    {
+                        PartnerId = "partnerId",
+                        IdentityPhoneFlag = false,
+                        IdentityEmailFlag = false,
+                        IdentityIOSFlag = false,
+                        IdentityAndroidFlag = false
+                    }
+                });
+
+            // Act
+            var result = await _service.GetPartnerConfigurationAsync(partnerId);
+
+            // Assert
+            result.Should().AllBeOfType<PartnerConfigDto>();
+        }
     }
 }

@@ -267,5 +267,15 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok();
         }
+
+        [HttpGet("partner-config/{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPartnerConfiguration([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.GetPartnerConfigurationAsync(partnerId);
+
+            return Ok(result);
+        }
     }
 }

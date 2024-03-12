@@ -179,7 +179,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         {
             VerifyHelper.NotNull(model, nameof(model));
 
-            var subscription = new Subscription 
+            var subscription = new Subscription
             {
                 SubscriptionId = model.SubscriptionId.ToString(),
                 State = model.State,
@@ -229,7 +229,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             new(partner.PartnerId, partner.PartnerName, partner.Address, partner.PartnerType,
                 partner.AmountOfLocations, partner.ServiceAgreementAccepted, partner.UserProfiles,
                 partner.IsActive, partner.Subscription, partner.CreatedOn, partner.IsOnBoarded,
-                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate,partner.SyntheticGenerateFlag,partner.UiEnableFlag,partner.DemogPredictFlag,partner.TutorialEnableFlag, partner.OverviewDashboardFlag, partner.IdentityPhoneFlag, partner.IdentityEmailFlag, partner.IdentityIOSFlag, partner.IdentityAndroidFlag);
+                partner.ServiceAgreementVersion, partner.ServiceAgreementAcceptedDate, partner.SyntheticGenerateFlag, partner.UiEnableFlag, partner.DemogPredictFlag, partner.TutorialEnableFlag, partner.OverviewDashboardFlag, partner.IdentityPhoneFlag, partner.IdentityEmailFlag, partner.IdentityIOSFlag, partner.IdentityAndroidFlag);
 
         /// <inheritdoc cref = "IPartnerProfileService.SearchPartnerIdsByActiveStateAsync(bool?)" />
         public async Task<List<string>> SearchPartnerIdsByActiveStateAsync(bool? active)
@@ -237,7 +237,7 @@ namespace ClientWebAppService.PartnerProfile.Business
             _logger.LogInformation($"Get partner information with active : {active}");
 
             var activePartner = await _partnerRepository.FilterBy(active != null ? partner => partner.IsActive == active : null);
-            var partnerIds = activePartner.Select(x=> x.PartnerId).ToList();
+            var partnerIds = activePartner.Select(x => x.PartnerId).ToList();
 
             _logger.LogInformation($"Successfully got partner information with active : {active}");
 
@@ -255,7 +255,7 @@ namespace ClientWebAppService.PartnerProfile.Business
                 TotalPages = model.TotalPages
             };
         }
-        
+
         /// <inheritdoc cref="UpdatePartnerSubscriptionsAsync(List<SubscriptionPartnerIdDto>)"/>
         public async Task UpdatePartnerSubscriptionsAsync(IEnumerable<SubscriptionBulkUpdateDto> subscriptionBulkUpdateDtos)
         {
@@ -313,7 +313,7 @@ namespace ClientWebAppService.PartnerProfile.Business
         public async Task DeleteProfileByPartnerIdAsync(string partnerId)
         {
             _logger.LogInformation($"Deleting partner profile with id : {partnerId}.");
-            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));           
+            VerifyHelper.NotEmptyOrWhiteSpace(partnerId, nameof(partnerId));
 
             var partnerToDelete = await _partnerRepository.FindOne(x => x.PartnerId == partnerId);
 
@@ -372,6 +372,32 @@ namespace ClientWebAppService.PartnerProfile.Business
                 _logger.LogError($"UpdateProfileAsync - Attempted to update partner profile with id : {partnerId}, Exception message - {ex.Message}");
                 throw;
             }
-        } 
+        }
+
+        ///<inheritdoc/>
+        public async Task<IEnumerable<PartnerConfigDto>> GetPartnerConfigurationAsync(string partnerId)
+        {
+            try
+            {
+                _logger.LogInformation($"Getting partner configuration with id : {partnerId}.");
+
+                var partnerConfigResult = new List<PartnerConfigDto>();
+
+                var partnerConfig = await _partnerRepository.GetPartnerConfigAsync(partnerId);
+
+                if (partnerConfig.Any())
+                {
+                    partnerConfigResult = partnerConfig.Select(x => new PartnerConfigDto
+                             (x.PartnerId, x.IdentityPhoneFlag, x.IdentityEmailFlag, x.IdentityIOSFlag, x.IdentityAndroidFlag)).ToList();
+                }
+
+                return partnerConfigResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"GetPartnerConfigurationAsync - partner profile with id : {partnerId}, Exception message - {ex.Message}");
+                throw;
+            }
+        }
     }
 }
