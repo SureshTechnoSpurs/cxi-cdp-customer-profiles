@@ -4,9 +4,11 @@ using CXI.Contracts.PartnerProfile.Models;
 using GL.MSA.Core.NoSql;
 using GL.MSA.Core.ResiliencyPolicy;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.PartnerProfile.DataAccess
@@ -135,6 +137,28 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
             var policy = GetDefaultPolicy();
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <summary>
+        /// Get partner with <paramref name="partnerId"/> 
+        /// </summary>
+        public async Task<List<Partner>> GetPartnerConfigAsync(string partnerId)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+
+            var projection = Builders<Partner>.Projection.Include(x => x.PartnerId)
+                                                                      .Include(x => x.IdentityPhoneFlag)
+                                                                      .Include(x => x.IdentityEmailFlag)
+                                                                      .Include(x => x.IdentityIOSFlag)
+                                                                      .Include(x => x.IdentityAndroidFlag);
+
+
+            var bsonDocuments = await _collection.Find(filter).Project(projection).ToListAsync();
+
+            var partnerConfig = bsonDocuments.Select(document => BsonSerializer.Deserialize<Partner>(document)).ToList();
+
+            return partnerConfig;
+
         }
     }
 }

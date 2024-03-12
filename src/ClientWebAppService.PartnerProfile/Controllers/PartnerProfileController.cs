@@ -256,5 +256,26 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok();
         }
+
+        [HttpPut("tutorial-config/{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> UpdatePartnerTutorialConfiguration([FromRoute] string partnerId,
+                                                [FromBody] bool tutorialEnableFlag)
+        {
+            await _partnerProfileService.UpdatePartnerTutorialConfigurationAsync(partnerId, tutorialEnableFlag);
+
+            return Ok();
+        }
+
+        [HttpGet("partner-config/{partnerId}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetPartnerConfiguration([FromRoute] string partnerId)
+        {
+            var result = await _partnerProfileService.GetPartnerConfigurationAsync(partnerId);
+
+            return Ok(result);
+        }
     }
 }
