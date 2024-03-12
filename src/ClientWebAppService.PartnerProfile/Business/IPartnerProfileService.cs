@@ -117,5 +117,10 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         Task UpdatePartnerTutorialConfigurationAsync(string partnerId, bool tutorialEnableFlag);
 
+        /// <summary>
+        /// Get partner configuration.
+        /// </summary>
+        Task<IEnumerable<PartnerConfigDto>> GetPartnerConfigurationAsync(string partnerId);
+
     }
 }
