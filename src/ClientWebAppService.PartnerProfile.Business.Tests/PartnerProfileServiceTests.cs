@@ -279,11 +279,50 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
             _repositoryMock.Setup(x => x.UpdateProcessConfigAsync(It.IsAny<string>(), It.IsAny<Partner>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new ProcessConfigurationUpdateModel( true, true, true);
+            var testInput = new ProcessConfigurationUpdateModel( true, true, true, false, false, false, false, false);
 
             var invocation = _service.Invoking(x => x.UpdateProcessConfigurationAsync("testId", testInput));
 
             await invocation.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task UpdatePartnerTutorialConfigurationAsync_CorrectParametersPassed_SuccessfulResult()
+        {
+            _repositoryMock.Setup(x => x.UpdateTutorialConfigAsync(It.IsAny<string>(), It.IsAny<Partner>()))
+                .Returns(Task.CompletedTask);
+
+            bool tutorialFlag = true;
+
+            var invocation = _service.Invoking(x => x.UpdatePartnerTutorialConfigurationAsync("testId", tutorialFlag));
+
+            await invocation.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task GetPartnerConfigAsync_ConfigExist_ShouldReturnPartnerProfiles()
+        {
+            var partnerId = "partnerId";
+
+            // Arrange
+            _repositoryMock.Setup(x => x.GetPartnerConfigAsync(It.IsAny<string>()))
+               .ReturnsAsync(new List<Partner>
+                {
+                    new()
+                    {
+                        PartnerId = "partnerId",
+                        IdentityPhoneFlag = false,
+                        IdentityEmailFlag = false,
+                        IdentityIOSFlag = false,
+                        IdentityAndroidFlag = false
+                    }
+                });
+
+            // Act
+            var result = await _service.GetPartnerConfigurationAsync(partnerId);
+
+            // Assert
+            result.Should().AllBeOfType<PartnerConfigDto>();
         }
     }
 }

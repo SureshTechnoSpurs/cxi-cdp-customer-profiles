@@ -4,9 +4,11 @@ using CXI.Contracts.PartnerProfile.Models;
 using GL.MSA.Core.NoSql;
 using GL.MSA.Core.ResiliencyPolicy;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ClientWebAppService.PartnerProfile.DataAccess
@@ -20,7 +22,7 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         public PartnerRepository(IMongoDbContext dataContext, IResiliencyPolicyProvider policyProvider)
             : base(dataContext, policyProvider)
         {
-           
+
         }
 
         ///<inheritdoc/>
@@ -113,11 +115,54 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
                 Builders<Partner>.Update.Combine(
                     Builders<Partner>.Update.Set(x => x.SyntheticGenerateFlag, updatedPartner.SyntheticGenerateFlag),
                     Builders<Partner>.Update.Set(x => x.UiEnableFlag, updatedPartner.UiEnableFlag),
-                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag));
+                    Builders<Partner>.Update.Set(x => x.DemogPredictFlag, updatedPartner.DemogPredictFlag),
+                    Builders<Partner>.Update.Set(x => x.OverviewDashboardFlag, updatedPartner.OverviewDashboardFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityPhoneFlag, updatedPartner.IdentityPhoneFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityEmailFlag, updatedPartner.IdentityEmailFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityIOSFlag, updatedPartner.IdentityIOSFlag),
+                    Builders<Partner>.Update.Set(x => x.IdentityAndroidFlag, updatedPartner.IdentityAndroidFlag));
 
             var policy = GetDefaultPolicy();
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <summary>
+        /// Update partner with <paramref name="partnerId"/> by new values from <paramref name="updatedPartner"/>
+        /// </summary>
+        public Task UpdateTutorialConfigAsync(string partnerId, Partner updatedPartner)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+
+            var updateStrategy =
+               Builders<Partner>.Update.Combine(
+                   Builders<Partner>.Update.Set(x => x.TutorialEnableFlag, updatedPartner.TutorialEnableFlag));
+
+            var policy = GetDefaultPolicy();
+
+            return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
+        }
+
+        /// <summary>
+        /// Get partner with <paramref name="partnerId"/> 
+        /// </summary>
+        public async Task<List<Partner>> GetPartnerConfigAsync(string partnerId)
+        {
+            var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
+
+            var projection = Builders<Partner>.Projection.Include(x => x.PartnerId)
+                                                                      .Include(x => x.IdentityPhoneFlag)
+                                                                      .Include(x => x.IdentityEmailFlag)
+                                                                      .Include(x => x.IdentityIOSFlag)
+                                                                      .Include(x => x.IdentityAndroidFlag);
+
+
+            var bsonDocuments = await _collection.Find(filter).Project(projection).ToListAsync();
+
+            var partnerConfig = bsonDocuments.Select(document => BsonSerializer.Deserialize<Partner>(document)).ToList();
+
+            return partnerConfig;
+
         }
     }
 }
