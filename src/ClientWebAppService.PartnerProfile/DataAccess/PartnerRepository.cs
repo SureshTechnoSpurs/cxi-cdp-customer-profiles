@@ -134,6 +134,10 @@ namespace ClientWebAppService.PartnerProfile.DataAccess
         {
             var filter = Builders<Partner>.Filter.Where(x => x.PartnerId == partnerId);
 
+            var updateStrategy =
+               Builders<Partner>.Update.Combine(
+                   Builders<Partner>.Update.Set(x => x.TutorialEnableFlag, updatedPartner.TutorialEnableFlag));
+
             var policy = GetDefaultPolicy();
 
             return policy.ExecuteAsync(() => _collection.UpdateOneAsync(filter, updateStrategy));
