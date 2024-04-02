@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Xunit;
 using CXI.Common.AuditLog.Models;
+using MongoDB.Bson;
 
 namespace ClientWebAppService.UserProfile.Business.Tests
 {
@@ -110,7 +111,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
                 .ReturnsAsync(existingUsers);
 
             _auditLogMock.Setup(x => x.GetAuditLogByEmails(It.IsAny<string[]>())).ReturnsAsync(getAuditLogs);
-            
+
             var testInput = new UserProfileSearchDto { PartnerId = "testPartnerId", Role = UserRole.Associate };
 
             var result = await _service.GetUserProfilesAsync(testInput);
@@ -242,7 +243,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         {
             var inputEmail = "test@mail.com";
             var testPartnerId = "testPartnerId";
-            var existingUser = new User { Email = inputEmail, PartnerId = testPartnerId, Role = UserRole.Owner };        
+            var existingUser = new User { Email = inputEmail, PartnerId = testPartnerId, Role = UserRole.Owner };
 
             _repositoryMock.Setup(x => x.FindOne(It.IsAny<Expression<Func<User, bool>>>()))
                            .ReturnsAsync(existingUser);
@@ -255,7 +256,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         [Fact]
         public async Task GetUsersCountByPartners_UsersFound_GetUsersCountByPartners()
         {
-            var partnerIds = new List<string> { "partnerID_1", "partnerID_2" , "partnerID_3" };
+            var partnerIds = new List<string> { "partnerID_1", "partnerID_2", "partnerID_3" };
             var users = new List<User>()
             {
                 new() { PartnerId = "partnerID_1"},
@@ -272,7 +273,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
 
             Assert.NotNull(result);
             Assert.Equal(partnerIds.Count, result.Count);
-            Assert.Contains("partnerID_1", (IDictionary<string,int>)result);
+            Assert.Contains("partnerID_1", (IDictionary<string, int>)result);
             Assert.Equal(5, result.GetValueOrDefault("partnerID_1"));
             Assert.Equal(1, result.GetValueOrDefault("partnerID_2"));
             Assert.Equal(0, result.GetValueOrDefault("partnerID_3"));
@@ -305,6 +306,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             result.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
         }
+
 
         [Fact]
         public async Task UpdateUserRoleByEmailAsync_CorrectParametersPassed_UserRoleUpdated()
@@ -345,7 +347,7 @@ namespace ClientWebAppService.UserProfile.Business.Tests
         public async Task DeleteUserProfilesByPartnerIdAsync_UserProfileFound_ProperMethodsInoked()
         {
             var testPartnerId = "testPartnerId";
-            var existingUserEmails = new List<string>() {"testPartnerEmail", "testPartnerEmail2" };
+            var existingUserEmails = new List<string>() { "testPartnerEmail", "testPartnerEmail2" };
 
             _repositoryMock.Setup(x => x.FilterBy(It.IsAny<Expression<Func<User, string>>>(), It.IsAny<Expression<Func<User, bool>>>()))
                            .ReturnsAsync(existingUserEmails);
@@ -364,11 +366,41 @@ namespace ClientWebAppService.UserProfile.Business.Tests
             _feedbackRepositryMock.Setup(x => x.InsertOne(It.IsAny<Feedback>()))
                 .Returns(Task.CompletedTask);
 
-            var testInput = new UserFeedbackCreationDto {  Email="testemail@email.com", PartnerId = "testPartnerId", PartnerName="testPartnerName", Message = "testMessage", Subject= "testSubject"};
+            var testInput = new UserFeedbackCreationDto { Email = "testemail@email.com", PartnerId = "testPartnerId", PartnerName = "testPartnerName", Message = "testMessage", Subject = "testSubject" };
 
-             await _service.CreateFeedbackEmailAsync(testInput);
+            await _service.CreateFeedbackEmailAsync(testInput);
 
             _emailServiceMock.Verify(mock => mock.SendFeedbackMessageToTechSupportAsync(testInput), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetFeedbackMessageAsync_MessageExist_ShouldReturnFeedbackMessagePaginatedDto()
+        {
+            var testPartnerId = "testPartnerId";
+            // Arrange
+            _feedbackRepositryMock
+                .Setup(x => x.GetPaginatedList(It.IsAny<PaginationRequest>(), It.IsAny<Expression<Func<Feedback, bool>>>()))
+                .ReturnsAsync(new PaginatedResponse<Feedback>
+                {
+                    Items = new List<Feedback>
+                    {
+                        new Feedback { PartnerId = "test", Email = "test@outlook.com", PartnerName = "partnerName", Subject = "testSubject", Message = "testMessage", CreatedOn= DateTime.Now}
+                    },
+                    PageIndex = 1,
+                    PageSize = 1,
+                    TotalCount = 1,
+                    TotalPages = 1
+                });
+
+            var pageRequest = new PaginationRequest() { PageIndex = 1, PageSize = 1 };
+
+            // Act
+            var result = await _service.GetFeedbackMessageAsync(testPartnerId, pageRequest);
+
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().NotBeEmpty();
         }
 
     }

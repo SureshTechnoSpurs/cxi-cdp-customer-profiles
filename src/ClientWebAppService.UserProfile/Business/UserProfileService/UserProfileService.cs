@@ -8,10 +8,13 @@ using CXI.Common.AuditLog;
 using CXI.Common.AuditLog.Models;
 using CXI.Contracts.UserProfile.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
+using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ClientWebAppService.UserProfile.Business
 {
@@ -122,12 +125,12 @@ namespace ClientWebAppService.UserProfile.Business
             var result = await _userProfileRepository.FilterBy(x => x.PartnerId == criteria.PartnerId && x.Role == criteria.Role);
 
             var useremail = result.Select(x => x.Email).ToList();
-            
+
             if (!useremail.Any())
             {
                 foreach (var user in result)
                 {
-                    var userProfile = new UserProfileAssociateDto(user.PartnerId, user.Email, user.Role, user.InvitationAccepted,  null);
+                    var userProfile = new UserProfileAssociateDto(user.PartnerId, user.Email, user.Role, user.InvitationAccepted, null);
 
                     userProfileAssociates.Add(userProfile);
                 }
@@ -284,7 +287,7 @@ namespace ClientWebAppService.UserProfile.Business
 
             if (ownerCount <= 0)
             {
-                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner");
+                throw new ValidationException("PartnerId", $"Partner ({partnerId}) must always have owner.");
             }
         }
 
@@ -358,7 +361,7 @@ namespace ClientWebAppService.UserProfile.Business
                 PartnerId = request.PartnerId,
                 PartnerName = request.PartnerName,
                 Email = request.Email,
-                Subject= request.Subject,
+                Subject = request.Subject,
                 Message = request.Message,
                 CreatedOn = DateTime.UtcNow
             };
@@ -367,5 +370,34 @@ namespace ClientWebAppService.UserProfile.Business
 
             await _emailService.SendFeedbackMessageToTechSupportAsync(request);
         }
+
+        ///<inheritdoc/>
+        public async Task<PaginatedResponse<UserFeedbackMessageDto>> GetFeedbackMessageAsync(string partnerId, PaginationRequest paginationRequest)
+        {
+            _logger.LogInformation($"Retrieving feedback message by search criteria.");
+
+            VerifyHelper.GreaterThanZero(paginationRequest.PageIndex, nameof(paginationRequest.PageIndex));
+            VerifyHelper.GreaterThanZero(paginationRequest.PageSize, nameof(paginationRequest.PageSize));
+
+            var result = await _partnerFeedbackRepository.GetPaginatedList(paginationRequest, x => x.PartnerId == partnerId);
+
+            VerifyHelper.NotNull(result, nameof(result));
+
+            return MapToDto(result);
+        }
+        private PaginatedResponse<UserFeedbackMessageDto> MapToDto(PaginatedResponse<Feedback> model)
+        {
+            return new PaginatedResponse<UserFeedbackMessageDto>
+            {
+                Items = model.Items.Select(MapFeedback).ToList(),
+                PageIndex = model.PageIndex,
+                PageSize = model.PageSize,
+                TotalCount = model.TotalCount,
+                TotalPages = model.TotalPages
+            };
+        }
+
+        private UserFeedbackMessageDto MapFeedback(Feedback feedback) =>
+            new UserFeedbackMessageDto(feedback.Id.ToString(), feedback.PartnerId, feedback.Email, feedback.PartnerName, feedback.Subject, feedback.Message, feedback.CreatedOn);
     }
 }

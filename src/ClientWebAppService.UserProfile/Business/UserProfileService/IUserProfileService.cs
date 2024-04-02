@@ -1,5 +1,6 @@
 ﻿using CXI.Common.Models.Pagination;
 using CXI.Contracts.UserProfile.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -65,5 +66,10 @@ namespace ClientWebAppService.UserProfile.Business
         /// Create Feedback Email.
         /// </summary>
         Task CreateFeedbackEmailAsync(UserFeedbackCreationDto request);
+
+        /// <summary>
+        /// Get Partner FeedbackMessage by pagination.
+        /// </summary>
+        Task<PaginatedResponse<UserFeedbackMessageDto>> GetFeedbackMessageAsync(string partnerId, PaginationRequest paginationRequest);
     }
 }

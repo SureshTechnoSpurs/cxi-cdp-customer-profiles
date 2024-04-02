@@ -141,6 +141,16 @@ namespace ClientWebAppService.UserProfile.Controllers
 
             return Ok();
         }
+
+        [HttpPost("partner-feedback-message/{partnerId}")]
+        [ProducesResponseType(typeof(PaginatedResponse<UserFeedbackMessageDto>), 200)]
+        [ProducesResponseType(typeof(ValidationProblemResponse), 400)]
+        public async Task<IActionResult> GetFeedbackMessage([CustomizeValidator(Skip = true)][FromRoute] string partnerId, [FromBody] PaginationRequest paginationRequest)
+        {
+           var result =  await _userProfileService.GetFeedbackMessageAsync(partnerId, paginationRequest);
+
+            return Ok(result);
+        }
     }
 }
 
