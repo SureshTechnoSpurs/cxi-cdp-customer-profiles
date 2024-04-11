@@ -26,6 +26,8 @@ namespace ClientWebAppService.UserProfile.Core.Extensions
 
             services.AddM2MAuthorization("domainservice_readwrite", Constants.M2MPolicy);
 
+            configuration["appidentity:clientsecret"] = configuration["AZURE_KEY_VAULT_SECRET"];
+
             services.Configure<AdB2CInvitationOptions>(configuration.GetSection("AzureAdB2C"));
             services.Configure<AdB2CMicrosoftGraphOptions>(configuration.GetSection("AzureAdB2C"));
 
