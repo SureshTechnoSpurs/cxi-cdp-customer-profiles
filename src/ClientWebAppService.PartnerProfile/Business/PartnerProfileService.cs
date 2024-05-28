@@ -6,10 +6,14 @@ using CXI.Common.Helpers;
 using CXI.Common.Models.Pagination;
 using CXI.Contracts.PartnerProfile.Models;
 using CXI.Contracts.PosProfile;
+using CXI.Contracts.PosProfile.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Extensions;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using ValidationException = CXI.Common.ExceptionHandling.Primitives.ValidationException;
 
@@ -404,6 +408,73 @@ namespace ClientWebAppService.PartnerProfile.Business
                 _logger.LogError($"GetPartnerConfigurationAsync - partner profile with id : {partnerId}, Exception message - {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<PaginatedResponse<PartnerListingDto>> GetPartnersListingAsync(PartnerProfilePaginationRequest request)
+        {
+            VerifyHelper.GreaterThanZero(request.PageSize, nameof(request.PageSize));
+            VerifyHelper.GreaterThanZero(request.PageIndex, nameof(request.PageIndex));
+
+            var partnerProfiles = await GetPartnerProfilesPaginatedAsync(
+                new PaginationRequest
+                {
+                    PageIndex = request.PageIndex,
+                    PageSize = request.PageSize,
+                    SortDirection = request.SortDirection,
+                    SortField = request.SortField?.GetAttributeOfType<EnumMemberAttribute>()?.Value ?? request.SortField?.ToString(),
+                    Filters = request.Filters?.Select(
+                        x => new PaginationFilterDto
+                        {
+                            FieldName = x.FieldName.GetAttributeOfType<EnumMemberAttribute>()?.Value ?? x.FieldName.ToString(),
+                            FieldValue = x.FieldValue,
+                            SearchMode = x.SearchMode,
+                            FieldType = x.FieldType
+                        }).ToList()
+                });
+
+            VerifyHelper.NotNull(partnerProfiles, nameof(partnerProfiles));
+            VerifyHelper.NotNull(partnerProfiles.Items, nameof(partnerProfiles.Items));
+
+            var partnerIds = partnerProfiles.Items.OrderBy(o => o.CreatedOn).Select(x => x.PartnerId).ToList();
+            var posProfiles = await _posProfileServiceClient.GetPosProfilesByPartnerIdsAsync(partnerIds);
+
+            VerifyHelper.NotNull(posProfiles, nameof(posProfiles));
+
+            return MapDto(partnerProfiles, posProfiles);
+
+        }
+
+        private PaginatedResponse<PartnerListingDto> MapDto(
+            PaginatedResponse<PartnerProfileDto> dto,
+            IList<PosProfileDto> posProfiles)
+        {
+            return new PaginatedResponse<PartnerListingDto>
+            {
+                Items = dto.Items.OrderBy(o => o.CreatedOn).Select(x => MapDto(x, posProfiles)).ToList(),
+                PageIndex = dto.PageIndex,
+                PageSize = dto.PageSize,
+                TotalCount = dto.TotalCount,
+                TotalPages = dto.TotalPages
+            };
+        }
+
+        private static PartnerListingDto MapDto(
+           PartnerProfileDto dto,
+           IEnumerable<PosProfileDto> posProfiles)
+        {
+            var posProfile = posProfiles.FirstOrDefault(x => x.PartnerId == dto.PartnerId);
+            var posTypes = posProfile?.PosCredentialsConfigurations.Select(x => x.PosType).ToList();
+
+            return new PartnerListingDto
+            {
+                PartnerId = dto.PartnerId,
+                PartnerName = dto.PartnerName,
+                IsActive = dto.IsActive,
+                //LastBilled = dto.Subscription.LastBilledDate,
+                RegisteredOn = dto.CreatedOn,
+                PosSources = posTypes
+
+            };
         }
     }
 }

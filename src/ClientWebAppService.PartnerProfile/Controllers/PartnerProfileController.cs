@@ -277,5 +277,15 @@ namespace ClientWebAppService.PartnerProfile.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("partner-listing")]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        public async Task<IActionResult> GetPartnersList(PartnerProfilePaginationRequest request)
+        {
+            var result = await _partnerProfileService.GetPartnersListingAsync(request);
+
+            return Ok(result);
+        }
     }
 }

@@ -122,5 +122,11 @@ namespace ClientWebAppService.PartnerProfile.Business
         /// </summary>
         Task<IEnumerable<PartnerConfigDto>> GetPartnerConfigurationAsync(string partnerId);
 
+        /// <summary>
+        /// Partner Listing
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PaginatedResponse<PartnerListingDto>> GetPartnersListingAsync(PartnerProfilePaginationRequest request);
     }
 }
