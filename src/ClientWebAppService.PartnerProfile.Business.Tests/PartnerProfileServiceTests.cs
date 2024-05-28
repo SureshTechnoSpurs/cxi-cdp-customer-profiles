@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using CXI.Contracts.PosProfile;
 using CXI.Contracts.PartnerProfile.Models;
 using CXI.Common.Models.Pagination;
+using CXI.Contracts.PartnerProfile.Pagination;
+using CXI.Contracts.PosProfile.Models;
 
 namespace ClientWebAppService.PartnerProfile.Business.Tests
 {
@@ -323,6 +325,51 @@ namespace ClientWebAppService.PartnerProfile.Business.Tests
 
             // Assert
             result.Should().AllBeOfType<PartnerConfigDto>();
+        }
+
+        [Fact]
+        public async Task GetPartnersListingAsync_ShouldReturnPartnerListingPaginatedDto()
+        {
+             var testPartnerId = "testPartnerId";
+
+            //// Arrange
+            
+            _repositoryMock
+               .Setup(x => x.GetPaginatedList(It.IsAny<PaginationRequest>(), It.IsAny<Expression<Func<Partner, bool>>>()))
+               .ReturnsAsync(new PaginatedResponse<Partner>
+               {
+                   Items = new List<Partner>
+                   {
+                        new Partner { PartnerId = testPartnerId }
+                   },
+                   PageIndex = 1,
+                   PageSize = 1,
+                   TotalCount = 1,
+                   TotalPages = 1
+               });
+
+            _posProfileServiceClientMock
+               .Setup(x => x.GetPosProfilesByPartnerIdsAsync(It.IsAny<List<string>>(), It.IsAny<string>()))
+               .ReturnsAsync(new List<PosProfileDto> { new PosProfileDto(testPartnerId, new List<PosCredentialsConfigurationDto>
+                {
+                    new("type", "keyRef", "id")
+                }) });
+
+            var partnerProfilePaginationRequest = new PartnerProfilePaginationRequest
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                SortDirection = 0,
+                SortField = PartnerProfileFields.PartnerId,
+                Filters = new List<PartnerProfileFilter>() // Add your filters here
+            };
+
+            // Act
+            var result = await _service.GetPartnersListingAsync(partnerProfilePaginationRequest);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Items.Should().NotBeEmpty();
         }
     }
 }
